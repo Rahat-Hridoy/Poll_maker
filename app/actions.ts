@@ -31,13 +31,13 @@ export async function createPoll(formData: any) {
         }))
     };
 
-    savePoll(newPoll);
+    await savePoll(newPoll);
     revalidatePath('/admin/dashboard');
     return { success: true, pollId: newPoll.id };
 }
 
 export async function submitVote(pollId: string, answers: Record<string, string>, voterInfo: { name: string, email: string }) {
-    const poll = getPoll(pollId);
+    const poll = await getPoll(pollId);
     if (!poll) return { success: false, error: "Poll not found" };
 
     // Update votes
@@ -71,7 +71,7 @@ export async function submitVote(pollId: string, answers: Record<string, string>
         time: new Date().toISOString() // "just now" equivalent
     });
 
-    savePoll(poll);
+    await savePoll(poll);
     revalidatePath(`/admin/${pollId}/stats`);
     revalidatePath(`/poll/${pollId}`);
     revalidatePath(`/admin/dashboard`);
@@ -81,7 +81,7 @@ export async function submitVote(pollId: string, answers: Record<string, string>
 
 export async function deletePoll(id: string) {
     try {
-        deletePollFromStore(id);
+        await deletePollFromStore(id);
         revalidatePath('/admin/dashboard');
         return { success: true };
     } catch (error) {

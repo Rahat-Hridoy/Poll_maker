@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import { Poll, MOCK_POLLS } from './data';
+import { sql } from '@vercel/postgres';
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
 
-// Global in-memory store fallback for Vercel/Serverless where filesystem is read-only
+// Global in-memory store fallback
 let memoryPolls: Poll[] = [];
 
-// Initialize memoryPolls with MOCK_POLLS or from file if possible
-function initStore() {
+// Initialize memoryPolls with MOCK_POLLS or from file if possible (for local dev)
+function initLocalStore() {
     try {
         if (fs.existsSync(DB_PATH)) {
             const fileData = fs.readFileSync(DB_PATH, 'utf-8');
@@ -16,55 +17,99 @@ function initStore() {
             memoryPolls = data.polls || [...MOCK_POLLS];
         } else {
             memoryPolls = [...MOCK_POLLS];
-            // Try to write initial data to file (works locally, fails on Vercel)
-            try {
-                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
-            } catch (e) {
-                console.warn("Could not write initial data.json, using in-memory store.");
-            }
+            try { fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2)); } catch (e) { }
         }
     } catch (error) {
-        console.error("Error initializing store:", error);
         memoryPolls = [...MOCK_POLLS];
     }
 }
 
-// Run init
-initStore();
+initLocalStore();
 
-export function getPolls(): Poll[] {
-    // On Serverless, we should probably re-read from memory or a real DB.
-    // Since this is a demo, we use the global variable.
+async function ensureTable() {
+    if (process.env.POSTGRES_URL) {
+        try {
+            await sql`
+                CREATE TABLE IF NOT EXISTS polls (
+                    id TEXT PRIMARY KEY,
+                    data JSONB,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                )
+            `;
+        } catch (e) {
+            console.error("Failed to ensure table exists:", e);
+        }
+    }
+}
+
+export async function getPolls(): Promise<Poll[]> {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            const { rows } = await sql`SELECT data FROM polls ORDER BY created_at DESC`;
+            return rows.map(r => r.data as Poll);
+        } catch (e) {
+            console.error("Error fetching from DB:", e);
+        }
+    }
     return memoryPolls;
 }
 
-export function savePoll(poll: Poll) {
-    const existingIndex = memoryPolls.findIndex(p => p.id === poll.id);
+export async function savePoll(poll: Poll) {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            // Upsert using id
+            await sql`
+                INSERT INTO polls (id, data)
+                VALUES (${poll.id}, ${JSON.stringify(poll)})
+                ON CONFLICT (id) 
+                DO UPDATE SET data = ${JSON.stringify(poll)}
+            `;
+            return;
+        } catch (e) {
+            console.error("Error saving to DB:", e);
+        }
+    }
 
+    const existingIndex = memoryPolls.findIndex(p => p.id === poll.id);
     if (existingIndex >= 0) {
         memoryPolls[existingIndex] = poll;
     } else {
         memoryPolls.push(poll);
     }
 
-    // Attempt to persist to file (works locally)
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
-    } catch (error) {
-        // Log once or silently fail for Vercel
-        console.warn("Filesystem is read-only. Data will be ephemeral.");
-    }
+    } catch (error) { }
 }
 
-export function getPoll(id: string): Poll | undefined {
+export async function getPoll(id: string): Promise<Poll | undefined> {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            const { rows } = await sql`SELECT data FROM polls WHERE id = ${id}`;
+            if (rows.length > 0) return rows[0].data as Poll;
+        } catch (e) {
+            console.error("Error fetching poll from DB:", e);
+        }
+    }
     return memoryPolls.find(p => p.id === id);
 }
 
-export function deletePollFromStore(id: string) {
+export async function deletePollFromStore(id: string) {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            await sql`DELETE FROM polls WHERE id = ${id}`;
+            return;
+        } catch (e) {
+            console.error("Error deleting from DB:", e);
+        }
+    }
+
     memoryPolls = memoryPolls.filter(p => p.id !== id);
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
-    } catch (error) {
-        console.warn("Could not delete from file, updating memory only.");
-    }
+    } catch (error) { }
 }

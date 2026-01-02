@@ -10,7 +10,7 @@ export default async function PollStatsPage({ params }: { params: Promise<{ id: 
     const { id } = await params;
 
     // Fetch from store
-    const poll = getPoll(id);
+    const poll = await getPoll(id);
 
     if (!poll) {
         notFound();

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function PublicPollPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const poll = getPoll(id);
+    const poll = await getPoll(id);
 
     if (!poll) {
         // Fallback for Vercel/Serverless cold starts where in-memory state is lost

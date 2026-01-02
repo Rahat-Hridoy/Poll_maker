@@ -6,8 +6,8 @@ import { getPolls } from "@/lib/store";
 import { Plus, BarChart2, Edit, ExternalLink, Trash2 } from "lucide-react";
 import { DeletePollButton } from "@/components/poll/delete-poll-button";
 
-export default function AdminDashboard() {
-    const polls = getPolls();
+export default async function AdminDashboard() {
+    const polls = await getPolls();
 
     return (
         <div className="space-y-8">

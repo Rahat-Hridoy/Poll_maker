@@ -170,6 +170,34 @@
           "time": "2026-01-02T05:58:54.242Z"
         }
       ]
+    },
+    {
+      "id": "poll-1767334805740",
+      "title": "hh",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-02T06:20:05.741Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767334805741-0.24357683525779517",
+          "text": "uhu",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767334805741-0.3601056587845439",
+              "text": "yh",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767334805741-0.4464504794419375",
+              "text": "y",
+              "votes": 0
+            }
+          ]
+        }
+      ]
     }
   ]
 }
