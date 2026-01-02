@@ -1,0 +1,107 @@
+{
+  "polls": [
+    {
+      "id": "poll-1",
+      "title": "Best Programming Language 2024",
+      "description": "Help us decide which language rules them all.",
+      "status": "published",
+      "createdAt": "2026-01-02T05:23:56.790Z",
+      "visitors": 1240,
+      "totalVotes": 856,
+      "questions": [
+        {
+          "id": "q-1",
+          "text": "What is your primary language?",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1",
+              "text": "TypeScript",
+              "votes": 450
+            },
+            {
+              "id": "opt-2",
+              "text": "Python",
+              "votes": 300
+            },
+            {
+              "id": "opt-3",
+              "text": "Rust",
+              "votes": 106
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poll-1767331680565",
+      "title": "Functional Test Poll",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-02T05:28:00.566Z",
+      "visitors": 0,
+      "totalVotes": 1,
+      "questions": [
+        {
+          "id": "q-1767331680567-0.794421268281033",
+          "text": "Does it work?",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767331680568-0.5540453109419661",
+              "text": "Yes",
+              "votes": 1
+            },
+            {
+              "id": "opt-1767331680568-0.6995941351967927",
+              "text": "",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "clients": [
+        {
+          "name": "Tester",
+          "email": "test@test.com",
+          "time": "2026-01-02T05:32:09.629Z"
+        }
+      ]
+    },
+    {
+      "id": "poll-1767332075475",
+      "title": "test",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-02T05:34:35.475Z",
+      "visitors": 0,
+      "totalVotes": 1,
+      "questions": [
+        {
+          "id": "q-1767332075475-0.9836470286500736",
+          "text": "Food",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767332075475-0.6290169834626687",
+              "text": "Kabab",
+              "votes": 1
+            },
+            {
+              "id": "opt-1767332075475-0.7923533394942766",
+              "text": "Kacci",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "clients": [
+        {
+          "name": "Tester",
+          "email": "test@test.com",
+          "time": "2026-01-02T05:35:05.571Z"
+        }
+      ]
+    }
+  ]
+}

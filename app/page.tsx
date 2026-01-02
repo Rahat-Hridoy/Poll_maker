@@ -1,65 +1,62 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, BarChart3, CheckCircle, Share2 } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex flex-col items-center justify-center space-y-20 py-10 md:py-20">
+      {/* Hero Section */}
+      <section className="container max-w-4xl text-center space-y-6">
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-6xl text-balance">
+          Create Instant Polls with <span className="text-primary">Real-time</span> Insights
+        </h1>
+        <p className="mx-auto max-w-2xl text-muted-foreground text-lg md:text-xl">
+          The simplest way to gather feedback. create custom polls, share with a link, and analyze results instantly. No sign-up required (for now).
+        </p>
+        <div className="flex justify-center gap-4 pt-4">
+          <Link href="/admin/create">
+            <Button size="lg" className="h-12 px-8 text-base">
+              Create a Poll <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/dashboard">
+            <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+              Manage Polls
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Feature Grid */}
+      <section className="container max-w-5xl grid gap-8 md:grid-cols-3">
+        <div className="flex flex-col items-center text-center p-6 space-y-4 rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <Share2 className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-bold">Share Instantly</h3>
+          <p className="text-muted-foreground">
+            Generate a unique link for your poll and share it anywhere. Viewers can vote immediately.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="flex flex-col items-center text-center p-6 space-y-4 rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <BarChart3 className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-bold">Real-time Analytics</h3>
+          <p className="text-muted-foreground">
+            Watch votes come in real-time. Visualize data with beautiful interactive charts.
+          </p>
         </div>
-      </main>
+        <div className="flex flex-col items-center text-center p-6 space-y-4 rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <CheckCircle className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-bold">Complete Control</h3>
+          <p className="text-muted-foreground">
+            Edit your polls, manage visibility, and track visitor interactions effortlessly.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
