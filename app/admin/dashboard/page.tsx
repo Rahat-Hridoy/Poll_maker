@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getPolls } from "@/lib/store";
-import { Plus, BarChart2, Edit, ExternalLink } from "lucide-react";
+import { Plus, BarChart2, Edit, ExternalLink, Trash2 } from "lucide-react";
+import { DeletePollButton } from "@/components/poll/delete-poll-button";
 
 export default function AdminDashboard() {
     const polls = getPolls();
@@ -28,9 +29,12 @@ export default function AdminDashboard() {
                         <CardHeader>
                             <div className="flex justify-between items-start">
                                 <CardTitle className="truncate pr-4">{poll.title}</CardTitle>
-                                <Badge variant={poll.status === 'published' ? 'default' : 'secondary'}>
-                                    {poll.status}
-                                </Badge>
+                                <div className="flex gap-2">
+                                    <DeletePollButton id={poll.id} />
+                                    <Badge variant={poll.status === 'published' ? 'default' : 'secondary'}>
+                                        {poll.status}
+                                    </Badge>
+                                </div>
                             </div>
                             <CardDescription className="line-clamp-2">
                                 {poll.description || "No description provided."}

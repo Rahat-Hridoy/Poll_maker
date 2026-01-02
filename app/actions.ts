@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { Poll } from '@/lib/data';
-import { getPoll, getPolls, savePoll } from '@/lib/store';
+import { getPoll, getPolls, savePoll, deletePollFromStore } from '@/lib/store';
 
 export async function createPoll(formData: any) {
     const { title, description, questions } = formData;
@@ -74,6 +74,18 @@ export async function submitVote(pollId: string, answers: Record<string, string>
     savePoll(poll);
     revalidatePath(`/admin/${pollId}/stats`);
     revalidatePath(`/poll/${pollId}`);
+    revalidatePath(`/admin/dashboard`);
 
     return { success: true };
+}
+
+export async function deletePoll(id: string) {
+    try {
+        deletePollFromStore(id);
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting poll:", error);
+        return { success: false, error: "Failed to delete poll" };
+    }
 }

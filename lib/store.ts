@@ -59,3 +59,12 @@ export function savePoll(poll: Poll) {
 export function getPoll(id: string): Poll | undefined {
     return memoryPolls.find(p => p.id === id);
 }
+
+export function deletePollFromStore(id: string) {
+    memoryPolls = memoryPolls.filter(p => p.id !== id);
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+    } catch (error) {
+        console.warn("Could not delete from file, updating memory only.");
+    }
+}
