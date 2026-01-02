@@ -1,65 +1,61 @@
 import fs from 'fs';
 import path from 'path';
-import { Poll } from './data';
+import { Poll, MOCK_POLLS } from './data';
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
 
-// Initialize DB if not exists
-if (!fs.existsSync(DB_PATH)) {
-    // Initial Seed
-    const initialData: { polls: Poll[] } = {
-        polls: [
-            {
-                id: "poll-1",
-                title: "Best Programming Language 2024",
-                description: "Help us decide which language rules them all.",
-                status: 'published',
-                createdAt: new Date().toISOString(),
-                visitors: 1240,
-                totalVotes: 856,
-                questions: [
-                    {
-                        id: "q-1",
-                        text: "What is your primary language?",
-                        type: "single",
-                        options: [
-                            { id: "opt-1", text: "TypeScript", votes: 450 },
-                            { id: "opt-2", text: "Python", votes: 300 },
-                            { id: "opt-3", text: "Rust", votes: 106 }
-                        ]
-                    }
-                ]
+// Global in-memory store fallback for Vercel/Serverless where filesystem is read-only
+let memoryPolls: Poll[] = [];
+
+// Initialize memoryPolls with MOCK_POLLS or from file if possible
+function initStore() {
+    try {
+        if (fs.existsSync(DB_PATH)) {
+            const fileData = fs.readFileSync(DB_PATH, 'utf-8');
+            const data = JSON.parse(fileData);
+            memoryPolls = data.polls || [...MOCK_POLLS];
+        } else {
+            memoryPolls = [...MOCK_POLLS];
+            // Try to write initial data to file (works locally, fails on Vercel)
+            try {
+                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+            } catch (e) {
+                console.warn("Could not write initial data.json, using in-memory store.");
             }
-        ]
-    };
-    fs.writeFileSync(DB_PATH, JSON.stringify(initialData, null, 2));
+        }
+    } catch (error) {
+        console.error("Error initializing store:", error);
+        memoryPolls = [...MOCK_POLLS];
+    }
 }
 
+// Run init
+initStore();
+
 export function getPolls(): Poll[] {
-    try {
-        const fileData = fs.readFileSync(DB_PATH, 'utf-8');
-        const data = JSON.parse(fileData);
-        return data.polls || [];
-    } catch (error) {
-        console.error("Error reading DB:", error);
-        return [];
-    }
+    // On Serverless, we should probably re-read from memory or a real DB.
+    // Since this is a demo, we use the global variable.
+    return memoryPolls;
 }
 
 export function savePoll(poll: Poll) {
-    const polls = getPolls();
-    const existingIndex = polls.findIndex(p => p.id === poll.id);
+    const existingIndex = memoryPolls.findIndex(p => p.id === poll.id);
 
     if (existingIndex >= 0) {
-        polls[existingIndex] = poll;
+        memoryPolls[existingIndex] = poll;
     } else {
-        polls.push(poll);
+        memoryPolls.push(poll);
     }
 
-    fs.writeFileSync(DB_PATH, JSON.stringify({ polls }, null, 2));
+    // Attempt to persist to file (works locally)
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+    } catch (error) {
+        // Log once or silently fail for Vercel
+        console.warn("Filesystem is read-only. Data will be ephemeral.");
+    }
 }
 
 export function getPoll(id: string): Poll | undefined {
-    const polls = getPolls();
-    return polls.find(p => p.id === id);
+    return memoryPolls.find(p => p.id === id);
 }
