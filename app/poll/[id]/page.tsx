@@ -1,5 +1,5 @@
 import { PollViewer } from "@/components/poll/poll-viewer";
-import { getPoll } from "@/lib/store";
+import { getPoll } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getPolls } from "@/lib/store";
+import { getPolls } from "@/app/actions";
 import { Plus, BarChart2, Edit, ExternalLink, Trash2 } from "lucide-react";
 import { DeletePollButton } from "@/components/poll/delete-poll-button";
 
