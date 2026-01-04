@@ -194,45 +194,33 @@
       "creatorId": "user-1767523112283"
     },
     {
-      "id": "poll-1767523577415",
-      "title": "Illum aut ut est o",
-      "description": "Tempora similique ex",
+      "id": "poll-1767559529439-tlchdwv2i",
+      "title": "Poll ID",
+      "description": "Date",
       "status": "published",
-      "createdAt": "2026-01-04T10:46:17.415Z",
+      "createdAt": "2026-01-04T20:45:29.439Z",
       "visitors": 0,
-      "totalVotes": 2,
+      "totalVotes": 0,
       "questions": [
         {
-          "id": "q-1767523577415-0.660568191224816",
-          "text": "Ipsa perferendis no",
-          "type": "multiple",
+          "id": "q-1767559529439-0.732470285461279",
+          "text": "Status",
+          "type": "single",
           "options": [
             {
-              "id": "opt-1767523577415-0.4253452890939322",
-              "text": "Nihil officia dolore",
+              "id": "opt-1767559529439-0.3774781157299205",
+              "text": "Total Votes",
               "votes": 0
             },
             {
-              "id": "opt-1767523577415-0.9633361715017656",
-              "text": "Fugiat id pariatur ",
-              "votes": 2
+              "id": "opt-1767559529439-0.8670532735233274",
+              "text": "Visitors",
+              "votes": 0
             }
           ]
         }
       ],
-      "creatorId": "user-1767523556026",
-      "clients": [
-        {
-          "name": "Rahat",
-          "email": "ceciv87729@cpaurl.com",
-          "time": "2026-01-04T10:47:00.613Z"
-        },
-        {
-          "name": "Gas Detected",
-          "email": "naciyam174@gianes.com",
-          "time": "2026-01-04T10:47:33.919Z"
-        }
-      ]
+      "creatorId": "user-1767523556026"
     }
   ],
   "users": [

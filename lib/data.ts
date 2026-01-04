@@ -1,4 +1,4 @@
-export type QuestionType = 'single' | 'multiple';
+export type QuestionType = 'single' | 'multiple' | 'text';
 
 export interface PollOption {
     id: string;

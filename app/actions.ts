@@ -1,9 +1,96 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { Poll } from '@/lib/data';
+import { Poll, QuestionType } from '@/lib/data';
 import { getPoll, getPolls, savePoll, deletePollFromStore } from '@/lib/store';
 import { cookies } from 'next/headers';
+import Papa from 'papaparse';
+
+export async function importPolls(formData: FormData) {
+    const file = formData.get('file') as File;
+    if (!file) {
+        return { success: false, error: "No file uploaded" };
+    }
+
+    try {
+        const text = await file.text();
+        const { data, errors } = Papa.parse(text, { header: false, skipEmptyLines: true });
+
+        if (errors.length > 0) {
+            console.error("CSV Parse Errors:", errors);
+            return { success: false, error: "Failed to parse CSV" };
+        }
+
+        const cookieStore = await cookies();
+        const creatorId = cookieStore.get('auth_session')?.value;
+
+        if (!creatorId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        // Group rows by Poll Title to handle multiple questions/polls
+        // CSV Format: Title, Description, Type, Question, Option1, Option2...
+        const pollsMap = new Map<string, Poll>();
+
+        // Type assertion for the row array
+        const rows = data as string[][];
+
+        rows.forEach((row, index) => {
+            // Skip header row if it exists and matches expected structure (or just skip first row if it looks like header)
+            // Heuristic: Check if first cell is 'Poll Title'
+            if (index === 0 && row[0]?.toLowerCase().includes('title')) return;
+
+            if (row.length < 4) return; // invalid row
+
+            // New Order: Title(0), Desc(1), Question(2), Type(3), Options(4...)
+            const [title, description, questionText, type, ...options] = row;
+            const validOptions = options.filter(o => o && o.trim() !== '');
+
+            let poll = pollsMap.get(title);
+            if (!poll) {
+                poll = {
+                    id: `poll-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    title,
+                    description,
+                    status: 'published', // Import as published by default for immediate visibility
+                    createdAt: new Date().toISOString(),
+                    visitors: 0,
+                    totalVotes: 0,
+                    questions: [],
+                    creatorId
+                };
+                pollsMap.set(title, poll);
+            }
+
+            let qType: QuestionType = 'single';
+            // Map common type strings to internal types
+            const lowerType = type?.toLowerCase().trim();
+            if (lowerType === 'multiple-choice' || lowerType === 'multiple') qType = 'multiple';
+            else if (lowerType === 'text') qType = 'text';
+
+            poll.questions.push({
+                id: `q-${Date.now()}-${Math.random()}`,
+                text: questionText,
+                type: qType,
+                options: validOptions.map(opt => ({
+                    id: `opt-${Date.now()}-${Math.random()}`,
+                    text: opt,
+                    votes: 0
+                }))
+            });
+        });
+
+        for (const poll of pollsMap.values()) {
+            await savePoll(poll);
+        }
+
+        revalidatePath('/admin/dashboard');
+        return { success: true, count: pollsMap.size };
+    } catch (e) {
+        console.error("Import error:", e);
+        return { success: false, error: "Failed to process import" };
+    }
+}
 
 export async function createPoll(formData: any) {
     const { title, description, questions } = formData;
@@ -41,7 +128,6 @@ export async function submitVote(pollId: string, answers: Record<string, string>
     if (!poll) return { success: false, error: "Poll not found" };
 
     // Update votes
-    // Note: This naive implementation has race conditions but is fine for a demo.
     poll.questions.forEach(q => {
         const answerId = answers[q.id];
         if (answerId) {
@@ -53,22 +139,15 @@ export async function submitVote(pollId: string, answers: Record<string, string>
     });
 
     poll.totalVotes += 1;
-    // We optionally could store the voter info in a separate "votes" collection, 
-    // but for now we won't persist the list of voters in our simple JSON store 
-    // unless we update the Type definition.
-    // Let's assume we just track the counts for the standard view, 
-    // and maybe log the visitor for the "Client List" requirement if we extend the type.
 
-    // For the "Client List" requirement from the User, we'll need to store it.
-    // Let's add a "clients" array to the Poll object via type assertion for now.
-
+    // For the "Client List" requirement
     const pollWithClients = poll as Poll & { clients?: any[] };
     if (!pollWithClients.clients) pollWithClients.clients = [];
 
     pollWithClients.clients.push({
         name: voterInfo.name,
         email: voterInfo.email,
-        time: new Date().toISOString() // "just now" equivalent
+        time: new Date().toISOString()
     });
 
     await savePoll(poll);
