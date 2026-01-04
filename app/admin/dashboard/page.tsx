@@ -28,13 +28,12 @@ export default async function AdminDashboard() {
                     <p className="text-muted-foreground mt-1">Manage your polls and view analytics.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <ImportButton />
-                    <LogoutButton />
                     <Link href="/admin/create">
                         <Button className="shadow-lg hover:shadow-primary/25 transition-all">
                             <Plus className="mr-2 h-4 w-4" /> Create New Poll
                         </Button>
                     </Link>
+                    <ImportButton />
                 </div>
             </div>
 

@@ -84,6 +84,10 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
                 const link = `${window.location.origin}/poll/${result.pollId}`
                 setGeneratedLink(link)
                 setShowSuccessDialog(true)
+                // Reset form
+                setTitle("")
+                setDescription("")
+                setQuestions([{ id: Date.now(), text: "", type: "single", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }] }])
             }
         } catch (error) {
             console.error(error)

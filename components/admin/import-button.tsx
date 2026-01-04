@@ -2,12 +2,14 @@
 
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Loader2 } from 'lucide-react';
+import { ArrowDownFromLine, Loader2 } from 'lucide-react';
 import { importPolls } from '@/app/actions';
+import { useRouter } from 'next/navigation';
 
 export function ImportButton() {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     const handleClick = () => {
         inputRef.current?.click();
@@ -24,7 +26,8 @@ export function ImportButton() {
         try {
             const result = await importPolls(formData);
             if (result.success) {
-                alert(`Successfully imported ${result.count} polls!`);
+                // Success - refresh data automatically
+                router.refresh();
             } else {
                 alert(`Import failed: ${result.error}`);
             }
@@ -50,7 +53,7 @@ export function ImportButton() {
                 {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                    <Upload className="mr-2 h-4 w-4" />
+                    <ArrowDownFromLine className="mr-2 h-4 w-4" />
                 )}
                 Import CSV
             </Button>

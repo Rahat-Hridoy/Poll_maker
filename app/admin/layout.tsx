@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 export default function AdminLayout({
     children,
@@ -18,9 +19,7 @@ export default function AdminLayout({
                         <Link href="/admin/dashboard">
                             <Button variant="ghost" size="sm">Dashboard</Button>
                         </Link>
-                        <Link href="/admin/create">
-                            <Button size="sm">Create Poll</Button>
-                        </Link>
+                        <LogoutButton />
                     </nav>
                 </div>
             </header>

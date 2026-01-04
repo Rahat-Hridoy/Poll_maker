@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart2, Edit, ExternalLink, Download, CheckSquare, Square } from 'lucide-react';
+import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square } from 'lucide-react';
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
 import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a checkbox component, or use native
@@ -106,7 +106,7 @@ export function PollList({ polls }: PollListProps) {
                     onClick={handleExport}
                     disabled={isExporting || selectedPolls.size === 0}
                 >
-                    <Download className="mr-2 h-4 w-4" />
+                    <ArrowUpFromLine className="mr-2 h-4 w-4" />
                     {isExporting ? 'Exporting...' : 'Export Selected'}
                 </Button>
             </div>
