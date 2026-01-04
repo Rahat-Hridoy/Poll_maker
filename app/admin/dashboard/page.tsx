@@ -6,7 +6,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { ImportButton } from "@/components/admin/import-button";
-import { ExportButton } from "@/components/admin/export-button";
 import { PollList } from "@/components/admin/poll-list";
 
 export default async function AdminDashboard() {

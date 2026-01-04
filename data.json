@@ -221,6 +221,69 @@
         }
       ],
       "creatorId": "user-1767523556026"
+    },
+    {
+      "id": "poll-1767561719733-lppodsild",
+      "title": "Id rerum laboris id",
+      "description": "Officia magna eos d",
+      "status": "published",
+      "createdAt": "2026-01-04T21:21:59.733Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767561719733-0.952662841391003",
+          "text": "Commodi mollitia lor",
+          "type": "multiple",
+          "options": [
+            {
+              "id": "opt-1767561719733-0.21857778657554605",
+              "text": "Autem deserunt eiusm",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767561719733-0.5021994432996055",
+              "text": "Ex enim qui nulla la",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
+    },
+    {
+      "id": "poll-1767561719733-9vb6k0qln",
+      "title": "Explicabo Quia et q",
+      "description": "In facilis consequun",
+      "status": "published",
+      "createdAt": "2026-01-04T21:21:59.733Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767561719733-0.5084748587476089",
+          "text": "Labore quisquam elit",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767561719733-0.7427385422058259",
+              "text": "Reiciendis officia m",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767561719733-0.9828532671439223",
+              "text": "Voluptatem anim debi",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767561719733-0.8339940981110823",
+              "text": "Vel id vero autem ne",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
     }
   ],
   "users": [
