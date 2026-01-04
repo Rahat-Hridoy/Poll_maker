@@ -3,11 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getPolls } from "@/lib/store";
-import { Plus, BarChart2, Edit, ExternalLink, Trash2 } from "lucide-react";
+import { Plus, BarChart2, Edit, ExternalLink, LogOut } from "lucide-react";
 import { DeletePollButton } from "@/components/poll/delete-poll-button";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { LogoutButton } from "@/components/auth/logout-button"; // We'll create this component
 
 export default async function AdminDashboard() {
-    const polls = await getPolls();
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('auth_session')?.value;
+
+    if (!userId) {
+        redirect('/login');
+    }
+
+    const polls = await getPolls(userId);
 
     return (
         <div className="space-y-8">
@@ -16,11 +26,14 @@ export default async function AdminDashboard() {
                     <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
                     <p className="text-muted-foreground">Manage your polls and view analytics.</p>
                 </div>
-                <Link href="/admin/create">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Create New Poll
-                    </Button>
-                </Link>
+                <div className="flex gap-2">
+                    <LogoutButton />
+                    <Link href="/admin/create">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> Create New Poll
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -77,11 +90,15 @@ export default async function AdminDashboard() {
                 ))}
 
                 {polls.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-muted-foreground">
-                        No polls created yet. Click "Create New Poll" to get started.
+                    <div className="col-span-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-muted/10">
+                        <div className="text-muted-foreground mb-4">No polls created yet.</div>
+                        <Link href="/admin/create">
+                            <Button variant="outline">Create your first poll</Button>
+                        </Link>
                     </div>
                 )}
             </div>
         </div>
     );
 }
+

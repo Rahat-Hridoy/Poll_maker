@@ -13,6 +13,13 @@ export interface PollQuestion {
     options: PollOption[];
 }
 
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    password: string; // In real app, this should be hashed!
+}
+
 export interface Poll {
     id: string;
     title: string;
@@ -22,6 +29,7 @@ export interface Poll {
     visitors: number;
     totalVotes: number;
     questions: PollQuestion[];
+    creatorId?: string; // Optional for now to support legacy/mock polls
 }
 
 // Temporary Mock Data storage (in memory)

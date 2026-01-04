@@ -134,6 +134,125 @@
           "time": "2026-01-04T09:15:26.926Z"
         }
       ]
+    },
+    {
+      "id": "poll-1767522959604",
+      "title": "Owner 1 Poll",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-04T10:35:59.604Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767522959604-0.7604132361100464",
+          "text": "What is your favorite color?",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767522959604-0.06346199256304463",
+              "text": "Red",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767522959604-0.8456890633861447",
+              "text": "Blue",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767522564687"
+    },
+    {
+      "id": "poll-1767523302483",
+      "title": "Owner 2 Poll",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-04T10:41:42.483Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767523302483-0.6983002994742653",
+          "text": "What is your favorite food?",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767523302483-0.33972170775257315",
+              "text": "Pizza",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767523302483-0.3354572885932319",
+              "text": "Burger",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523112283"
+    },
+    {
+      "id": "poll-1767523577415",
+      "title": "Illum aut ut est o",
+      "description": "Tempora similique ex",
+      "status": "published",
+      "createdAt": "2026-01-04T10:46:17.415Z",
+      "visitors": 0,
+      "totalVotes": 2,
+      "questions": [
+        {
+          "id": "q-1767523577415-0.660568191224816",
+          "text": "Ipsa perferendis no",
+          "type": "multiple",
+          "options": [
+            {
+              "id": "opt-1767523577415-0.4253452890939322",
+              "text": "Nihil officia dolore",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767523577415-0.9633361715017656",
+              "text": "Fugiat id pariatur ",
+              "votes": 2
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026",
+      "clients": [
+        {
+          "name": "Rahat",
+          "email": "ceciv87729@cpaurl.com",
+          "time": "2026-01-04T10:47:00.613Z"
+        },
+        {
+          "name": "Gas Detected",
+          "email": "naciyam174@gianes.com",
+          "time": "2026-01-04T10:47:33.919Z"
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "user-1767522564687",
+      "name": "Owner One",
+      "email": "owner1@test.com",
+      "password": "123"
+    },
+    {
+      "id": "user-1767523112283",
+      "name": "Owner Two",
+      "email": "owner2@test.com",
+      "password": "123"
+    },
+    {
+      "id": "user-1767523556026",
+      "name": "MD RAHATUL ISLAM",
+      "email": "rahatd2x@gmail.com",
+      "password": "123"
     }
   ]
 }

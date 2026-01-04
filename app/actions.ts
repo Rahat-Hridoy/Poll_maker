@@ -3,13 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { Poll } from '@/lib/data';
 import { getPoll, getPolls, savePoll, deletePollFromStore } from '@/lib/store';
+import { cookies } from 'next/headers';
 
 export async function createPoll(formData: any) {
     const { title, description, questions } = formData;
-
-    // Convert generic questions to typed PollQuestion structure if needed
-    // For now assuming the incoming data matches roughly what we need usually, 
-    // but likely we need to shape it properly.
+    const cookieStore = await cookies();
+    const creatorId = cookieStore.get('auth_session')?.value;
 
     const newPoll: Poll = {
         id: `poll-${Date.now()}`,
@@ -28,7 +27,8 @@ export async function createPoll(formData: any) {
                 text: o.text,
                 votes: 0
             }))
-        }))
+        })),
+        creatorId // Attach the logged-in user ID
     };
 
     await savePoll(newPoll);

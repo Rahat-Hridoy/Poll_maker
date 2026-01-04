@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import { Poll, MOCK_POLLS } from './data';
+import { Poll, MOCK_POLLS, User } from './data';
 import { sql } from '@vercel/postgres';
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
 
 // Global in-memory store fallback
 let memoryPolls: Poll[] = [];
+let memoryUsers: User[] = [];
 let lastFileReadTime: number = 0;
 
 // Initialize memoryPolls with MOCK_POLLS or from file if possible (for local dev)
@@ -16,16 +17,19 @@ function initLocalStore() {
             const fileData = fs.readFileSync(DB_PATH, 'utf-8');
             const data = JSON.parse(fileData);
             memoryPolls = data.polls || [...MOCK_POLLS];
+            memoryUsers = data.users || [];
             lastFileReadTime = Date.now();
         } else {
             memoryPolls = [...MOCK_POLLS];
+            memoryUsers = [];
             try {
-                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
                 lastFileReadTime = Date.now();
             } catch (e) { }
         }
     } catch (error) {
         memoryPolls = [...MOCK_POLLS];
+        memoryUsers = [];
     }
 }
 
@@ -43,6 +47,7 @@ function reloadIfNeeded() {
                 const fileData = fs.readFileSync(DB_PATH, 'utf-8');
                 const data = JSON.parse(fileData);
                 memoryPolls = data.polls || [...MOCK_POLLS];
+                memoryUsers = data.users || [];
                 lastFileReadTime = Date.now();
             }
         }
@@ -67,18 +72,44 @@ async function ensureTable() {
     }
 }
 
-export async function getPolls(): Promise<Poll[]> {
+// User Management
+export async function createUser(user: User): Promise<void> {
+    reloadIfNeeded();
+    memoryUsers.push(user);
+    saveData();
+}
+
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+    reloadIfNeeded();
+    return memoryUsers.find(u => u.email === email);
+}
+
+function saveData() {
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+        lastFileReadTime = Date.now();
+    } catch (error) { }
+}
+
+export async function getPolls(creatorId?: string): Promise<Poll[]> {
     if (process.env.POSTGRES_URL) {
         await ensureTable();
         try {
             const { rows } = await sql`SELECT data FROM polls ORDER BY created_at DESC`;
-            return rows.map(r => r.data as Poll);
+            const allPolls = rows.map(r => r.data as Poll);
+            if (creatorId) {
+                return allPolls.filter(p => p.creatorId === creatorId);
+            }
+            return allPolls;
         } catch (e) {
             console.error("Error fetching from DB:", e);
         }
     }
 
     reloadIfNeeded();
+    if (creatorId) {
+        return memoryPolls.filter(p => p.creatorId === creatorId);
+    }
     return memoryPolls;
 }
 
@@ -107,10 +138,7 @@ export async function savePoll(poll: Poll) {
         memoryPolls.push(poll);
     }
 
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
-        lastFileReadTime = Date.now();
-    } catch (error) { }
+    saveData();
 }
 
 export async function getPoll(id: string): Promise<Poll | undefined> {
@@ -141,8 +169,5 @@ export async function deletePollFromStore(id: string) {
 
     reloadIfNeeded();
     memoryPolls = memoryPolls.filter(p => p.id !== id);
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
-        lastFileReadTime = Date.now();
-    } catch (error) { }
+    saveData();
 }
