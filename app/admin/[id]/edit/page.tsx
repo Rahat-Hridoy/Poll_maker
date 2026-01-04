@@ -1,13 +1,15 @@
 import { PollForm } from "@/components/poll/poll-form";
-import { MOCK_POLLS } from "@/lib/data";
+import { getPoll } from "@/lib/store";
+import { notFound } from "next/navigation";
 
 // In a real app, this would be async and fetch data
 export default async function EditPollPage({ params }: { params: Promise<{ id: string }> }) {
-    // Mock data fetching logic
-    // Since this is a server component in App Router, we usually await params
-    // But for static demo we'll assume it works or fix if Next.js 15+ needs await
     const { id } = await params;
-    const poll = MOCK_POLLS.find(p => p.id === id) || MOCK_POLLS[0];
+    const poll = await getPoll(id);
+
+    if (!poll) {
+        notFound();
+    }
 
     return (
         <div className="max-w-4xl mx-auto py-6 space-y-8">

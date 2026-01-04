@@ -7,6 +7,7 @@ const DB_PATH = path.join(process.cwd(), 'data.json');
 
 // Global in-memory store fallback
 let memoryPolls: Poll[] = [];
+let lastFileReadTime: number = 0;
 
 // Initialize memoryPolls with MOCK_POLLS or from file if possible (for local dev)
 function initLocalStore() {
@@ -15,9 +16,13 @@ function initLocalStore() {
             const fileData = fs.readFileSync(DB_PATH, 'utf-8');
             const data = JSON.parse(fileData);
             memoryPolls = data.polls || [...MOCK_POLLS];
+            lastFileReadTime = Date.now();
         } else {
             memoryPolls = [...MOCK_POLLS];
-            try { fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2)); } catch (e) { }
+            try {
+                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+                lastFileReadTime = Date.now();
+            } catch (e) { }
         }
     } catch (error) {
         memoryPolls = [...MOCK_POLLS];
@@ -25,6 +30,26 @@ function initLocalStore() {
 }
 
 initLocalStore();
+
+function reloadIfNeeded() {
+    if (process.env.POSTGRES_URL) return; // DB mode doesn't need file reload
+
+    try {
+        if (fs.existsSync(DB_PATH)) {
+            const stats = fs.statSync(DB_PATH);
+            const fileModTime = stats.mtimeMs;
+
+            if (fileModTime > lastFileReadTime) {
+                const fileData = fs.readFileSync(DB_PATH, 'utf-8');
+                const data = JSON.parse(fileData);
+                memoryPolls = data.polls || [...MOCK_POLLS];
+                lastFileReadTime = Date.now();
+            }
+        }
+    } catch (error) {
+        console.error("Error reloading from file:", error);
+    }
+}
 
 async function ensureTable() {
     if (process.env.POSTGRES_URL) {
@@ -52,6 +77,8 @@ export async function getPolls(): Promise<Poll[]> {
             console.error("Error fetching from DB:", e);
         }
     }
+
+    reloadIfNeeded();
     return memoryPolls;
 }
 
@@ -72,6 +99,7 @@ export async function savePoll(poll: Poll) {
         }
     }
 
+    reloadIfNeeded(); // Make sure we have latest before modifying
     const existingIndex = memoryPolls.findIndex(p => p.id === poll.id);
     if (existingIndex >= 0) {
         memoryPolls[existingIndex] = poll;
@@ -81,6 +109,7 @@ export async function savePoll(poll: Poll) {
 
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+        lastFileReadTime = Date.now();
     } catch (error) { }
 }
 
@@ -94,6 +123,8 @@ export async function getPoll(id: string): Promise<Poll | undefined> {
             console.error("Error fetching poll from DB:", e);
         }
     }
+
+    reloadIfNeeded();
     return memoryPolls.find(p => p.id === id);
 }
 
@@ -108,8 +139,10 @@ export async function deletePollFromStore(id: string) {
         }
     }
 
+    reloadIfNeeded();
     memoryPolls = memoryPolls.filter(p => p.id !== id);
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls }, null, 2));
+        lastFileReadTime = Date.now();
     } catch (error) { }
 }

@@ -1,201 +1,137 @@
 {
   "polls": [
     {
-      "id": "poll-1",
-      "title": "Best Programming Language 2024",
-      "description": "Help us decide which language rules them all.",
+      "id": "poll-1767516486146",
+      "title": "Ea enim culpa et qui",
+      "description": "Minus accusantium la",
       "status": "published",
-      "createdAt": "2026-01-02T05:23:56.790Z",
-      "visitors": 1240,
-      "totalVotes": 856,
-      "questions": [
-        {
-          "id": "q-1",
-          "text": "What is your primary language?",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1",
-              "text": "TypeScript",
-              "votes": 450
-            },
-            {
-              "id": "opt-2",
-              "text": "Python",
-              "votes": 300
-            },
-            {
-              "id": "opt-3",
-              "text": "Rust",
-              "votes": 106
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "poll-1767331680565",
-      "title": "Functional Test Poll",
-      "description": "",
-      "status": "published",
-      "createdAt": "2026-01-02T05:28:00.566Z",
+      "createdAt": "2026-01-04T08:48:06.146Z",
       "visitors": 0,
-      "totalVotes": 1,
+      "totalVotes": 5,
       "questions": [
         {
-          "id": "q-1767331680567-0.794421268281033",
-          "text": "Does it work?",
+          "id": "q-1767516486146-0.7436175225717898",
+          "text": "Ex occaecat facilis ",
           "type": "single",
           "options": [
             {
-              "id": "opt-1767331680568-0.5540453109419661",
-              "text": "Yes",
-              "votes": 1
+              "id": "opt-1767516486146-0.9285810457652564",
+              "text": "Voluptatum suscipit ",
+              "votes": 3
             },
             {
-              "id": "opt-1767331680568-0.6995941351967927",
-              "text": "",
-              "votes": 0
+              "id": "opt-1767516486146-0.7766084173439218",
+              "text": "Ea excepturi qui mol",
+              "votes": 2
             }
           ]
         }
       ],
       "clients": [
         {
-          "name": "Tester",
-          "email": "test@test.com",
-          "time": "2026-01-02T05:32:09.629Z"
-        }
-      ]
-    },
-    {
-      "id": "poll-1767332075475",
-      "title": "test",
-      "description": "",
-      "status": "published",
-      "createdAt": "2026-01-02T05:34:35.475Z",
-      "visitors": 0,
-      "totalVotes": 1,
-      "questions": [
+          "name": "df",
+          "email": "ceciv87729@cpaurl.com",
+          "time": "2026-01-04T08:48:29.359Z"
+        },
         {
-          "id": "q-1767332075475-0.9836470286500736",
-          "text": "Food",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1767332075475-0.6290169834626687",
-              "text": "Kabab",
-              "votes": 1
-            },
-            {
-              "id": "opt-1767332075475-0.7923533394942766",
-              "text": "Kacci",
-              "votes": 0
-            }
-          ]
-        }
-      ],
-      "clients": [
-        {
-          "name": "Tester",
-          "email": "test@test.com",
-          "time": "2026-01-02T05:35:05.571Z"
-        }
-      ]
-    },
-    {
-      "id": "poll-1767332460836",
-      "title": "Demo",
-      "description": "",
-      "status": "published",
-      "createdAt": "2026-01-02T05:41:00.836Z",
-      "visitors": 0,
-      "totalVotes": 0,
-      "questions": [
-        {
-          "id": "q-1767332460836-0.47875679348192834",
-          "text": "q",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1767332460836-0.7599766789169977",
-              "text": "f",
-              "votes": 0
-            },
-            {
-              "id": "opt-1767332460836-0.2462077769546338",
-              "text": "b",
-              "votes": 0
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "poll-1767332677497",
-      "title": "test",
-      "description": "",
-      "status": "published",
-      "createdAt": "2026-01-02T05:44:37.497Z",
-      "visitors": 0,
-      "totalVotes": 2,
-      "questions": [
-        {
-          "id": "q-1767332677497-0.7901898882177056",
-          "text": "Qestion",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1767332677497-0.9974697875237544",
-              "text": "A",
-              "votes": 1
-            },
-            {
-              "id": "opt-1767332677497-0.3427447540121309",
-              "text": "B",
-              "votes": 1
-            }
-          ]
-        }
-      ],
-      "clients": [
-        {
-          "name": "abc",
-          "email": "abc@gmail.com",
-          "time": "2026-01-02T05:45:15.567Z"
+          "name": "Rahat",
+          "email": "ambidesignla@gmail.com",
+          "time": "2026-01-04T09:05:51.770Z"
         },
         {
           "name": "MD RAHATUL ISLAM",
           "email": "rahatd2x@gmail.com",
-          "time": "2026-01-02T05:58:54.242Z"
+          "time": "2026-01-04T09:06:15.474Z"
+        },
+        {
+          "name": "Home Automation ",
+          "email": "wholeuses@gmail.com",
+          "time": "2026-01-04T09:18:22.157Z"
+        },
+        {
+          "name": "Rahat",
+          "email": "naciyam174@gianes.com",
+          "time": "2026-01-04T09:18:53.006Z"
         }
       ]
     },
     {
-      "id": "poll-1767334805740",
-      "title": "hh",
+      "id": "poll-1767516956171",
+      "title": "Live Stats Test",
       "description": "",
       "status": "published",
-      "createdAt": "2026-01-02T06:20:05.741Z",
+      "createdAt": "2026-01-04T08:55:56.171Z",
       "visitors": 0,
-      "totalVotes": 0,
+      "totalVotes": 2,
       "questions": [
         {
-          "id": "q-1767334805741-0.24357683525779517",
-          "text": "uhu",
+          "id": "q-1767516956171-0.6029899515815145",
+          "text": "Do you like live stats?",
           "type": "single",
           "options": [
             {
-              "id": "opt-1767334805741-0.3601056587845439",
-              "text": "yh",
-              "votes": 0
+              "id": "opt-1767516956171-0.1409980944627316",
+              "text": "Yes",
+              "votes": 1
             },
             {
-              "id": "opt-1767334805741-0.4464504794419375",
-              "text": "y",
-              "votes": 0
+              "id": "opt-1767516956171-0.6754940835099805",
+              "text": "No",
+              "votes": 1
             }
           ]
+        }
+      ],
+      "clients": [
+        {
+          "name": "Test User",
+          "email": "test@example.com",
+          "time": "2026-01-04T08:59:51.298Z"
+        },
+        {
+          "name": "User 2",
+          "email": "user2@example.com",
+          "time": "2026-01-04T09:02:40.332Z"
+        }
+      ]
+    },
+    {
+      "id": "poll-1767517862155",
+      "title": "Voter Accuracy Test",
+      "description": "",
+      "status": "published",
+      "createdAt": "2026-01-04T09:11:02.155Z",
+      "visitors": 0,
+      "totalVotes": 2,
+      "questions": [
+        {
+          "id": "q-1767517862156-0.4836211209510115",
+          "text": "Is this test working?",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767517862156-0.14522485977725252",
+              "text": "Yes",
+              "votes": 1
+            },
+            {
+              "id": "opt-1767517862156-0.46942213258223164",
+              "text": "No",
+              "votes": 1
+            }
+          ]
+        }
+      ],
+      "clients": [
+        {
+          "name": "User 1",
+          "email": "user1@example.com",
+          "time": "2026-01-04T09:13:44.175Z"
+        },
+        {
+          "name": "User 2",
+          "email": "user2@example.com",
+          "time": "2026-01-04T09:15:26.926Z"
         }
       ]
     }
