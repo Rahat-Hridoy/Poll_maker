@@ -1,85 +1,87 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-
-export async function getPolls() {
-    try {
-        const response = await fetch(`${BACKEND_URL}/polls`, { cache: 'no-store' });
-        if (!response.ok) return [];
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching polls:", error);
-        return [];
-    }
-}
-
-export async function getPoll(id: string) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/polls/${id}`, { cache: 'no-store' });
-        if (!response.ok) return null;
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching poll ${id}:`, error);
-        return null;
-    }
-}
+import { Poll } from '@/lib/data';
+import { getPoll, getPolls, savePoll, deletePollFromStore } from '@/lib/store';
 
 export async function createPoll(formData: any) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/polls`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
+    const { title, description, questions } = formData;
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || "Failed to create poll");
-        }
+    // Convert generic questions to typed PollQuestion structure if needed
+    // For now assuming the incoming data matches roughly what we need usually, 
+    // but likely we need to shape it properly.
 
-        const data = await response.json();
-        revalidatePath('/admin/dashboard');
-        return { success: true, pollId: data.id };
-    } catch (error: any) {
-        console.error("Create poll error:", error);
-        return { success: false, error: error.message || "Failed to create poll" };
-    }
+    const newPoll: Poll = {
+        id: `poll-${Date.now()}`,
+        title,
+        description,
+        status: 'published',
+        createdAt: new Date().toISOString(),
+        visitors: 0,
+        totalVotes: 0,
+        questions: questions.map((q: any) => ({
+            id: `q-${Date.now()}-${Math.random()}`,
+            text: q.text,
+            type: q.type,
+            options: q.options.map((o: any) => ({
+                id: `opt-${Date.now()}-${Math.random()}`,
+                text: o.text,
+                votes: 0
+            }))
+        }))
+    };
+
+    await savePoll(newPoll);
+    revalidatePath('/admin/dashboard');
+    return { success: true, pollId: newPoll.id };
 }
 
 export async function submitVote(pollId: string, answers: Record<string, string>, voterInfo: { name: string, email: string }) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/polls/${pollId}/vote`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answers, voterInfo }),
-        });
+    const poll = await getPoll(pollId);
+    if (!poll) return { success: false, error: "Poll not found" };
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || "Vote failed");
+    // Update votes
+    // Note: This naive implementation has race conditions but is fine for a demo.
+    poll.questions.forEach(q => {
+        const answerId = answers[q.id];
+        if (answerId) {
+            const option = q.options.find(o => o.id === answerId);
+            if (option) {
+                option.votes += 1;
+            }
         }
+    });
 
-        revalidatePath(`/admin/${pollId}/stats`);
-        revalidatePath(`/poll/${pollId}`);
-        revalidatePath(`/admin/dashboard`);
+    poll.totalVotes += 1;
+    // We optionally could store the voter info in a separate "votes" collection, 
+    // but for now we won't persist the list of voters in our simple JSON store 
+    // unless we update the Type definition.
+    // Let's assume we just track the counts for the standard view, 
+    // and maybe log the visitor for the "Client List" requirement if we extend the type.
 
-        return { success: true };
-    } catch (error: any) {
-        console.error("Vote submission error:", error);
-        return { success: false, error: error.message || "Failed to submit vote" };
-    }
+    // For the "Client List" requirement from the User, we'll need to store it.
+    // Let's add a "clients" array to the Poll object via type assertion for now.
+
+    const pollWithClients = poll as Poll & { clients?: any[] };
+    if (!pollWithClients.clients) pollWithClients.clients = [];
+
+    pollWithClients.clients.push({
+        name: voterInfo.name,
+        email: voterInfo.email,
+        time: new Date().toISOString() // "just now" equivalent
+    });
+
+    await savePoll(poll);
+    revalidatePath(`/admin/${pollId}/stats`);
+    revalidatePath(`/poll/${pollId}`);
+    revalidatePath(`/admin/dashboard`);
+
+    return { success: true };
 }
 
 export async function deletePoll(id: string) {
     try {
-        const response = await fetch(`${BACKEND_URL}/polls/${id}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) throw new Error("Delete failed");
-
+        await deletePollFromStore(id);
         revalidatePath('/admin/dashboard');
         return { success: true };
     } catch (error) {

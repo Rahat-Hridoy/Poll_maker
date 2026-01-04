@@ -1,5 +1,5 @@
 import { VoteChart } from "@/components/poll/vote-chart";
-import { getPoll } from "@/app/actions";
+import { getPoll } from "@/lib/store";
 import { ArrowLeft, Users, Vote } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
