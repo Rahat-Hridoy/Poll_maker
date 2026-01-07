@@ -284,6 +284,35 @@
         }
       ],
       "creatorId": "user-1767523556026"
+    },
+    {
+      "id": "poll-1767776181905",
+      "title": "rrr",
+      "description": "Eius et quaerat et l",
+      "status": "published",
+      "createdAt": "2026-01-07T08:56:21.906Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767776181906-0.5104360631542253",
+          "text": "Et qui commodo et co",
+          "type": "single",
+          "options": [
+            {
+              "id": "opt-1767776181906-0.7986427890216079",
+              "text": "Error eos natus magn",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767776181906-0.911517698087128",
+              "text": "Tempore tempora qui",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
     }
   ],
   "users": [

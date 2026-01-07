@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, QrCode } from 'lucide-react';
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
-import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a checkbox component, or use native
 import { QRCodeDialog } from '@/components/admin/qr-code-dialog';
 
 interface PollListProps {

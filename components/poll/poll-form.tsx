@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,12 +10,13 @@ import { Copy, ExternalLink, Check, Plus, Trash2, GripVertical, Save, QrCode } f
 import { QRCodeDialog } from "@/components/admin/qr-code-dialog"
 
 import { createPoll } from "@/app/actions"
+import { Poll, PollQuestion } from "@/lib/data"
 
-export function PollForm({ initialData = null }: { initialData?: any }) {
+export function PollForm({ initialData = null }: { initialData?: Partial<Poll> | null }) {
     const [title, setTitle] = useState(initialData?.title || "")
     const [description, setDescription] = useState(initialData?.description || "")
-    const [questions, setQuestions] = useState<any[]>(initialData?.questions || [
-        { id: Date.now(), text: "", type: "single", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }] }
+    const [questions, setQuestions] = useState<PollQuestion[]>(initialData?.questions as PollQuestion[] || [
+        { id: Date.now().toString(), text: "", type: "single", options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }] }
     ])
 
     // Success Dialog State
@@ -29,46 +29,46 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
         setQuestions([
             ...questions,
             {
-                id: Date.now(),
+                id: Date.now().toString(),
                 text: "",
                 type: "single",
-                options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }]
+                options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }]
             }
         ])
     }
 
-    const removeQuestion = (id: number) => {
+    const removeQuestion = (id: string) => {
         setQuestions(questions.filter(q => q.id !== id))
     }
 
-    const updateQuestion = (id: number, field: string, value: any) => {
-        setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q))
+    const updateQuestion = (id: string, field: string, value: string) => {
+        setQuestions(questions.map((q) => q.id === id ? { ...q, [field]: value } : q))
     }
 
-    const addOption = (questionId: number) => {
-        setQuestions(questions.map(q => {
+    const addOption = (questionId: string) => {
+        setQuestions(questions.map((q) => {
             if (q.id === questionId) {
-                return { ...q, options: [...q.options, { id: Date.now(), text: "" }] }
+                return { ...q, options: [...q.options, { id: Date.now().toString(), text: "", votes: 0 }] }
             }
             return q
         }))
     }
 
-    const removeOption = (questionId: number, optionId: number) => {
-        setQuestions(questions.map(q => {
+    const removeOption = (questionId: string, optionId: string) => {
+        setQuestions(questions.map((q) => {
             if (q.id === questionId) {
-                return { ...q, options: q.options.filter((o: any) => o.id !== optionId) }
+                return { ...q, options: q.options.filter((o) => o.id !== optionId) }
             }
             return q
         }))
     }
 
-    const updateOption = (questionId: number, optionId: number, text: string) => {
-        setQuestions(questions.map(q => {
+    const updateOption = (questionId: string, optionId: string, text: string) => {
+        setQuestions(questions.map((q) => {
             if (q.id === questionId) {
                 return {
                     ...q,
-                    options: q.options.map((o: any) => o.id === optionId ? { ...o, text } : o)
+                    options: q.options.map((o) => o.id === optionId ? { ...o, text } : o)
                 }
             }
             return q
@@ -82,13 +82,13 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
         try {
             const result = await createPoll({ title, description, questions });
             if (result.success) {
-                const link = `${window.location.origin}/poll/${result.pollId}`
+                const link = `${window.location.origin} /poll/${result.pollId} `
                 setGeneratedLink(link)
                 setShowSuccessDialog(true)
                 // Reset form
                 setTitle("")
                 setDescription("")
-                setQuestions([{ id: Date.now(), text: "", type: "single", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }] }])
+                setQuestions([{ id: Date.now().toString(), text: "", type: "single", options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }] }])
             }
         } catch (error) {
             console.error(error)
@@ -170,13 +170,13 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
 
                                 <div className="space-y-3 pt-2">
                                     <Label>Options</Label>
-                                    {question.options.map((option: any, optIndex: number) => (
+                                    {question.options.map((option, optIndex: number) => (
                                         <div key={option.id} className="flex items-center gap-2">
                                             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
                                             <Input
                                                 value={option.text}
                                                 onChange={(e) => updateOption(question.id, option.id, e.target.value)}
-                                                placeholder={`Option ${optIndex + 1}`}
+                                                placeholder={`Option ${optIndex + 1} `}
                                                 className="flex-1"
                                             />
                                             {question.options.length > 2 && (
@@ -215,8 +215,9 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
                     >
                         <Plus className="mr-2 h-4 w-4" /> Add Question
                     </Button>
-                    <Button type="submit" size="lg" className="w-full sm:w-auto">
-                        <Save className="mr-2 h-4 w-4" /> Save & Publish Poll
+                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
+                        <Save className="mr-2 h-4 w-4" />
+                        {isSubmitting ? "Saving..." : "Save & Publish Poll"}
                     </Button>
                 </div>
             </form>

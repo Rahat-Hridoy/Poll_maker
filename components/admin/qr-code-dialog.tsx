@@ -11,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Download, QrCode } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 interface QRCodeDialogProps {
     url: string;
@@ -29,7 +29,8 @@ export function QRCodeDialog({ url, title, trigger, open, onOpenChange }: QRCode
     const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
 
     const downloadQRCode = () => {
-        const svg = document.getElementById('qr-code-svg');
+        const qrId = `qr-code-svg-${title.replace(/\s+/g, '_')}`;
+        const svg = document.getElementById(qrId);
         if (!svg) return;
 
         const svgData = new XMLSerializer().serializeToString(svg);
@@ -72,7 +73,7 @@ export function QRCodeDialog({ url, title, trigger, open, onOpenChange }: QRCode
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border">
                         <QRCodeSVG
-                            id="qr-code-svg"
+                            id={`qr-code-svg-${title.replace(/\s+/g, '_')}`}
                             value={url}
                             size={256}
                             level="H"
