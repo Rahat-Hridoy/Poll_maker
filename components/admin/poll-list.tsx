@@ -30,13 +30,29 @@ const item = {
     show: { opacity: 1, y: 0 }
 };
 
-export function PollList({ polls }: PollListProps) {
+export function PollList({ polls: initialPolls }: PollListProps) {
+    const [polls, setPolls] = useState<Poll[]>(initialPolls);
     const [selectedPolls, setSelectedPolls] = useState<Set<string>>(new Set());
     const [isExporting, setIsExporting] = useState(false);
     const [origin, setOrigin] = useState('');
 
     useEffect(() => {
         setOrigin(window.location.origin);
+
+        // Live polling for dashboard updates
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch('/api/polls', { cache: 'no-store' });
+                if (response.ok) {
+                    const updatedPolls = await response.json();
+                    setPolls(updatedPolls);
+                }
+            } catch (error) {
+                console.error('Failed to poll dashboard updates:', error);
+            }
+        }, 5000); // Update every 5 seconds
+
+        return () => clearInterval(interval);
     }, []);
 
     const toggleSelection = (id: string) => {

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { PollResults } from "@/components/poll/poll-results"
-import { submitVote } from "@/app/actions"
+import { submitVote, trackPollVisitor } from "@/app/actions"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function PollViewer({ poll }: { poll: any }) {
@@ -16,6 +16,12 @@ export function PollViewer({ poll }: { poll: any }) {
     const [voterName, setVoterName] = useState("")
     const [voterEmail, setVoterEmail] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    useEffect(() => {
+        if (poll?.id) {
+            trackPollVisitor(poll.id);
+        }
+    }, [poll?.id]);
 
     const handleOptionChange = (questionId: string, value: string) => {
         setSelectedOptions(prev => ({ ...prev, [questionId]: value }))

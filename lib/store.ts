@@ -156,6 +156,35 @@ export async function getPoll(id: string): Promise<Poll | undefined> {
     return memoryPolls.find(p => p.id === id);
 }
 
+export async function incrementPollVisitors(id: string) {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            // Get current poll, increment, and save
+            const { rows } = await sql`SELECT data FROM polls WHERE id = ${id}`;
+            if (rows.length > 0) {
+                const poll = rows[0].data as Poll;
+                poll.visitors = (poll.visitors || 0) + 1;
+                await sql`
+                    UPDATE polls 
+                    SET data = ${JSON.stringify(poll)}
+                    WHERE id = ${id}
+                `;
+            }
+            return;
+        } catch (e) {
+            console.error("Error incrementing visitors in DB:", e);
+        }
+    }
+
+    reloadIfNeeded();
+    const poll = memoryPolls.find(p => p.id === id);
+    if (poll) {
+        poll.visitors = (poll.visitors || 0) + 1;
+        saveData();
+    }
+}
+
 export async function deletePollFromStore(id: string) {
     if (process.env.POSTGRES_URL) {
         await ensureTable();

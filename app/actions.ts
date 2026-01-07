@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { Poll, QuestionType } from '@/lib/data';
-import { getPoll, getPolls, savePoll, deletePollFromStore } from '@/lib/store';
+import { getPoll, getPolls, savePoll, deletePollFromStore, incrementPollVisitors } from '@/lib/store';
 import { cookies } from 'next/headers';
 import Papa from 'papaparse';
 
@@ -156,6 +156,18 @@ export async function submitVote(pollId: string, answers: Record<string, string>
     revalidatePath(`/admin/dashboard`);
 
     return { success: true };
+}
+
+export async function trackPollVisitor(pollId: string) {
+    try {
+        await incrementPollVisitors(pollId);
+        revalidatePath('/admin/dashboard');
+        revalidatePath(`/admin/${pollId}/stats`);
+        return { success: true };
+    } catch (e) {
+        console.error("Error tracking visitor:", e);
+        return { success: false };
+    }
 }
 
 export async function deletePoll(id: string) {
