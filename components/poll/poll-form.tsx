@@ -24,6 +24,8 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
     const [generatedLink, setGeneratedLink] = useState("")
     const [copied, setCopied] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [scheduledDate, setScheduledDate] = useState(initialData?.scheduledAt ? new Date(initialData.scheduledAt).toISOString().slice(0, 16) : "")
+    const [isScheduling, setIsScheduling] = useState(false)
 
     const addQuestion = () => {
         setQuestions([
@@ -75,7 +77,7 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
         }))
     }
 
-    const handleSubmit = async (e: React.FormEvent, status: 'draft' | 'published' = 'published') => {
+    const handleSubmit = async (e: React.FormEvent, status: 'draft' | 'published' | 'scheduled' = 'published') => {
         e.preventDefault()
         setIsSubmitting(true)
 
@@ -85,7 +87,8 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                 title,
                 description,
                 questions,
-                status
+                status,
+                scheduledAt: status === 'scheduled' ? new Date(scheduledDate).toISOString() : undefined
             });
 
             if (result.success) {
@@ -93,6 +96,8 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                     const link = `${window.location.origin}/poll/${result.pollId}`
                     setGeneratedLink(link)
                     setShowSuccessDialog(true)
+                } else if (status === 'scheduled') {
+                    alert(`Poll scheduled for ${new Date(scheduledDate).toLocaleString()}!`)
                 } else {
                     alert("Poll saved as draft!")
                 }
@@ -101,6 +106,8 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                     // Reset form only if creating new
                     setTitle("")
                     setDescription("")
+                    setScheduledDate("")
+                    setIsScheduling(false)
                     setQuestions([{ id: Date.now().toString(), text: "", type: "single", options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }] }])
                 }
             }
@@ -230,17 +237,55 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                         <Plus className="mr-2 h-4 w-4" /> Add Question
                     </Button>
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="lg"
-                            className="w-full sm:w-auto"
-                            disabled={isSubmitting}
-                            onClick={(e) => handleSubmit(e as any, 'draft')}
-                        >
-                            <Save className="mr-2 h-4 w-4" />
-                            {isSubmitting ? "Saving..." : "Save as Draft"}
-                        </Button>
+                        {isScheduling ? (
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="datetime-local"
+                                    value={scheduledDate}
+                                    onChange={(e) => setScheduledDate(e.target.value)}
+                                    className="w-full sm:w-auto"
+                                    required
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={(e) => scheduledDate && handleSubmit(e as any, 'scheduled')}
+                                    disabled={!scheduledDate || isSubmitting}
+                                >
+                                    Confirm Schedule
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setIsScheduling(false)}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsScheduling(true)}
+                                    className="w-full sm:w-auto"
+                                    disabled={isSubmitting}
+                                >
+                                    <Check className="mr-2 h-4 w-4" /> Schedule
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="lg"
+                                    className="w-full sm:w-auto"
+                                    disabled={isSubmitting}
+                                    onClick={(e) => handleSubmit(e as any, 'draft')}
+                                >
+                                    <Save className="mr-2 h-4 w-4" />
+                                    {isSubmitting ? "Saving..." : "Save as Draft"}
+                                </Button>
+                            </>
+                        )}
                         <Button type="submit" size="lg" className="shadow-lg hover:shadow-primary/25 transition-all w-full sm:w-auto" disabled={isSubmitting}>
                             <ExternalLink className="mr-2 h-4 w-4" />
                             {isSubmitting ? "Publishing..." : initialData ? "Update & Publish" : "Save & Publish Poll"}

@@ -194,35 +194,6 @@
       "creatorId": "user-1767523112283"
     },
     {
-      "id": "poll-1767562960455-l73dbpoh0",
-      "title": "Id rerum laboris id",
-      "description": "Officia magna eos d",
-      "status": "published",
-      "createdAt": "2026-01-04T21:42:40.455Z",
-      "visitors": 0,
-      "totalVotes": 0,
-      "questions": [
-        {
-          "id": "q-1767562960455-0.6181592995671363",
-          "text": "Commodi mollitia lor",
-          "type": "multiple",
-          "options": [
-            {
-              "id": "opt-1767562960455-0.9423754186068249",
-              "text": "Autem deserunt eiusm",
-              "votes": 0
-            },
-            {
-              "id": "opt-1767562960455-0.035673665875809224",
-              "text": "Ex enim qui nulla la",
-              "votes": 0
-            }
-          ]
-        }
-      ],
-      "creatorId": "user-1767523556026"
-    },
-    {
       "id": "poll-1767562960455-ctguguyfi",
       "title": "Explicabo Quia et q",
       "description": "In facilis consequun",
@@ -327,27 +298,57 @@
       ]
     },
     {
-      "id": "poll-1767810305572",
-      "title": "A qui amet omnis no",
-      "description": "Ut velit id et quia",
-      "status": "published",
-      "createdAt": "2026-01-07T18:25:05.572Z",
+      "id": "poll-1767815314999",
+      "title": "Schedule test",
+      "description": "Fugiat tempora volu",
+      "status": "scheduled",
+      "scheduledAt": "2026-01-07T19:49:00.000Z",
+      "createdAt": "2026-01-07T19:48:34.999Z",
       "visitors": 0,
       "totalVotes": 0,
       "questions": [
         {
-          "id": "1767810289549",
-          "text": "Recusandae Mollit o",
+          "id": "1767815278647",
+          "text": "Placeat veniam duc",
           "type": "single",
           "options": [
             {
-              "id": "1767810289550",
-              "text": "Nostrud fuga Natus ",
+              "id": "1767815278648",
+              "text": "Consectetur voluptat",
               "votes": 0
             },
             {
-              "id": "1767810289551",
-              "text": "Alias consequatur C",
+              "id": "1767815278649",
+              "text": "Quis ex ut quia enim",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
+    },
+    {
+      "id": "poll-1767815318117",
+      "title": "",
+      "description": "",
+      "status": "draft",
+      "createdAt": "2026-01-07T19:48:38.117Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "1767815316380",
+          "text": "",
+          "type": "single",
+          "options": [
+            {
+              "id": "1767815316381",
+              "text": "",
+              "votes": 0
+            },
+            {
+              "id": "1767815316382",
+              "text": "",
               "votes": 0
             }
           ]

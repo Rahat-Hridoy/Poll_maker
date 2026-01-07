@@ -24,7 +24,8 @@ export interface Poll {
     id: string;
     title: string;
     description?: string;
-    status: 'draft' | 'published' | 'closed';
+    status: 'draft' | 'published' | 'closed' | 'scheduled';
+    scheduledAt?: string;
     createdAt: string;
     visitors: number;
     totalVotes: number;

@@ -96,7 +96,14 @@ export async function getPolls(creatorId?: string): Promise<Poll[]> {
         await ensureTable();
         try {
             const { rows } = await sql`SELECT data FROM polls ORDER BY created_at DESC`;
-            const allPolls = rows.map(r => r.data as Poll);
+            const allPolls = rows.map(r => {
+                const p = r.data as Poll;
+                // Auto-publish logic
+                if (p.status === 'scheduled' && p.scheduledAt && new Date(p.scheduledAt) <= new Date()) {
+                    p.status = 'published';
+                }
+                return p;
+            });
             if (creatorId) {
                 return allPolls.filter(p => p.creatorId === creatorId);
             }
@@ -107,10 +114,17 @@ export async function getPolls(creatorId?: string): Promise<Poll[]> {
     }
 
     reloadIfNeeded();
+    const processedPolls = memoryPolls.map(p => {
+        if (p.status === 'scheduled' && p.scheduledAt && new Date(p.scheduledAt) <= new Date()) {
+            return { ...p, status: 'published' as const };
+        }
+        return p;
+    });
+
     if (creatorId) {
-        return memoryPolls.filter(p => p.creatorId === creatorId);
+        return processedPolls.filter(p => p.creatorId === creatorId);
     }
-    return memoryPolls;
+    return processedPolls;
 }
 
 export async function savePoll(poll: Poll) {
@@ -153,7 +167,11 @@ export async function getPoll(id: string): Promise<Poll | undefined> {
     }
 
     reloadIfNeeded();
-    return memoryPolls.find(p => p.id === id);
+    const poll = memoryPolls.find(p => p.id === id);
+    if (poll && poll.status === 'scheduled' && poll.scheduledAt && new Date(poll.scheduledAt) <= new Date()) {
+        return { ...poll, status: 'published' };
+    }
+    return poll;
 }
 
 export async function incrementPollVisitors(id: string) {
