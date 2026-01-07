@@ -75,24 +75,38 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
         }))
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent, status: 'draft' | 'published' = 'published') => {
         e.preventDefault()
         setIsSubmitting(true)
 
         try {
-            const result = await createPoll({ title, description, questions });
+            const result = await createPoll({
+                id: initialData?.id,
+                title,
+                description,
+                questions,
+                status
+            });
+
             if (result.success) {
-                const link = `${window.location.origin} /poll/${result.pollId} `
-                setGeneratedLink(link)
-                setShowSuccessDialog(true)
-                // Reset form
-                setTitle("")
-                setDescription("")
-                setQuestions([{ id: Date.now().toString(), text: "", type: "single", options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }] }])
+                if (status === 'published') {
+                    const link = `${window.location.origin}/poll/${result.pollId}`
+                    setGeneratedLink(link)
+                    setShowSuccessDialog(true)
+                } else {
+                    alert("Poll saved as draft!")
+                }
+
+                if (!initialData) {
+                    // Reset form only if creating new
+                    setTitle("")
+                    setDescription("")
+                    setQuestions([{ id: Date.now().toString(), text: "", type: "single", options: [{ id: (Date.now() + 1).toString(), text: "", votes: 0 }, { id: (Date.now() + 2).toString(), text: "", votes: 0 }] }])
+                }
             }
         } catch (error) {
             console.error(error)
-            alert("Failed to create poll")
+            alert("Failed to save poll")
         } finally {
             setIsSubmitting(false)
         }
@@ -106,7 +120,7 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto">
+            <form onSubmit={(e) => handleSubmit(e, 'published')} className="space-y-8 max-w-3xl mx-auto">
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="title">Poll Title</Label>
@@ -215,10 +229,23 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                     >
                         <Plus className="mr-2 h-4 w-4" /> Add Question
                     </Button>
-                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
-                        <Save className="mr-2 h-4 w-4" />
-                        {isSubmitting ? "Saving..." : "Save & Publish Poll"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="lg"
+                            className="w-full sm:w-auto"
+                            disabled={isSubmitting}
+                            onClick={(e) => handleSubmit(e as any, 'draft')}
+                        >
+                            <Save className="mr-2 h-4 w-4" />
+                            {isSubmitting ? "Saving..." : "Save as Draft"}
+                        </Button>
+                        <Button type="submit" size="lg" className="shadow-lg hover:shadow-primary/25 transition-all w-full sm:w-auto" disabled={isSubmitting}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            {isSubmitting ? "Publishing..." : initialData ? "Update & Publish" : "Save & Publish Poll"}
+                        </Button>
+                    </div>
                 </div>
             </form>
 

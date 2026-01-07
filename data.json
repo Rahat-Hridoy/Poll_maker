@@ -325,6 +325,35 @@
           "time": "2026-01-07T09:10:50.234Z"
         }
       ]
+    },
+    {
+      "id": "poll-1767810305572",
+      "title": "A qui amet omnis no",
+      "description": "Ut velit id et quia",
+      "status": "published",
+      "createdAt": "2026-01-07T18:25:05.572Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "1767810289549",
+          "text": "Recusandae Mollit o",
+          "type": "single",
+          "options": [
+            {
+              "id": "1767810289550",
+              "text": "Nostrud fuga Natus ",
+              "votes": 0
+            },
+            {
+              "id": "1767810289551",
+              "text": "Alias consequatur C",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
     }
   ],
   "users": [

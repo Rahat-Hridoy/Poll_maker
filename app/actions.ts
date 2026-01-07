@@ -93,29 +93,34 @@ export async function importPolls(formData: FormData) {
 }
 
 export async function createPoll(formData: any) {
-    const { title, description, questions } = formData;
+    const { title, description, questions, status = 'published', id } = formData;
     const cookieStore = await cookies();
     const creatorId = cookieStore.get('auth_session')?.value;
 
+    let existingPoll: Poll | undefined;
+    if (id) {
+        existingPoll = await getPoll(id);
+    }
+
     const newPoll: Poll = {
-        id: `poll-${Date.now()}`,
+        id: id || `poll-${Date.now()}`,
         title,
         description,
-        status: 'published',
-        createdAt: new Date().toISOString(),
-        visitors: 0,
-        totalVotes: 0,
+        status,
+        createdAt: existingPoll?.createdAt || new Date().toISOString(),
+        visitors: existingPoll?.visitors || 0,
+        totalVotes: existingPoll?.totalVotes || 0,
         questions: questions.map((q: any) => ({
-            id: `q-${Date.now()}-${Math.random()}`,
+            id: q.id || `q-${Date.now()}-${Math.random()}`,
             text: q.text,
             type: q.type,
             options: q.options.map((o: any) => ({
-                id: `opt-${Date.now()}-${Math.random()}`,
+                id: o.id || `opt-${Date.now()}-${Math.random()}`,
                 text: o.text,
-                votes: 0
+                votes: o.votes || 0
             }))
         })),
-        creatorId // Attach the logged-in user ID
+        creatorId: creatorId || existingPoll?.creatorId // Attach the logged-in user ID
     };
 
     await savePoll(newPoll);
