@@ -10,6 +10,7 @@ import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, Qr
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
 import { QRCodeDialog } from '@/components/admin/qr-code-dialog';
+import { CountdownTimer } from './countdown-timer';
 
 interface PollListProps {
     polls: Poll[];
@@ -164,9 +165,12 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                                     <div className="w-6 shrink-0"></div>
                                 </div>
                                 <div className="flex gap-2 mt-1">
-                                    <Badge variant={poll.status === 'published' ? 'default' : 'secondary'} className="animate-in fade-in">
+                                    <Badge variant={poll.status === 'published' ? 'default' : poll.status === 'scheduled' ? 'outline' : 'secondary'} className="animate-in fade-in">
                                         {poll.status}
                                     </Badge>
+                                    {poll.status === 'scheduled' && poll.scheduledAt && (
+                                        <CountdownTimer targetDate={poll.scheduledAt} />
+                                    )}
                                 </div>
                                 <CardDescription className="line-clamp-2 min-h-[2.5em] mt-2">
                                     {poll.description || "No description provided."}

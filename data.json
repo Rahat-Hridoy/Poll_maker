@@ -194,40 +194,6 @@
       "creatorId": "user-1767523112283"
     },
     {
-      "id": "poll-1767562960455-ctguguyfi",
-      "title": "Explicabo Quia et q",
-      "description": "In facilis consequun",
-      "status": "published",
-      "createdAt": "2026-01-04T21:42:40.455Z",
-      "visitors": 0,
-      "totalVotes": 0,
-      "questions": [
-        {
-          "id": "q-1767562960455-0.9289962946568684",
-          "text": "Labore quisquam elit",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1767562960455-0.9805328016840198",
-              "text": "Reiciendis officia m",
-              "votes": 0
-            },
-            {
-              "id": "opt-1767562960455-0.37370351398841795",
-              "text": "Voluptatem anim debi",
-              "votes": 0
-            },
-            {
-              "id": "opt-1767562960455-0.7565911286521647",
-              "text": "Vel id vero autem ne",
-              "votes": 0
-            }
-          ]
-        }
-      ],
-      "creatorId": "user-1767523556026"
-    },
-    {
       "id": "poll-1767775205294",
       "title": "Fugiat sed nulla mag",
       "description": "Distinctio Odit ad ",
@@ -298,57 +264,28 @@
       ]
     },
     {
-      "id": "poll-1767815314999",
-      "title": "Schedule test",
-      "description": "Fugiat tempora volu",
+      "id": "poll-1767815768908",
+      "title": "Vel asperiores simil",
+      "description": "Ut cupidatat pariatu",
       "status": "scheduled",
-      "scheduledAt": "2026-01-07T19:49:00.000Z",
-      "createdAt": "2026-01-07T19:48:34.999Z",
+      "scheduledAt": "2026-01-07T19:57:00.000Z",
+      "createdAt": "2026-01-07T19:56:08.908Z",
       "visitors": 0,
       "totalVotes": 0,
       "questions": [
         {
-          "id": "1767815278647",
-          "text": "Placeat veniam duc",
+          "id": "1767815759853",
+          "text": "Placeat sunt soluta",
           "type": "single",
           "options": [
             {
-              "id": "1767815278648",
-              "text": "Consectetur voluptat",
+              "id": "1767815759854",
+              "text": "Quod esse aut volupt",
               "votes": 0
             },
             {
-              "id": "1767815278649",
-              "text": "Quis ex ut quia enim",
-              "votes": 0
-            }
-          ]
-        }
-      ],
-      "creatorId": "user-1767523556026"
-    },
-    {
-      "id": "poll-1767815318117",
-      "title": "",
-      "description": "",
-      "status": "draft",
-      "createdAt": "2026-01-07T19:48:38.117Z",
-      "visitors": 0,
-      "totalVotes": 0,
-      "questions": [
-        {
-          "id": "1767815316380",
-          "text": "",
-          "type": "single",
-          "options": [
-            {
-              "id": "1767815316381",
-              "text": "",
-              "votes": 0
-            },
-            {
-              "id": "1767815316382",
-              "text": "",
+              "id": "1767815759855",
+              "text": "Distinctio Sed qui ",
               "votes": 0
             }
           ]
