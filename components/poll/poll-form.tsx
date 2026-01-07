@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Copy, ExternalLink, Check, Plus, Trash2, GripVertical, Save } from "lucide-react"
+import { Copy, ExternalLink, Check, Plus, Trash2, GripVertical, Save, QrCode } from "lucide-react"
+import { QRCodeDialog } from "@/components/admin/qr-code-dialog"
 
 import { createPoll } from "@/app/actions"
 
@@ -253,6 +254,16 @@ export function PollForm({ initialData = null }: { initialData?: any }) {
                             <ExternalLink className="mr-2 h-4 w-4" />
                             View Poll
                         </Button>
+                        <QRCodeDialog
+                            url={generatedLink}
+                            title={title || "Your Poll"}
+                            trigger={
+                                <Button type="button" variant="outline">
+                                    <QrCode className="mr-2 h-4 w-4" />
+                                    QR Code
+                                </Button>
+                            }
+                        />
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

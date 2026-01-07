@@ -255,6 +255,35 @@
         }
       ],
       "creatorId": "user-1767523556026"
+    },
+    {
+      "id": "poll-1767775205294",
+      "title": "Fugiat sed nulla mag",
+      "description": "Distinctio Odit ad ",
+      "status": "published",
+      "createdAt": "2026-01-07T08:40:05.294Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q-1767775205294-0.6823028168222995",
+          "text": "Labore quo enim cupi",
+          "type": "multiple",
+          "options": [
+            {
+              "id": "opt-1767775205294-0.939818121615098",
+              "text": "Quos tempore dolore",
+              "votes": 0
+            },
+            {
+              "id": "opt-1767775205294-0.8628401173622693",
+              "text": "Molestiae ad sunt di",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026"
     }
   ],
   "users": [

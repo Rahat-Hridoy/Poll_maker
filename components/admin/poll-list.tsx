@@ -2,14 +2,15 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square } from 'lucide-react';
+import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, QrCode } from 'lucide-react';
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
 import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a checkbox component, or use native
+import { QRCodeDialog } from '@/components/admin/qr-code-dialog';
 
 interface PollListProps {
     polls: Poll[];
@@ -33,6 +34,11 @@ const item = {
 export function PollList({ polls }: PollListProps) {
     const [selectedPolls, setSelectedPolls] = useState<Set<string>>(new Set());
     const [isExporting, setIsExporting] = useState(false);
+    const [origin, setOrigin] = useState('');
+
+    useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
 
     const toggleSelection = (id: string) => {
         const newSelection = new Set(selectedPolls);
@@ -177,11 +183,22 @@ export function PollList({ polls }: PollListProps) {
                                         </Button>
                                     </Link>
                                     {poll.status === 'published' && (
-                                        <Link href={`/poll/${poll.id}`} target="_blank">
-                                            <Button variant="secondary" size="sm" className="h-8 w-8 p-0">
-                                                <ExternalLink className="h-3.5 w-3.5" />
-                                            </Button>
-                                        </Link>
+                                        <>
+                                            <QRCodeDialog
+                                                url={`${origin}/poll/${poll.id}`}
+                                                title={poll.title}
+                                                trigger={
+                                                    <Button variant="secondary" size="sm" className="h-8 w-8 p-0" title="Get QR Code">
+                                                        <QrCode className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                }
+                                            />
+                                            <Link href={`/poll/${poll.id}`} target="_blank">
+                                                <Button variant="secondary" size="sm" className="h-8 w-8 p-0" title="Open Poll">
+                                                    <ExternalLink className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </Link>
+                                        </>
                                     )}
                                 </div>
                             </CardFooter>
