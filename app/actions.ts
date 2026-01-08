@@ -93,7 +93,7 @@ export async function importPolls(formData: FormData) {
 }
 
 export async function createPoll(formData: any) {
-    const { title, description, questions, status = 'published', id, scheduledAt } = formData;
+    const { title, description, questions, status = 'published', id, scheduledAt, style, settings } = formData;
     const cookieStore = await cookies();
     const creatorId = cookieStore.get('auth_session')?.value;
 
@@ -108,6 +108,8 @@ export async function createPoll(formData: any) {
         description,
         status,
         scheduledAt,
+        style,
+        settings,
         createdAt: existingPoll?.createdAt || new Date().toISOString(),
         visitors: existingPoll?.visitors || 0,
         totalVotes: existingPoll?.totalVotes || 0,

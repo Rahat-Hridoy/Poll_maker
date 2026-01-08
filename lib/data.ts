@@ -31,7 +31,64 @@ export interface Poll {
     totalVotes: number;
     questions: PollQuestion[];
     creatorId?: string; // Optional for now to support legacy/mock polls
+    settings?: PollSettings;
+    style?: PollStyle;
 }
+
+export interface PollSettings {
+    allowMultipleVotes: boolean;
+    showResults: boolean;
+    allowEditVote: boolean;
+}
+
+export interface PollStyle {
+    backgroundColor: string;
+    textColor: string;
+    primaryColor: string;
+    fontFamily: string;
+    boxShape: 'rounded' | 'square' | 'pill';
+    theme: string;
+    chartType: 'bar' | 'pie';
+}
+
+export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
+    {
+        name: "Blank Canvas",
+        style: {
+            backgroundColor: "#ffffff",
+            textColor: "#000000",
+            primaryColor: "#2563eb",
+            fontFamily: "Inter, sans-serif",
+            boxShape: "rounded",
+            theme: "default",
+            chartType: "bar"
+        }
+    },
+    {
+        name: "Midnight Modern",
+        style: {
+            backgroundColor: "#0f172a",
+            textColor: "#f8fafc",
+            primaryColor: "#8b5cf6",
+            fontFamily: "Inter, sans-serif",
+            boxShape: "pill",
+            theme: "dark",
+            chartType: "bar"
+        }
+    },
+    {
+        name: "Corporate Clean",
+        style: {
+            backgroundColor: "#f8fafc",
+            textColor: "#1e293b",
+            primaryColor: "#0f766e",
+            fontFamily: "Georgia, serif",
+            boxShape: "square",
+            theme: "professional",
+            chartType: "pie"
+        }
+    }
+];
 
 // Temporary Mock Data storage (in memory)
 // In a real app we'd use a database.
