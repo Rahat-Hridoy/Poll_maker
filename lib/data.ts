@@ -22,6 +22,7 @@ export interface User {
 
 export interface Poll {
     id: string;
+    shortCode: string;
     title: string;
     description?: string;
     status: 'draft' | 'published' | 'closed' | 'scheduled';
@@ -41,14 +42,59 @@ export interface PollSettings {
     allowEditVote: boolean;
 }
 
+export interface PollTitleStyle {
+    fontFamily: string;
+    fontSize: number;
+    fontWeight: 'light' | 'normal' | 'medium' | 'bold';
+    color: string;
+}
+
+export interface PollQuestionStyle {
+    fontFamily: string;
+    fontSize: number;
+    fontWeight: 'light' | 'normal' | 'medium' | 'bold';
+    color: string;
+    input: {
+        borderShape: 'square' | 'rounded' | 'pill' | 'dashed' | 'solid' | 'border-less';
+        borderColor: string;
+        backgroundColor: string;
+        shadow: boolean;
+    };
+}
+
+export interface PollOptionStyle {
+    fontFamily: string;
+    fontSize: number;
+    fontWeight: 'light' | 'normal' | 'medium' | 'bold';
+    color: string;
+    radio: {
+        type: 'classic' | 'filled' | 'custom';
+        size: 'sm' | 'md' | 'lg';
+        activeColor: string;
+    };
+    container: {
+        borderShape: 'square' | 'rounded' | 'pill';
+        borderColor: string;
+        backgroundColor: string;
+        hoverEffect: boolean;
+        padding: number;
+        gap: number;
+    };
+}
+
 export interface PollStyle {
+    // Legacy/Global Fallbacks
     backgroundColor: string;
     textColor: string;
     primaryColor: string;
     fontFamily: string;
     boxShape: 'rounded' | 'square' | 'pill';
     theme: string;
-    chartType: 'bar' | 'pie';
+
+    // New Granular Styles
+    title?: PollTitleStyle;
+    question?: PollQuestionStyle;
+    option?: PollOptionStyle;
 }
 
 export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
@@ -61,7 +107,16 @@ export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
             fontFamily: "Inter, sans-serif",
             boxShape: "rounded",
             theme: "default",
-            chartType: "bar"
+            title: { fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 'bold', color: "#000000" },
+            question: {
+                fontFamily: "Inter, sans-serif", fontSize: 18, fontWeight: 'medium', color: "#000000",
+                input: { borderShape: 'rounded', borderColor: '#e2e8f0', backgroundColor: '#f8fafc', shadow: false }
+            },
+            option: {
+                fontFamily: "Inter, sans-serif", fontSize: 16, fontWeight: 'normal', color: "#334155",
+                radio: { type: 'classic', size: 'md', activeColor: '#2563eb' },
+                container: { borderShape: 'rounded', borderColor: '#e2e8f0', backgroundColor: '#ffffff', hoverEffect: true, padding: 12, gap: 10 }
+            }
         }
     },
     {
@@ -73,7 +128,16 @@ export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
             fontFamily: "Inter, sans-serif",
             boxShape: "pill",
             theme: "dark",
-            chartType: "bar"
+            title: { fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 'bold', color: "#f8fafc" },
+            question: {
+                fontFamily: "Inter, sans-serif", fontSize: 18, fontWeight: 'medium', color: "#e2e8f0",
+                input: { borderShape: 'pill', borderColor: '#334155', backgroundColor: '#1e293b', shadow: true }
+            },
+            option: {
+                fontFamily: "Inter, sans-serif", fontSize: 16, fontWeight: 'normal', color: "#cbd5e1",
+                radio: { type: 'filled', size: 'md', activeColor: '#8b5cf6' },
+                container: { borderShape: 'pill', borderColor: '#334155', backgroundColor: '#1e293b', hoverEffect: true, padding: 14, gap: 12 }
+            }
         }
     },
     {
@@ -85,7 +149,16 @@ export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
             fontFamily: "Georgia, serif",
             boxShape: "square",
             theme: "professional",
-            chartType: "pie"
+            title: { fontFamily: "Georgia, serif", fontSize: 28, fontWeight: 'bold', color: "#0f766e" },
+            question: {
+                fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 'medium', color: "#1e293b",
+                input: { borderShape: 'square', borderColor: '#cbd5e1', backgroundColor: '#ffffff', shadow: false }
+            },
+            option: {
+                fontFamily: "Georgia, serif", fontSize: 16, fontWeight: 'normal', color: "#334155",
+                radio: { type: 'classic', size: 'md', activeColor: '#0f766e' },
+                container: { borderShape: 'square', borderColor: '#e2e8f0', backgroundColor: '#ffffff', hoverEffect: false, padding: 10, gap: 8 }
+            }
         }
     }
 ];
@@ -98,6 +171,7 @@ export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
 export const MOCK_POLLS: Poll[] = [
     {
         id: "poll-1",
+        shortCode: "12345",
         title: "Best Programming Language 2024",
         description: "Help us decide which language rules them all.",
         status: 'published',
@@ -119,6 +193,7 @@ export const MOCK_POLLS: Poll[] = [
     },
     {
         id: "poll-2",
+        shortCode: "67890",
         title: "Team Lunch Preferences",
         status: 'draft',
         createdAt: new Date().toISOString(),

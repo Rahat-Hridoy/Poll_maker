@@ -2,9 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 import { Poll, QuestionType } from '@/lib/data';
-import { getPoll, getPolls, savePoll, deletePollFromStore, incrementPollVisitors } from '@/lib/store';
+import { getPoll, getPolls, savePoll, deletePollFromStore, incrementPollVisitors, getPollByCode } from '@/lib/store';
 import { cookies } from 'next/headers';
 import Papa from 'papaparse';
+
+function generateShortCode() {
+    return Math.floor(10000 + Math.random() * 90000).toString();
+}
 
 export async function importPolls(formData: FormData) {
     const file = formData.get('file') as File;
@@ -50,6 +54,7 @@ export async function importPolls(formData: FormData) {
             if (!poll) {
                 poll = {
                     id: `poll-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    shortCode: generateShortCode(),
                     title,
                     description,
                     status: 'published', // Import as published by default for immediate visibility
@@ -104,6 +109,7 @@ export async function createPoll(formData: any) {
 
     const newPoll: Poll = {
         id: id || `poll-${Date.now()}`,
+        shortCode: existingPoll?.shortCode || generateShortCode(),
         title,
         description,
         status,
@@ -187,4 +193,23 @@ export async function deletePoll(id: string) {
         console.error("Error deleting poll:", error);
         return { success: false, error: "Failed to delete poll" };
     }
+}
+
+export async function updatePollStatus(id: string, status: 'published' | 'draft' | 'scheduled', scheduledAt?: string) {
+    const poll = await getPoll(id);
+    if (!poll) return { success: false, error: "Poll not found" };
+
+    poll.status = status;
+    if (scheduledAt) poll.scheduledAt = scheduledAt;
+
+    await savePoll(poll);
+    revalidatePath('/admin/dashboard');
+    revalidatePath(`/poll/${id}`);
+    return { success: true };
+}
+
+export async function findPollByCode(code: string) {
+    const poll = await getPollByCode(code);
+    if (!poll) return { success: false, error: "Poll not found" };
+    return { success: true, pollId: poll.id };
 }

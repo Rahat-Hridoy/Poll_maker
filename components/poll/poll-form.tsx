@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Copy, ExternalLink, Check, Plus, Trash2, GripVertical, Save, QrCode } from "lucide-react"
-import { QRCodeDialog } from "@/components/admin/qr-code-dialog"
+import { ShareDialog } from "@/components/admin/share-dialog"
 
 import { createPoll } from "@/app/actions"
 import { Poll, PollQuestion } from "@/lib/data"
@@ -327,8 +327,9 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                             <ExternalLink className="mr-2 h-4 w-4" />
                             View Poll
                         </Button>
-                        <QRCodeDialog
+                        <ShareDialog
                             url={generatedLink}
+                            shortCode="12345"
                             title={title || "Your Poll"}
                             trigger={
                                 <Button type="button" variant="outline">

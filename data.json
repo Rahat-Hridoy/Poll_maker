@@ -194,79 +194,8 @@
       "creatorId": "user-1767523112283"
     },
     {
-      "id": "poll-1767776181905",
-      "title": "rrr",
-      "description": "Eius et quaerat et l",
-      "status": "published",
-      "createdAt": "2026-01-07T08:56:21.906Z",
-      "visitors": 3,
-      "totalVotes": 2,
-      "questions": [
-        {
-          "id": "q-1767776181906-0.5104360631542253",
-          "text": "Et qui commodo et co",
-          "type": "single",
-          "options": [
-            {
-              "id": "opt-1767776181906-0.7986427890216079",
-              "text": "Error eos natus magn",
-              "votes": 1
-            },
-            {
-              "id": "opt-1767776181906-0.911517698087128",
-              "text": "Tempore tempora qui",
-              "votes": 1
-            }
-          ]
-        }
-      ],
-      "creatorId": "user-1767523556026",
-      "clients": [
-        {
-          "name": "Summer",
-          "email": "bavysile@mailinator.com",
-          "time": "2026-01-07T09:05:41.314Z"
-        },
-        {
-          "name": "Zorita",
-          "email": "laje@mailinator.com",
-          "time": "2026-01-07T09:10:50.234Z"
-        }
-      ]
-    },
-    {
-      "id": "poll-1767815768908",
-      "title": "Vel asperiores simil",
-      "description": "Ut cupidatat pariatu",
-      "status": "scheduled",
-      "scheduledAt": "2026-01-07T19:57:00.000Z",
-      "createdAt": "2026-01-07T19:56:08.908Z",
-      "visitors": 0,
-      "totalVotes": 0,
-      "questions": [
-        {
-          "id": "1767815759853",
-          "text": "Placeat sunt soluta",
-          "type": "single",
-          "options": [
-            {
-              "id": "1767815759854",
-              "text": "Quod esse aut volupt",
-              "votes": 0
-            },
-            {
-              "id": "1767815759855",
-              "text": "Distinctio Sed qui ",
-              "votes": 0
-            }
-          ]
-        }
-      ],
-      "creatorId": "user-1767523556026"
-    },
-    {
-      "id": "poll-1767903902238",
-      "title": "Poll",
+      "id": "poll-1767940214635",
+      "title": "Production Ready Poll",
       "status": "draft",
       "style": {
         "backgroundColor": "#ffffff",
@@ -282,33 +211,159 @@
         "showResults": true,
         "allowEditVote": true
       },
-      "createdAt": "2026-01-08T20:25:02.238Z",
+      "createdAt": "2026-01-09T06:30:14.635Z",
       "visitors": 0,
       "totalVotes": 0,
       "questions": [
         {
           "id": "1",
-          "text": "Food",
+          "text": "Is this poll production ready?",
           "type": "single",
           "options": [
             {
               "id": "o1",
-              "text": "Kacci",
+              "text": "Yes",
               "votes": 0
             },
             {
               "id": "o2",
-              "text": "Kabab",
+              "text": "Absolutely",
               "votes": 0
             }
           ]
         }
       ],
-      "creatorId": "user-1767523556026"
+      "creatorId": "user-1767938711463"
     },
     {
-      "id": "poll-1767903918103",
-      "title": "Poll",
+      "id": "poll-1767940380825",
+      "title": "Production Ready Poll",
+      "status": "draft",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "chartType": "bar"
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": true
+      },
+      "createdAt": "2026-01-09T06:33:00.825Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "1",
+          "text": "Is this poll production ready?",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Yes",
+              "votes": 0
+            },
+            {
+              "id": "o2",
+              "text": "Absolutely",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767938711463"
+    },
+    {
+      "id": "poll-1767940520250",
+      "title": "Production Ready Poll",
+      "status": "draft",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "chartType": "bar"
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": true
+      },
+      "createdAt": "2026-01-09T06:35:20.250Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "1",
+          "text": "Is this poll production ready?",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Yes",
+              "votes": 0
+            },
+            {
+              "id": "o2",
+              "text": "Absolutely",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767938711463"
+    },
+    {
+      "id": "poll-1767941473011",
+      "title": "Scheduled Poll Test",
+      "status": "draft",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "chartType": "bar"
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": true
+      },
+      "createdAt": "2026-01-09T06:51:13.011Z",
+      "visitors": 0,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "1",
+          "text": "What is your favorite color?",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Red",
+              "votes": 0
+            },
+            {
+              "id": "o2",
+              "text": "Blue",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767938711463"
+    },
+    {
+      "id": "poll-1767955454541",
+      "title": "Poo",
       "status": "published",
       "style": {
         "backgroundColor": "#ffffff",
@@ -324,23 +379,126 @@
         "showResults": true,
         "allowEditVote": true
       },
-      "createdAt": "2026-01-08T20:25:18.103Z",
-      "visitors": 0,
-      "totalVotes": 0,
+      "createdAt": "2026-01-09T10:44:14.541Z",
+      "visitors": 3,
+      "totalVotes": 1,
       "questions": [
         {
           "id": "1",
-          "text": "Food",
+          "text": "a",
           "type": "single",
           "options": [
             {
               "id": "o1",
-              "text": "Kacci",
+              "text": "x",
+              "votes": 1
+            },
+            {
+              "id": "o2",
+              "text": "y",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767955435190",
+      "scheduledAt": "2026-01-09T16:45",
+      "clients": [
+        {
+          "name": "Tester",
+          "email": "test@test.com",
+          "time": "2026-01-09T10:46:50.730Z"
+        }
+      ]
+    },
+    {
+      "id": "poll-1767972364799",
+      "title": "Soluta non provident",
+      "status": "published",
+      "style": {
+        "backgroundColor": "#73d05a",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 42,
+          "fontWeight": "bold",
+          "color": "#574985"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 44,
+          "fontWeight": "medium",
+          "color": "#3dde7f",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#3955ac",
+            "backgroundColor": "#8ab99d",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "color": "#3e9497",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#64b0ae"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#fb172c",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": false
+      },
+      "createdAt": "2026-01-09T15:26:04.799Z",
+      "visitors": 1,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Ut corrupti nobis a",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Consequatur quis am",
               "votes": 0
             },
             {
               "id": "o2",
-              "text": "Kabab",
+              "text": "Omnis aliqua Consec",
+              "votes": 0
+            }
+          ]
+        },
+        {
+          "id": "q-1767972358100",
+          "text": "Ut odit dolore quia ",
+          "type": "single",
+          "options": [
+            {
+              "id": "o-1767972358100-1",
+              "text": "At atque ab saepe vo",
+              "votes": 0
+            },
+            {
+              "id": "o-1767972358100-2",
+              "text": "Ipsum aut perspiciat",
               "votes": 0
             }
           ]
@@ -349,46 +507,272 @@
       "creatorId": "user-1767523556026"
     },
     {
-      "id": "poll-1767904052241",
-      "title": "Untitled Poll",
+      "id": "poll-1767979824034",
+      "shortCode": "69729",
+      "title": "Dolores dolorem moll",
       "status": "published",
       "style": {
-        "backgroundColor": "#0f1f29",
-        "textColor": "#570a0a",
-        "primaryColor": "#8b5cf6",
+        "backgroundColor": "#ef87f4",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
         "fontFamily": "Inter, sans-serif",
         "boxShape": "rounded",
-        "theme": "dark",
-        "chartType": "bar"
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 20,
+          "fontWeight": "bold",
+          "color": "#fcf899"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 50,
+          "fontWeight": "medium",
+          "color": "#b341f5",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#d155ba",
+            "backgroundColor": "#b6bb00",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 20,
+          "fontWeight": "normal",
+          "color": "#4157c2",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#c3acfc"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#300c5f",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
       },
       "settings": {
-        "allowMultipleVotes": true,
+        "allowMultipleVotes": false,
         "showResults": true,
-        "allowEditVote": true
+        "allowEditVote": false
       },
-      "createdAt": "2026-01-08T20:27:32.241Z",
-      "visitors": 0,
-      "totalVotes": 0,
+      "createdAt": "2026-01-09T17:30:24.034Z",
+      "visitors": 4,
+      "totalVotes": 1,
       "questions": [
         {
-          "id": "1",
-          "text": "",
-          "type": "multiple",
+          "id": "q1",
+          "text": "Adipisicing iste lab",
+          "type": "single",
           "options": [
             {
               "id": "o1",
-              "text": "",
+              "text": "In lorem molestias e",
               "votes": 0
             },
             {
               "id": "o2",
-              "text": "",
+              "text": "Elit non excepteur ",
+              "votes": 1
+            }
+          ]
+        },
+        {
+          "id": "q-1767979784677",
+          "text": "Et fugiat incidunt",
+          "type": "single",
+          "options": [
+            {
+              "id": "o-1767979784677-1",
+              "text": "Blanditiis nobis err",
+              "votes": 1
+            },
+            {
+              "id": "o-1767979784677-2",
+              "text": "Laudantium similiqu",
               "votes": 0
             }
           ]
         }
       ],
-      "creatorId": "user-1767523556026"
+      "creatorId": "user-1767523556026",
+      "clients": [
+        {
+          "name": "Odessa William",
+          "email": "bumimypo@mailinator.com",
+          "time": "2026-01-09T17:56:45.186Z"
+        }
+      ]
+    },
+    {
+      "id": "poll-1767981239473",
+      "shortCode": "40490",
+      "title": "Best Pizza Topping",
+      "status": "published",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "bold",
+          "color": "#000000"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 18,
+          "fontWeight": "medium",
+          "color": "#000000",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#f8fafc",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "color": "#334155",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#2563eb"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#ffffff",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": false
+      },
+      "createdAt": "2026-01-09T17:53:59.474Z",
+      "visitors": 2,
+      "totalVotes": 0,
+      "questions": [
+        {
+          "id": "q1",
+          "text": "What is your favorite pizza topping?",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Pepperoni",
+              "votes": 0
+            },
+            {
+              "id": "o2",
+              "text": "Mushrooms",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767955435190"
+    },
+    {
+      "id": "poll-1767981628328",
+      "shortCode": "48862",
+      "title": "Quia quis ullam quis",
+      "status": "published",
+      "style": {
+        "backgroundColor": "#334155",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 45,
+          "fontWeight": "bold",
+          "color": "#f59e0b"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 40,
+          "fontWeight": "medium",
+          "color": "#10b981",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#11d7fc",
+            "backgroundColor": "#334155",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 20,
+          "fontWeight": "normal",
+          "color": "#ef4444",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#ef4444"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#10b981",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": false,
+        "allowEditVote": false
+      },
+      "createdAt": "2026-01-09T18:00:28.329Z",
+      "visitors": 5,
+      "totalVotes": 1,
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Delectus debitis ve",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Ipsam pariatur Volu",
+              "votes": 1
+            },
+            {
+              "id": "o2",
+              "text": "Voluptas et reiciend",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026",
+      "clients": [
+        {
+          "name": "Molly Mccoy",
+          "email": "johe@mailinator.com",
+          "time": "2026-01-09T18:02:08.562Z"
+        }
+      ]
     }
   ],
   "users": [
@@ -408,6 +792,18 @@
       "id": "user-1767523556026",
       "name": "MD RAHATUL ISLAM",
       "email": "rahatd2x@gmail.com",
+      "password": "123"
+    },
+    {
+      "id": "user-1767938711463",
+      "name": "Test User",
+      "email": "test@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "user-1767955435190",
+      "name": "Tester",
+      "email": "test@test.com",
       "password": "123"
     }
   ]

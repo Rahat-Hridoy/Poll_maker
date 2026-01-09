@@ -174,6 +174,27 @@ export async function getPoll(id: string): Promise<Poll | undefined> {
     return poll;
 }
 
+export async function getPollByCode(code: string): Promise<Poll | undefined> {
+    if (process.env.POSTGRES_URL) {
+        await ensureTable();
+        try {
+            // In a real app we'd probably have short_code as a separate column for indexing, 
+            // but for now we search within JSONB
+            const { rows } = await sql`SELECT data FROM polls WHERE data->>'shortCode' = ${code}`;
+            if (rows.length > 0) return rows[0].data as Poll;
+        } catch (e) {
+            console.error("Error fetching poll by code from DB:", e);
+        }
+    }
+
+    reloadIfNeeded();
+    const poll = memoryPolls.find(p => p.shortCode === code);
+    if (poll && poll.status === 'scheduled' && poll.scheduledAt && new Date(poll.scheduledAt) <= new Date()) {
+        return { ...poll, status: 'published' };
+    }
+    return poll;
+}
+
 export async function incrementPollVisitors(id: string) {
     if (process.env.POSTGRES_URL) {
         await ensureTable();

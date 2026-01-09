@@ -2,13 +2,15 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 interface VoteChartProps {
     question: string
     data: { name: string; votes: number }[]
+    color?: string
 }
 
-export function VoteChart({ question, data }: VoteChartProps) {
+export function VoteChart({ question, data, color }: VoteChartProps) {
     return (
         <Card>
             <CardHeader>
@@ -38,7 +40,7 @@ export function VoteChart({ question, data }: VoteChartProps) {
                                 cursor={{ fill: 'transparent' }}
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                             />
-                            <Bar dataKey="votes" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+                            <Bar dataKey="votes" fill={color || "currentColor"} radius={[4, 4, 0, 0]} className={cn(!color && "fill-primary")} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

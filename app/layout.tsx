@@ -20,10 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.className} min-h-screen bg-background text-foreground bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-sky-100 via-background to-background dark:from-sky-950 dark:via-background dark:to-background overflow-x-hidden selection:bg-primary/20`}>
+      <body suppressHydrationWarning className={`${inter.className} min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

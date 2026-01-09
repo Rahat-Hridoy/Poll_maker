@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Poll } from "@/lib/data";
+import { Poll, PollStyle } from "@/lib/data";
 import { VoteChart } from "./vote-chart";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RotateCcw } from "lucide-react";
@@ -51,32 +51,43 @@ export function PollResults({ pollId, initialPoll, onReset }: PollResultsProps) 
 
     if (!poll) return <div className="text-center py-8">Loading results...</div>;
 
+    const style = (poll as any).style as PollStyle || {};
+
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in duration-500 p-8 rounded-3xl" style={{ backgroundColor: style.backgroundColor, color: style.textColor, fontFamily: style.fontFamily }}>
             <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-                <div className="rounded-full bg-green-100 p-3 text-green-600 dark:bg-green-900 dark:text-green-200">
+                <div className="rounded-full p-3" style={{ backgroundColor: `${style.primaryColor}20`, color: style.primaryColor }}>
                     <CheckCircle2 className="h-8 w-8" />
                 </div>
-                <h2 className="text-2xl font-bold">Thank you for voting!</h2>
-                <p className="text-muted-foreground">Here are the live results.</p>
-                {isLive && <span className="text-xs text-green-500 animate-pulse">● Live updates active</span>}
+                <h2 className="text-3xl font-bold" style={{ color: style.title?.color || style.textColor }}>Thank you for voting!</h2>
+                <p className="text-muted-foreground opacity-80">Here are the live results for: <span className="font-semibold" style={{ color: style.primaryColor }}>{poll.title}</span></p>
+                {isLive && <span className="text-xs font-medium animate-pulse" style={{ color: style.primaryColor }}>● Live updates active</span>}
             </div>
 
             <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-center">Current Standings</h3>
+                <h3 className="text-xl font-semibold text-center opacity-90">Current Standings</h3>
                 <div className="grid gap-6 md:grid-cols-1">
                     {poll.questions.map((q) => (
                         <VoteChart
                             key={q.id}
                             question={q.text}
                             data={q.options.map((o: any) => ({ name: o.text, votes: o.votes }))}
+                            color={style.primaryColor}
                         />
                     ))}
                 </div>
             </div>
 
             <div className="flex justify-center pt-4">
-                <Button variant="outline" onClick={() => window.location.reload()}>
+                <Button
+                    variant="outline"
+                    onClick={() => window.location.reload()}
+                    style={{
+                        borderColor: style.primaryColor,
+                        color: style.primaryColor,
+                        borderRadius: style.boxShape === 'pill' ? '9999px' : '0.5rem'
+                    }}
+                >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Vote Again (Reload)
                 </Button>
