@@ -23,9 +23,10 @@ export function Accordion({ children, type = "single", collapsible = true }: { c
         <div className="space-y-4">
             {React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
-                    return React.cloneElement(child, {
-                        isOpen: child.props.value === openItem,
-                        onToggle: () => handleToggle(child.props.value)
+                    const item = child as React.ReactElement<AccordionItemProps>
+                    return React.cloneElement(item, {
+                        isOpen: item.props.value === openItem,
+                        onToggle: () => handleToggle(item.props.value)
                     } as any)
                 }
                 return child
