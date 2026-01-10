@@ -413,8 +413,10 @@
     },
     {
       "id": "poll-1767972364799",
+      "shortCode": "75039",
       "title": "Soluta non provident",
-      "status": "published",
+      "status": "scheduled",
+      "scheduledAt": "2026-01-10T17:57",
       "style": {
         "backgroundColor": "#73d05a",
         "textColor": "#000000",

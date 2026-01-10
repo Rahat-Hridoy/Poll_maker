@@ -173,18 +173,20 @@ export function PollList({ polls: initialPolls }: PollListProps) {
             >
                 {polls.map((poll) => (
                     <motion.div key={poll.id} variants={item} className="relative group">
-                        <div className={`absolute top-3 right-3 z-10 transition-all duration-200 ${selectedPolls.has(poll.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                            <div
-                                onClick={() => toggleSelection(poll.id)}
-                                className={`cursor-pointer p-1 bg-white dark:bg-slate-800 rounded-md shadow-md transition-colors border border-slate-200 dark:border-slate-700 ${selectedPolls.has(poll.id) ? 'text-indigo-600' : 'text-slate-300 hover:text-indigo-500'}`}
-                            >
-                                {selectedPolls.has(poll.id) ? (
-                                    <CheckSquare className="h-5 w-5 fill-current" />
-                                ) : (
-                                    <Square className="h-5 w-5" />
-                                )}
+                        {viewMode === 'grid' && (
+                            <div className={`absolute top-3 right-3 z-10 transition-all duration-200 ${selectedPolls.has(poll.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                <div
+                                    onClick={() => toggleSelection(poll.id)}
+                                    className={`cursor-pointer p-1 bg-white dark:bg-slate-800 rounded-md shadow-md transition-colors border border-slate-200 dark:border-slate-700 ${selectedPolls.has(poll.id) ? 'text-indigo-600' : 'text-slate-300 hover:text-indigo-500'}`}
+                                >
+                                    {selectedPolls.has(poll.id) ? (
+                                        <CheckSquare className="h-5 w-5 fill-current" />
+                                    ) : (
+                                        <Square className="h-5 w-5" />
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <Card className={cn(
                             "group transition-all duration-300 border-2 overflow-hidden",
@@ -255,12 +257,32 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                             ) : (
                                 /* List View Variant */
                                 <div className="flex-1 flex flex-col md:flex-row items-center justify-between w-full px-4 gap-4">
+                                    <div
+                                        onClick={(e) => { e.stopPropagation(); toggleSelection(poll.id); }}
+                                        className={cn(
+                                            "cursor-pointer p-2 rounded-lg transition-all shrink-0",
+                                            selectedPolls.has(poll.id) ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        )}
+                                    >
+                                        {selectedPolls.has(poll.id) ? (
+                                            <CheckSquare className="h-5 w-5 fill-current" />
+                                        ) : (
+                                            <Square className="h-5 w-5" />
+                                        )}
+                                    </div>
                                     <div className="flex items-center gap-4 flex-1 min-w-0">
                                         <div className="h-12 w-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 shrink-0">
                                             <BarChart2 className="h-6 w-6" />
                                         </div>
                                         <div className="min-w-0">
-                                            <h3 className="font-bold text-slate-900 dark:text-white truncate pr-6">{poll.title}</h3>
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="font-bold text-slate-900 dark:text-white truncate">{poll.title}</h3>
+                                                {poll.status === 'scheduled' && poll.scheduledAt && (
+                                                    <div className="scale-90 shrink-0">
+                                                        <CountdownTimer targetDate={poll.scheduledAt} />
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div className="flex gap-2 mt-1">
                                                 <Badge className={cn(
                                                     "px-2 py-0 border-none rounded-full text-[8px] font-black uppercase tracking-widest",
