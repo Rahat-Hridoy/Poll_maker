@@ -775,6 +775,92 @@
           "time": "2026-01-09T18:02:08.562Z"
         }
       ]
+    },
+    {
+      "id": "poll-1768046732321",
+      "shortCode": "91645",
+      "title": "Atque aut officia si",
+      "status": "published",
+      "style": {
+        "backgroundColor": "#8d56ff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 23,
+          "fontWeight": "bold",
+          "color": "#0d072f"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 42,
+          "fontWeight": "medium",
+          "color": "#57a225",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#212aee",
+            "backgroundColor": "#150b83",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 60,
+          "fontWeight": "normal",
+          "color": "#2546af",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#e61217"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#886db4",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": false,
+        "allowEditVote": false
+      },
+      "createdAt": "2026-01-10T12:05:32.321Z",
+      "visitors": 1,
+      "totalVotes": 1,
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Sed magna maxime qua",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "Ex repellendus Aut ",
+              "votes": 0
+            },
+            {
+              "id": "o2",
+              "text": "Nisi voluptatem lau",
+              "votes": 1
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026",
+      "clients": [
+        {
+          "name": "Blossom Stevens",
+          "email": "zadyho@mailinator.com",
+          "time": "2026-01-10T12:06:14.671Z"
+        }
+      ]
     }
   ],
   "users": [

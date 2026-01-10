@@ -6,12 +6,14 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, QrCode, LayoutGrid, List, Share2 } from 'lucide-react';
+import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, QrCode, LayoutGrid, List, Share2, Filter, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
 import { ShareDialog } from '@/components/admin/share-dialog';
 import { CountdownTimer } from './countdown-timer';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PollListProps {
     polls: Poll[];
@@ -38,6 +40,8 @@ export function PollList({ polls: initialPolls }: PollListProps) {
     const [isExporting, setIsExporting] = useState(false);
     const [origin, setOrigin] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft' | 'scheduled' | 'closed'>('all');
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'votes'>('newest');
 
     useEffect(() => {
         setOrigin(window.location.origin);
@@ -111,6 +115,31 @@ export function PollList({ polls: initialPolls }: PollListProps) {
         );
     }
 
+    const getFilteredAndSortedPolls = () => {
+        let result = [...polls];
+
+        // Filter by status
+        if (statusFilter !== 'all') {
+            result = result.filter(p => p.status === statusFilter);
+        }
+
+        // Sort
+        result.sort((a, b) => {
+            if (sortOrder === 'newest') {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            } else if (sortOrder === 'oldest') {
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            } else if (sortOrder === 'votes') {
+                return b.totalVotes - a.totalVotes;
+            }
+            return 0;
+        });
+
+        return result;
+    };
+
+    const displayPolls = getFilteredAndSortedPolls();
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center bg-white dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -139,6 +168,44 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                     </div>
 
                     <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+
+                    {/* Filter Dropdown */}
+                    <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                        <SelectTrigger className="w-[140px] h-10 rounded-xl border-dashed border-2 bg-transparent">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Filter className="h-3.5 w-3.5" />
+                                <span className="text-xs font-bold uppercase">{statusFilter}</span>
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="scheduled">Scheduled</SelectItem>
+                            <SelectItem value="closed">Closed</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Sort Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-10 rounded-xl border-dashed border-2 gap-2 text-muted-foreground">
+                                <ArrowUpDown className="h-3.5 w-3.5" />
+                                <span className="text-xs font-bold uppercase">Sort</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => setSortOrder('newest')}>
+                                Newest First
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setSortOrder('oldest')}>
+                                Oldest First
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setSortOrder('votes')}>
+                                Most Votes
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
                     <span className="text-sm font-semibold text-slate-500">
                         {selectedPolls.size} selected
@@ -171,7 +238,7 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                     viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
                 )}
             >
-                {polls.map((poll) => (
+                {displayPolls.map((poll) => (
                     <motion.div key={poll.id} variants={item} className="relative group">
                         {viewMode === 'grid' && (
                             <div className={`absolute top-3 right-3 z-10 transition-all duration-200 ${selectedPolls.has(poll.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
