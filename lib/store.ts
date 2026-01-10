@@ -4,6 +4,7 @@ import { Poll, MOCK_POLLS, User } from './data';
 import { sql } from '@vercel/postgres';
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
+const IS_VERCEL = !!process.env.VERCEL;
 
 // Global in-memory store fallback
 let memoryPolls: Poll[] = [];
@@ -13,7 +14,7 @@ let lastFileReadTime: number = 0;
 // Initialize memoryPolls with MOCK_POLLS or from file if possible (for local dev)
 function initLocalStore() {
     try {
-        if (fs.existsSync(DB_PATH)) {
+        if (!IS_VERCEL && fs.existsSync(DB_PATH)) {
             const fileData = fs.readFileSync(DB_PATH, 'utf-8');
             const data = JSON.parse(fileData);
             memoryPolls = data.polls || [...MOCK_POLLS];
@@ -23,7 +24,9 @@ function initLocalStore() {
             memoryPolls = [...MOCK_POLLS];
             memoryUsers = [];
             try {
-                fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+                if (!IS_VERCEL) {
+                    fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+                }
                 lastFileReadTime = Date.now();
             } catch { }
         }
@@ -39,7 +42,7 @@ function reloadIfNeeded() {
     if (process.env.POSTGRES_URL) return; // DB mode doesn't need file reload
 
     try {
-        if (fs.existsSync(DB_PATH)) {
+        if (!IS_VERCEL && fs.existsSync(DB_PATH)) {
             const stats = fs.statSync(DB_PATH);
             const fileModTime = stats.mtimeMs;
 
@@ -86,7 +89,9 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 
 function saveData() {
     try {
-        fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+        if (!IS_VERCEL) {
+            fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+        }
         lastFileReadTime = Date.now();
     } catch { }
 }
