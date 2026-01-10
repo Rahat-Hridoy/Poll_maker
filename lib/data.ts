@@ -20,6 +20,12 @@ export interface User {
     password: string; // In real app, this should be hashed!
 }
 
+export interface PollClient {
+    name: string;
+    email: string;
+    time: string;
+}
+
 export interface Poll {
     id: string;
     shortCode: string;
@@ -34,6 +40,7 @@ export interface Poll {
     creatorId?: string; // Optional for now to support legacy/mock polls
     settings?: PollSettings;
     style?: PollStyle;
+    clients?: PollClient[];
 }
 
 export interface PollSettings {
@@ -162,6 +169,8 @@ export const POLL_TEMPLATES: { name: string; style: PollStyle }[] = [
         }
     }
 ];
+
+export const DEFAULT_STYLE: PollStyle = POLL_TEMPLATES[0].style;
 
 // Temporary Mock Data storage (in memory)
 // In a real app we'd use a database.

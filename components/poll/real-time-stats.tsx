@@ -51,8 +51,7 @@ export function RealTimeStats({ initialPoll }: RealTimeStatsProps) {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, []);
 
-    const pollWithClients = poll as any;
-    const clients = pollWithClients.clients || [];
+    const clients = poll.clients || [];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -90,7 +89,7 @@ export function RealTimeStats({ initialPoll }: RealTimeStatsProps) {
                     <VoteChart
                         key={q.id}
                         question={q.text}
-                        data={q.options.map((o: any) => ({ name: o.text, votes: o.votes }))}
+                        data={q.options.map((o) => ({ name: o.text, votes: o.votes }))}
                     />
                 ))}
             </div>
@@ -103,7 +102,7 @@ export function RealTimeStats({ initialPoll }: RealTimeStatsProps) {
                 <CardContent>
                     {clients.length > 0 ? (
                         <div className="space-y-4">
-                            {clients.map((client: any, i: number) => (
+                            {clients.map((client, i) => (
                                 <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium leading-none">{client.name}</p>

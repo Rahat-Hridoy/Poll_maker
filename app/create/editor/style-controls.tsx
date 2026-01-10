@@ -1,11 +1,11 @@
 "use client"
 
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
+
 import { cn } from "@/lib/utils"
-import { Check } from "lucide-react"
+
 
 // Color Palette
 export const PRESET_COLORS = [
@@ -43,7 +43,7 @@ export function ColorPicker({ label, value, onChange }: ColorPickerProps) {
                         onClick={() => onChange(color)}
                     />
                 ))}
-                <div className="relative h-6 w-6 rounded-full overflow-hidden border border-black/10 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+                <div className="relative h-6 w-6 rounded-full overflow-hidden border border-black/10 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500">
                     <input
                         type="color"
                         value={value}
@@ -59,9 +59,9 @@ export function ColorPicker({ label, value, onChange }: ColorPickerProps) {
 interface FontControlProps {
     fontFamily: string
     fontSize: number
-    fontWeight: string
+    fontWeight: 'light' | 'normal' | 'medium' | 'bold'
     color: string
-    onUpdate: (updates: Partial<{ fontFamily: string; fontSize: number; fontWeight: string; color: string }>) => void
+    onUpdate: (updates: Partial<{ fontFamily: string; fontSize: number; fontWeight: 'light' | 'normal' | 'medium' | 'bold'; color: string }>) => void
 }
 
 export function FontControls({ fontFamily, fontSize, fontWeight, color, onUpdate }: FontControlProps) {
@@ -85,14 +85,14 @@ export function FontControls({ fontFamily, fontSize, fontWeight, color, onUpdate
                 </div>
                 <div className="space-y-1">
                     <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Weight</Label>
-                    <Select value={fontWeight} onValueChange={(v) => onUpdate({ fontWeight: v })} >
+                    <Select value={fontWeight} onValueChange={(v: 'light' | 'normal' | 'medium' | 'bold') => onUpdate({ fontWeight: v })} >
                         <SelectTrigger className="h-9 text-xs">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="300">Light</SelectItem>
+                            <SelectItem value="light">Light</SelectItem>
                             <SelectItem value="normal">Regular</SelectItem>
-                            <SelectItem value="500">Medium</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="bold">Bold</SelectItem>
                         </SelectContent>
                     </Select>

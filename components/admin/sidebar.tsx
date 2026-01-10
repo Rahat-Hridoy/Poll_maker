@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, HelpCircle, Layers, Settings, MessageSquare, LayoutDashboard } from "lucide-react"
+import { BarChart3, HelpCircle, Settings, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -16,7 +16,7 @@ export function Sidebar() {
     const settingsLink = { href: "/admin/settings", label: "Settings", icon: Settings }
 
     return (
-        <div className="w-64 border-r bg-card h-screen sticky top-0 flex flex-col hidden md:flex">
+        <div className="w-64 border-r bg-card h-screen sticky top-0 flex-col hidden md:flex">
             <div className="p-6 border-b">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl">
                     <span className="text-primary font-black">Poll</span>Maker

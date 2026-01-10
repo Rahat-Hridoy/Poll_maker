@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -13,15 +13,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Loader2, BarChart3, Hash, ArrowRight, Check, RotateCcw } from "lucide-react"
 import Link from "next/link"
+import { Poll, PollQuestion, PollOption, DEFAULT_STYLE } from "@/lib/data"
 
-export function PollViewer({ poll }: { poll: any }) {
+export function PollViewer({ poll }: { poll: Poll }) {
     const [hasVoted, setHasVoted] = useState(false)
     const [showThankYou, setShowThankYou] = useState(false) // For when results are hidden
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string | string[]>>({})
     const [voterName, setVoterName] = useState("")
     const [voterEmail, setVoterEmail] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [canRevote, setCanRevote] = useState(false)
 
     const settings = poll.settings || { allowMultipleVotes: false, showResults: true, allowEditVote: false }
 
@@ -38,7 +38,7 @@ export function PollViewer({ poll }: { poll: any }) {
                     setHasVoted(true);
                     if (!settings.showResults) setShowThankYou(true);
                 } else {
-                    setCanRevote(true);
+                    // User can vote again (allowEditVote is true)
                 }
             }
         }
@@ -95,16 +95,17 @@ export function PollViewer({ poll }: { poll: any }) {
         }
     }
 
-    const style = poll.style || {}
+    const style = poll.style || DEFAULT_STYLE
     const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
     const defaultTextColor = isDark ? '#ffffff' : '#0f172a'
 
-    const safeTitleStyle = style.title || { fontSize: 32, fontWeight: 'bold' as const, color: style.textColor || defaultTextColor }
-    const safeQuestionStyle = style.question || { fontSize: 18, fontWeight: 'medium' as const, color: style.textColor || defaultTextColor }
+    const safeTitleStyle = style.title || { fontSize: 32, fontWeight: 'bold' as const, color: style.textColor || defaultTextColor, fontFamily: style.fontFamily }
+    const safeQuestionStyle = style.question || { fontSize: 18, fontWeight: 'medium' as const, color: style.textColor || defaultTextColor, fontFamily: style.fontFamily }
     const safeOptionStyle = style.option || {
         fontSize: 16,
         fontWeight: 'normal' as const,
         color: style.textColor || defaultTextColor,
+        fontFamily: style.fontFamily,
         container: { borderShape: 'rounded' as const, padding: 16, backgroundColor: 'transparent', borderColor: 'rgba(128,128,128,0.2)' }
     }
 
@@ -240,7 +241,7 @@ export function PollViewer({ poll }: { poll: any }) {
                         </motion.div>
 
                         <div className="space-y-12">
-                            {poll.questions.map((question: any, index: number) => (
+                            {poll.questions.map((question: PollQuestion, index: number) => (
                                 <motion.div key={question.id} variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}>
                                     <div className="relative group/question">
                                         <div className="absolute -left-12 top-2 hidden lg:flex flex-col items-center opacity-20 group-hover/question:opacity-100 transition-opacity">
@@ -278,7 +279,7 @@ export function PollViewer({ poll }: { poll: any }) {
                                                         onValueChange={(val) => handleOptionChange(question.id, val)}
                                                         className="grid gap-5"
                                                     >
-                                                        {question.options.map((option: any) => (
+                                                        {question.options.map((option: PollOption) => (
                                                             <div
                                                                 key={option.id}
                                                                 className={cn(
@@ -332,7 +333,7 @@ export function PollViewer({ poll }: { poll: any }) {
                                                     </RadioGroup>
                                                 ) : (
                                                     <div className="grid gap-5">
-                                                        {question.options.map((option: any) => (
+                                                        {question.options.map((option: PollOption) => (
                                                             <div
                                                                 key={option.id}
                                                                 className={cn(

@@ -77,7 +77,7 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
         }))
     }
 
-    const handleSubmit = async (e: React.FormEvent, status: 'draft' | 'published' | 'scheduled' = 'published') => {
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent, status: 'draft' | 'published' | 'scheduled' = 'published') => {
         e.preventDefault()
         setIsSubmitting(true)
 
@@ -249,7 +249,7 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={(e) => scheduledDate && handleSubmit(e as any, 'scheduled')}
+                                    onClick={(e) => scheduledDate && handleSubmit(e, 'scheduled')}
                                     disabled={!scheduledDate || isSubmitting}
                                 >
                                     Confirm Schedule
@@ -279,7 +279,7 @@ export function PollForm({ initialData = null }: { initialData?: Partial<Poll> |
                                     size="lg"
                                     className="w-full sm:w-auto"
                                     disabled={isSubmitting}
-                                    onClick={(e) => handleSubmit(e as any, 'draft')}
+                                    onClick={(e) => handleSubmit(e, 'draft')}
                                 >
                                     <Save className="mr-2 h-4 w-4" />
                                     {isSubmitting ? "Saving..." : "Save as Draft"}

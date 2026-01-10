@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Poll, PollStyle } from "@/lib/data";
+import { Poll, DEFAULT_STYLE } from "@/lib/data";
 import { VoteChart } from "./vote-chart";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RotateCcw } from "lucide-react";
@@ -12,7 +12,7 @@ interface PollResultsProps {
     onReset?: () => void;
 }
 
-export function PollResults({ pollId, initialPoll, onReset }: PollResultsProps) {
+export function PollResults({ pollId, initialPoll }: PollResultsProps) {
     const [poll, setPoll] = useState<Poll | undefined>(initialPoll);
     const [isLive, setIsLive] = useState(true);
 
@@ -51,7 +51,7 @@ export function PollResults({ pollId, initialPoll, onReset }: PollResultsProps) 
 
     if (!poll) return <div className="text-center py-8">Loading results...</div>;
 
-    const style = (poll as any).style as PollStyle || {};
+    const style = poll.style || DEFAULT_STYLE;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 p-8 rounded-3xl" style={{ backgroundColor: style.backgroundColor, color: style.textColor, fontFamily: style.fontFamily }}>
@@ -71,7 +71,7 @@ export function PollResults({ pollId, initialPoll, onReset }: PollResultsProps) 
                         <VoteChart
                             key={q.id}
                             question={q.text}
-                            data={q.options.map((o: any) => ({ name: o.text, votes: o.votes }))}
+                            data={q.options.map((o) => ({ name: o.text, votes: o.votes }))}
                             color={style.primaryColor}
                         />
                     ))}

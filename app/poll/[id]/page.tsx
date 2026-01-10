@@ -15,7 +15,7 @@ export default async function PublicPollPage({ params }: { params: Promise<{ id:
                 <div className="max-w-3xl mx-auto py-12 px-4 text-center space-y-4">
                     <h1 className="text-2xl font-bold text-destructive">Poll Session Expired (Demo Limitation)</h1>
                     <p className="text-muted-foreground">
-                        Since this is a demo running on Vercel's serverless platform, data is stored in memory and may be lost when the server "sleeps".
+                        Since this is a demo running on Vercel&apos;s serverless platform, data is stored in memory and may be lost when the server &quot;sleeps&quot;.
                     </p>
                     <Link href="/admin/create">
                         <Button>Create a New Poll</Button>

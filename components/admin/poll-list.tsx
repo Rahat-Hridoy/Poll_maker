@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart2, Edit, ExternalLink, ArrowUpFromLine, CheckSquare, Square, QrCode, LayoutGrid, List, Share2, Filter, ArrowUpDown } from 'lucide-react';
+import { BarChart2, Edit, ArrowUpFromLine, CheckSquare, Square, LayoutGrid, List, Share2, Filter, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DeletePollButton } from '@/components/poll/delete-poll-button';
 import { Poll } from '@/lib/data';
 import { ShareDialog } from '@/components/admin/share-dialog';
 import { CountdownTimer } from './countdown-timer';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 interface PollListProps {
     polls: Poll[];
@@ -170,7 +170,7 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                     <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
 
                     {/* Filter Dropdown */}
-                    <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                    <Select value={statusFilter} onValueChange={(v: "all" | "published" | "draft" | "scheduled" | "closed") => setStatusFilter(v)}>
                         <SelectTrigger className="w-[140px] h-10 rounded-xl border-dashed border-2 bg-transparent">
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Filter className="h-3.5 w-3.5" />

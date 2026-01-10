@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Zap, Layout, PlayCircle, Hash } from "lucide-react";
+import { ArrowRight, BarChart3, Zap, Layout, PlayCircle } from "lucide-react";
 
 export default function Home() {
   return (

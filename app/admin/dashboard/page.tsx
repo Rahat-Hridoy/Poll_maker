@@ -4,7 +4,7 @@ import { getPolls } from "@/lib/store";
 import { Plus } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "@/components/auth/logout-button";
+
 import { ImportButton } from "@/components/admin/import-button";
 import { PollList } from "@/components/admin/poll-list";
 

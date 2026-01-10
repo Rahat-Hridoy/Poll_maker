@@ -25,9 +25,9 @@ function initLocalStore() {
             try {
                 fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
                 lastFileReadTime = Date.now();
-            } catch (e) { }
+            } catch { }
         }
-    } catch (error) {
+    } catch {
         memoryPolls = [...MOCK_POLLS];
         memoryUsers = [];
     }
@@ -88,7 +88,7 @@ function saveData() {
     try {
         fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
         lastFileReadTime = Date.now();
-    } catch (error) { }
+    } catch { }
 }
 
 export async function getPolls(creatorId?: string): Promise<Poll[]> {
@@ -169,7 +169,7 @@ export async function getPoll(id: string): Promise<Poll | undefined> {
     reloadIfNeeded();
     const poll = memoryPolls.find(p => p.id === id);
     if (poll && poll.status === 'scheduled' && poll.scheduledAt && new Date(poll.scheduledAt) <= new Date()) {
-        return { ...poll, status: 'published' };
+        return { ...poll, status: 'published' as const };
     }
     return poll;
 }
@@ -190,7 +190,7 @@ export async function getPollByCode(code: string): Promise<Poll | undefined> {
     reloadIfNeeded();
     const poll = memoryPolls.find(p => p.shortCode === code);
     if (poll && poll.status === 'scheduled' && poll.scheduledAt && new Date(poll.scheduledAt) <= new Date()) {
-        return { ...poll, status: 'published' };
+        return { ...poll, status: 'published' as const };
     }
     return poll;
 }

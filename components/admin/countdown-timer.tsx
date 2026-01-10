@@ -26,7 +26,7 @@ export function CountdownTimer({ targetDate, onComplete }: CountdownTimerProps) 
             const minutes = Math.floor((difference / 1000 / 60) % 60);
             const seconds = Math.floor((difference / 1000) % 60);
 
-            let parts = [];
+            const parts = [];
             if (days > 0) parts.push(`${days}d`);
             parts.push(`${hours.toString().padStart(2, '0')}h`);
             parts.push(`${minutes.toString().padStart(2, '0')}m`);

@@ -37,7 +37,7 @@ export default function LoginPage() {
                 const data = await res.json()
                 setError(data.error || "Something went wrong")
             }
-        } catch (error) {
+        } catch {
             setError("Failed to connect to server")
         } finally {
             setIsLoading(false)

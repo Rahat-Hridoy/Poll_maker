@@ -27,7 +27,7 @@ export function JoinPollForm() {
             } else {
                 setError('Poll not found. Please check the code.');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred. Please try again.');
         } finally {
             setIsPending(false);

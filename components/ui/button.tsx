@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps, cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
@@ -35,18 +34,12 @@ const buttonVariants = cva(
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-    asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, asChild = false, ...props }, ref) => {
-        // If we want to use Slot, we need @radix-ui/react-slot. 
-        // For now, let's keep it simple and just use 'button' if not installed, or I'll add it to dependencies.
-        // I will assume standard button for now to avoid extra deps if Slot is not critical.
-        // actually, I'll just use a standard button for now to minimize complex setups.
-        const Comp = "button"
+    ({ className, variant, size, ...props }, ref) => {
         return (
-            <Comp
+            <button
                 className={cn(buttonVariants({ variant, size, className }))}
                 ref={ref}
                 {...props}

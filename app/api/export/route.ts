@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         pollIds = body.pollIds || [];
-    } catch (e) {
+    } catch {
         // If body parsing fails or is empty, pollIds remains []
     }
 

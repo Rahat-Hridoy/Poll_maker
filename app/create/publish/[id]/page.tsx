@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Copy, Check, QrCode, Calendar, ArrowRight, Download, Share2, Globe, LayoutDashboard, Clock } from "lucide-react"
+import { Copy, Check, Calendar, Download, Globe, LayoutDashboard } from "lucide-react"
 import { QRCodeSVG } from 'qrcode.react'
 import { updatePollStatus } from '@/app/actions'
 import { motion } from "framer-motion"
@@ -89,10 +89,10 @@ export default function PublishPage() {
                 className="w-full max-w-lg"
             >
                 <Card className="shadow-2xl border-none bg-white rounded-3xl overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+                    <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500" />
 
                     <CardHeader className="text-center pb-2 pt-8">
-                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-purple-600">
                             Ready to Publish?
                         </CardTitle>
                         <CardDescription>

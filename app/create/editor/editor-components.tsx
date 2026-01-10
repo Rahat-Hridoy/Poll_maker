@@ -2,7 +2,7 @@
 
 import React from "react"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight, Hash, Settings, Palette, Type, MousePointer2 } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Sidebar({ side, isOpen, onToggle, children, title, icon: Icon }: {
@@ -11,7 +11,7 @@ export function Sidebar({ side, isOpen, onToggle, children, title, icon: Icon }:
     onToggle: () => void,
     children: React.ReactNode,
     title: string,
-    icon: any
+    icon: React.ElementType
 }) {
     return (
         <div className={cn(

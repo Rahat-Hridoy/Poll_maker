@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { Poll, QuestionType } from '@/lib/data';
-import { getPoll, getPolls, savePoll, deletePollFromStore, incrementPollVisitors, getPollByCode } from '@/lib/store';
+import { Poll, QuestionType, PollQuestion, PollOption } from '@/lib/data';
+import { getPoll, savePoll, deletePollFromStore, incrementPollVisitors, getPollByCode } from '@/lib/store';
 import { cookies } from 'next/headers';
 import Papa from 'papaparse';
 
@@ -97,7 +97,7 @@ export async function importPolls(formData: FormData) {
     }
 }
 
-export async function createPoll(formData: any) {
+export async function createPoll(formData: Partial<Poll>) {
     const { title, description, questions, status = 'published', id, scheduledAt, style, settings } = formData;
     const cookieStore = await cookies();
     const creatorId = cookieStore.get('auth_session')?.value;
@@ -110,7 +110,7 @@ export async function createPoll(formData: any) {
     const newPoll: Poll = {
         id: id || `poll-${Date.now()}`,
         shortCode: existingPoll?.shortCode || generateShortCode(),
-        title,
+        title: title || "Untitled Poll",
         description,
         status,
         scheduledAt,
@@ -119,13 +119,13 @@ export async function createPoll(formData: any) {
         createdAt: existingPoll?.createdAt || new Date().toISOString(),
         visitors: existingPoll?.visitors || 0,
         totalVotes: existingPoll?.totalVotes || 0,
-        questions: questions.map((q: any) => ({
+        questions: (questions || []).map((q: Partial<PollQuestion>) => ({
             id: q.id || `q-${Date.now()}-${Math.random()}`,
-            text: q.text,
-            type: q.type,
-            options: q.options.map((o: any) => ({
+            text: q.text || "",
+            type: q.type || "single",
+            options: (q.options || []).map((o: Partial<PollOption>) => ({
                 id: o.id || `opt-${Date.now()}-${Math.random()}`,
-                text: o.text,
+                text: o.text || "",
                 votes: o.votes || 0
             }))
         })),
@@ -143,8 +143,7 @@ export async function submitVote(pollId: string, answers: Record<string, string 
 
     // Check revote prevention (if allowEditVote is false)
     if (poll.settings && !poll.settings.allowEditVote) {
-        const pollWithClients = poll as Poll & { clients?: any[] };
-        const hasVoted = pollWithClients.clients?.some(c => c.email === voterInfo.email);
+        const hasVoted = poll.clients?.some(c => c.email === voterInfo.email);
         if (hasVoted) {
             return { success: false, error: "You have already voted in this poll." };
         }
@@ -170,10 +169,9 @@ export async function submitVote(pollId: string, answers: Record<string, string 
     poll.totalVotes += 1;
 
     // Track voter in clients array
-    const pollWithClients = poll as Poll & { clients?: any[] };
-    if (!pollWithClients.clients) pollWithClients.clients = [];
+    if (!poll.clients) poll.clients = [];
 
-    pollWithClients.clients.push({
+    poll.clients.push({
         name: voterInfo.name,
         email: voterInfo.email,
         time: new Date().toISOString()

@@ -4,14 +4,14 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Settings, Palette, Save, ArrowLeft, Plus, LayoutDashboard, Type, Copy, Trash2, ArrowRight, Sun, Moon, Smartphone, Monitor, Eye, EyeOff, ArrowUpFromLine, Zap } from "lucide-react"
+import { Palette, Save, Plus, LayoutDashboard, Type, Trash2, ArrowRight, Sun, Moon, Smartphone, Monitor, Eye, EyeOff, ArrowUpFromLine, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Calendar as CalendarIcon, Clock } from "lucide-react"
-import { PollQuestion, PollSettings, PollStyle, POLL_TEMPLATES } from "@/lib/data"
+import { Poll, PollQuestion, PollSettings, PollStyle, POLL_TEMPLATES, PollTitleStyle, PollQuestionStyle, PollOptionStyle } from "@/lib/data"
 import { createPoll } from "@/app/actions"
 import { Accordion, AccordionItem } from "@/components/ui/accordion-simple"
 import { FontControls, ColorPicker } from "./style-controls"
@@ -137,7 +137,7 @@ function EditorContent() {
         setIsSubmitting(true)
         try {
             const formData = {
-                id: pollId, // Pass ID if it exists to trigger update
+                id: pollId || undefined, // Pass ID if it exists to trigger update
                 title,
                 questions,
                 status,
@@ -290,7 +290,18 @@ function EditorContent() {
                                 "w-full bg-white shadow-2xl transition-all duration-500 h-fit mb-20",
                                 previewMode === 'mobile' ? "border-[12px] border-slate-900 rounded-[3rem] overflow-hidden" : "rounded-2xl border"
                             )}>
-                                <PollViewer poll={{ title, questions, style, settings }} />
+                                <PollViewer poll={{
+                                    id: pollId || 'preview',
+                                    title,
+                                    questions,
+                                    style,
+                                    settings,
+                                    shortCode: '00000',
+                                    status: 'published',
+                                    createdAt: new Date().toISOString(),
+                                    visitors: 0,
+                                    totalVotes: 0
+                                } as Poll} />
                             </div>
                         </div>
                     ) : (
@@ -457,7 +468,7 @@ function EditorContent() {
                                     fontSize={style.title?.fontSize || 32}
                                     fontWeight={style.title?.fontWeight || "bold"}
                                     color={style.title?.color || style.textColor}
-                                    onUpdate={(u) => setStyle({ ...style, title: { ...style.title!, ...u } as any })}
+                                    onUpdate={(u) => setStyle({ ...style, title: { ...style.title!, ...u } as PollTitleStyle })}
                                 />
                             </AccordionItem>
 
@@ -468,7 +479,7 @@ function EditorContent() {
                                         fontSize={style.question?.fontSize || 18}
                                         fontWeight={style.question?.fontWeight || "medium"}
                                         color={style.question?.color || style.textColor}
-                                        onUpdate={(u) => setStyle({ ...style, question: { ...style.question!, ...u } as any })}
+                                        onUpdate={(u) => setStyle({ ...style, question: { ...style.question!, ...u } as PollQuestionStyle })}
                                     />
                                     <div className="space-y-4 pt-4 border-t border-border">
                                         <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Input Field</Label>
@@ -487,7 +498,7 @@ function EditorContent() {
                                         fontSize={style.option?.fontSize || 16}
                                         fontWeight={style.option?.fontWeight || "normal"}
                                         color={style.option?.color || style.textColor}
-                                        onUpdate={(u) => setStyle({ ...style, option: { ...style.option!, ...u } as any })}
+                                        onUpdate={(u) => setStyle({ ...style, option: { ...style.option!, ...u } as PollOptionStyle })}
                                     />
                                     <div className="space-y-4 pt-4 border-t border-border">
                                         <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Container Style</Label>
@@ -496,7 +507,7 @@ function EditorContent() {
                                             <ColorPicker label="Active Accent" value={style.option?.radio.activeColor || style.primaryColor} onChange={(c) => setStyle({ ...style, option: { ...style.option!, radio: { ...style.option!.radio, activeColor: c } } })} />
                                             <div className="flex items-center justify-between">
                                                 <Label className="text-xs text-slate-400">Border Shape</Label>
-                                                <Select value={style.option?.container.borderShape} onValueChange={(v: any) => setStyle({ ...style, option: { ...style.option!, container: { ...style.option!.container, borderShape: v } } })}>
+                                                <Select value={style.option?.container.borderShape} onValueChange={(v: "square" | "rounded" | "pill") => setStyle({ ...style, option: { ...style.option!, container: { ...style.option!.container, borderShape: v } } })}>
                                                     <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="rounded">Rounded</SelectItem>

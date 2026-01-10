@@ -12,7 +12,7 @@ interface AccordionItemProps {
     onToggle?: () => void
 }
 
-export function Accordion({ children, type = "single", collapsible = true }: { children: React.ReactNode, type?: "single" | "multiple", collapsible?: boolean }) {
+export function Accordion({ children, collapsible = true }: { children: React.ReactNode, type?: "single" | "multiple", collapsible?: boolean }) {
     const [openItem, setOpenItem] = React.useState<string | null>(null)
 
     const handleToggle = (value: string) => {
@@ -24,10 +24,11 @@ export function Accordion({ children, type = "single", collapsible = true }: { c
             {React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
                     const item = child as React.ReactElement<AccordionItemProps>
-                    return React.cloneElement(item, {
+                    const props: Partial<AccordionItemProps> = {
                         isOpen: item.props.value === openItem,
                         onToggle: () => handleToggle(item.props.value)
-                    } as any)
+                    }
+                    return React.cloneElement(item, props)
                 }
                 return child
             })}
@@ -35,7 +36,7 @@ export function Accordion({ children, type = "single", collapsible = true }: { c
     )
 }
 
-export function AccordionItem({ value, title, children, isOpen, onToggle }: AccordionItemProps) {
+export function AccordionItem({ title, children, isOpen, onToggle }: AccordionItemProps) {
     return (
         <div className="rounded-xl border border-border bg-card overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
             <button
