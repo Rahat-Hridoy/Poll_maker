@@ -827,13 +827,13 @@
         }
       },
       "settings": {
-        "allowMultipleVotes": false,
+        "allowMultipleVotes": true,
         "showResults": false,
         "allowEditVote": false
       },
       "createdAt": "2026-01-10T12:05:32.321Z",
-      "visitors": 1,
-      "totalVotes": 1,
+      "visitors": 2,
+      "totalVotes": 2,
       "questions": [
         {
           "id": "q1",
@@ -843,12 +843,12 @@
             {
               "id": "o1",
               "text": "Ex repellendus Aut ",
-              "votes": 0
+              "votes": 1
             },
             {
               "id": "o2",
               "text": "Nisi voluptatem lau",
-              "votes": 1
+              "votes": 2
             }
           ]
         }
@@ -856,9 +856,9 @@
       "creatorId": "user-1767523556026",
       "clients": [
         {
-          "name": "Blossom Stevens",
-          "email": "zadyho@mailinator.com",
-          "time": "2026-01-10T12:06:14.671Z"
+          "name": "Macy Glover",
+          "email": "baziwudu@mailinator.com",
+          "time": "2026-01-10T12:33:58.293Z"
         }
       ]
     }

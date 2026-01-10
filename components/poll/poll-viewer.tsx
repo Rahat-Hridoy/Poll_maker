@@ -6,41 +6,90 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { PollResults } from "@/components/poll/poll-results"
 import { submitVote, trackPollVisitor } from "@/app/actions"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Loader2, BarChart3, Hash, ArrowRight } from "lucide-react"
+import { Loader2, BarChart3, Hash, ArrowRight, Check, RotateCcw } from "lucide-react"
 import Link from "next/link"
 
 export function PollViewer({ poll }: { poll: any }) {
     const [hasVoted, setHasVoted] = useState(false)
+    const [showThankYou, setShowThankYou] = useState(false) // For when results are hidden
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string | string[]>>({})
     const [voterName, setVoterName] = useState("")
     const [voterEmail, setVoterEmail] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [canRevote, setCanRevote] = useState(false)
+
+    const settings = poll.settings || { allowMultipleVotes: false, showResults: true, allowEditVote: false }
 
     useEffect(() => {
         if (poll?.id) {
             trackPollVisitor(poll.id);
-        }
-    }, [poll?.id]);
 
-    const handleOptionChange = (questionId: string, value: string) => {
-        setSelectedOptions(prev => ({ ...prev, [questionId]: value }))
+            // Check if user has voted before
+            const storageKey = `poll_voted_${poll.id}`;
+            const previousVote = localStorage.getItem(storageKey);
+
+            if (previousVote) {
+                if (!settings.allowEditVote) {
+                    setHasVoted(true);
+                    if (!settings.showResults) setShowThankYou(true);
+                } else {
+                    setCanRevote(true);
+                }
+            }
+        }
+    }, [poll?.id, settings.allowEditVote, settings.showResults]);
+
+
+    const handleOptionChange = (questionId: string, optionId: string) => {
+        if (settings.allowMultipleVotes) {
+            // Checkbox logic for multiple choice
+            setSelectedOptions(prev => {
+                const current = prev[questionId] as string[] || [];
+                if (current.includes(optionId)) {
+                    return { ...prev, [questionId]: current.filter(id => id !== optionId) };
+                } else {
+                    return { ...prev, [questionId]: [...current, optionId] };
+                }
+            });
+        } else {
+            // Radio logic for single choice
+            setSelectedOptions(prev => ({ ...prev, [questionId]: optionId }));
+        }
+    }
+
+    const isOptionSelected = (qId: string, oId: string) => {
+        const selection = selectedOptions[qId];
+        if (Array.isArray(selection)) {
+            return selection.includes(oId);
+        }
+        return selection === oId;
     }
     const handleSubmit = async () => {
         setIsSubmitting(true)
         try {
-            const result = await submitVote(poll.id, selectedOptions as Record<string, string>, { name: voterName, email: voterEmail })
-            if (result.success) {
-                setHasVoted(true)
-            } else {
-                alert("Failed to submit vote: " + result.error)
+            const result = await submitVote(poll.id, selectedOptions, { name: voterName, email: voterEmail })
+
+            if (!result.success) {
+                alert(result.error || "Failed to submit vote");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem(`poll_voted_${poll.id}`, JSON.stringify({ name: voterName, email: voterEmail, date: new Date().toISOString() }));
+
+            setHasVoted(true)
+            if (!settings.showResults) {
+                setShowThankYou(true);
             }
         } catch (error) {
             console.error(error)
-            alert("An error occurred while voting.")
+            alert("An error occurred. Please try again.")
         } finally {
             setIsSubmitting(false)
         }
@@ -59,6 +108,32 @@ export function PollViewer({ poll }: { poll: any }) {
         container: { borderShape: 'rounded' as const, padding: 16, backgroundColor: 'transparent', borderColor: 'rgba(128,128,128,0.2)' }
     }
 
+    // 1. THANK YOU SCREEN (when results are hidden)
+    if (hasVoted && showThankYou) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 space-y-6"
+                style={{ fontFamily: style.fontFamily }}
+            >
+                <div className="h-24 w-24 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4 animate-bounce">
+                    <Check className="h-12 w-12" />
+                </div>
+                <h2 className="text-4xl font-black" style={{ color: safeTitleStyle.color }}>Vote Recorded!</h2>
+                <p className="text-xl text-muted-foreground max-w-md">
+                    Thank you for participating. The results are currently hidden by the organizer.
+                </p>
+                {settings.allowEditVote && (
+                    <Button variant="outline" onClick={() => { setHasVoted(false); setShowThankYou(false); }} className="mt-8">
+                        <RotateCcw className="mr-2 h-4 w-4" /> Vote Again
+                    </Button>
+                )}
+            </motion.div>
+        )
+    }
+
+    // 2. RESULTS (if allowed)
     if (hasVoted) {
         return (
             <motion.div
@@ -67,6 +142,14 @@ export function PollViewer({ poll }: { poll: any }) {
                 transition={{ duration: 0.5 }}
             >
                 <PollResults pollId={poll.id} initialPoll={poll} />
+
+                {settings.allowEditVote && (
+                    <div className="flex justify-center mt-8 pb-12">
+                        <Button variant="outline" onClick={() => setHasVoted(false)}>
+                            <RotateCcw className="mr-2 h-4 w-4" /> Change Vote
+                        </Button>
+                    </div>
+                )}
             </motion.div>
         )
     }
@@ -189,63 +272,117 @@ export function PollViewer({ poll }: { poll: any }) {
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent className="pb-12 px-10">
-                                                <RadioGroup
-                                                    value={selectedOptions[question.id] as string}
-                                                    onValueChange={(val) => handleOptionChange(question.id, val)}
-                                                    className="grid gap-5"
-                                                >
-                                                    {question.options.map((option: any) => (
-                                                        <div
-                                                            key={option.id}
-                                                            className={cn(
-                                                                "flex items-center space-x-6 border-2 transition-all duration-500 cursor-pointer relative group/option",
-                                                                selectedOptions[question.id] === option.id
-                                                                    ? "shadow-2xl shadow-primary/10 border-primary scale-[1.02] bg-primary/3"
-                                                                    : "border-border/50 hover:border-primary/40 hover:bg-primary/2"
-                                                            )}
-                                                            style={{
-                                                                padding: `${safeOptionStyle.container?.padding || 20}px`,
-                                                                borderRadius: safeOptionStyle.container?.borderShape === 'pill' ? '9999px' : safeOptionStyle.container?.borderShape === 'rounded' ? '1rem' : '0',
-                                                                backgroundColor: selectedOptions[question.id] === option.id ? `${style.primaryColor}15` : 'transparent',
-                                                            }}
-                                                            onClick={() => handleOptionChange(question.id, option.id)}
-                                                        >
-                                                            <div className="relative flex items-center justify-center">
-                                                                <RadioGroupItem
-                                                                    value={option.id}
-                                                                    id={option.id}
-                                                                    className="h-8 w-8 border-2 transition-all group-hover/option:scale-110 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                                                    style={{
-                                                                        borderColor: selectedOptions[question.id] === option.id ? style.primaryColor : 'var(--border)',
-                                                                        color: '#fff'
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <Label
-                                                                htmlFor={option.id}
-                                                                className="flex-1 cursor-pointer font-black text-xl tracking-tight select-none transition-colors group-hover/option:text-foreground"
-                                                                style={{
-                                                                    fontFamily: safeOptionStyle.fontFamily || style.fontFamily,
-                                                                    fontSize: `${Math.max(safeOptionStyle.fontSize, 18)}px`,
-                                                                    fontWeight: 700,
-                                                                    color: selectedOptions[question.id] === option.id ? style.primaryColor : (safeOptionStyle.color === '#000000' ? 'inherit' : safeOptionStyle.color)
-                                                                }}
-                                                            >
-                                                                {option.text}
-                                                            </Label>
-                                                            <AnimatePresence>
-                                                                {selectedOptions[question.id] === option.id && (
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0, scale: 0.5 }}
-                                                                        animate={{ opacity: 1, scale: 1 }}
-                                                                        exit={{ opacity: 0, scale: 0.5 }}
-                                                                        className="absolute right-8 h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"
-                                                                    />
+                                                {!settings.allowMultipleVotes ? (
+                                                    <RadioGroup
+                                                        value={selectedOptions[question.id] as string}
+                                                        onValueChange={(val) => handleOptionChange(question.id, val)}
+                                                        className="grid gap-5"
+                                                    >
+                                                        {question.options.map((option: any) => (
+                                                            <div
+                                                                key={option.id}
+                                                                className={cn(
+                                                                    "flex items-center space-x-6 border-2 transition-all duration-500 cursor-pointer relative group/option",
+                                                                    selectedOptions[question.id] === option.id
+                                                                        ? "shadow-2xl shadow-primary/10 border-primary scale-[1.02] bg-primary/3"
+                                                                        : "border-border/50 hover:border-primary/40 hover:bg-primary/2"
                                                                 )}
-                                                            </AnimatePresence>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
+                                                                style={{
+                                                                    padding: `${safeOptionStyle.container?.padding || 20}px`,
+                                                                    borderRadius: safeOptionStyle.container?.borderShape === 'pill' ? '9999px' : safeOptionStyle.container?.borderShape === 'rounded' ? '1rem' : '0',
+                                                                    backgroundColor: selectedOptions[question.id] === option.id ? `${style.primaryColor}15` : 'transparent',
+                                                                }}
+                                                                onClick={() => handleOptionChange(question.id, option.id)}
+                                                            >
+                                                                <div className="relative flex items-center justify-center">
+                                                                    <RadioGroupItem
+                                                                        value={option.id}
+                                                                        id={option.id}
+                                                                        className="h-8 w-8 border-2 transition-all group-hover/option:scale-110 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                                                        style={{
+                                                                            borderColor: selectedOptions[question.id] === option.id ? style.primaryColor : 'var(--border)',
+                                                                            color: '#fff'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <Label
+                                                                    htmlFor={option.id}
+                                                                    className="flex-1 cursor-pointer font-black text-xl tracking-tight select-none transition-colors group-hover/option:text-foreground"
+                                                                    style={{
+                                                                        fontFamily: safeOptionStyle.fontFamily || style.fontFamily,
+                                                                        fontSize: `${Math.max(safeOptionStyle.fontSize, 18)}px`,
+                                                                        fontWeight: 700,
+                                                                        color: selectedOptions[question.id] === option.id ? style.primaryColor : (safeOptionStyle.color === '#000000' ? 'inherit' : safeOptionStyle.color)
+                                                                    }}
+                                                                >
+                                                                    {option.text}
+                                                                </Label>
+                                                                <AnimatePresence>
+                                                                    {selectedOptions[question.id] === option.id && (
+                                                                        <motion.div
+                                                                            initial={{ opacity: 0, scale: 0.5 }}
+                                                                            animate={{ opacity: 1, scale: 1 }}
+                                                                            exit={{ opacity: 0, scale: 0.5 }}
+                                                                            className="absolute right-8 h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"
+                                                                        />
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        ))}
+                                                    </RadioGroup>
+                                                ) : (
+                                                    <div className="grid gap-5">
+                                                        {question.options.map((option: any) => (
+                                                            <div
+                                                                key={option.id}
+                                                                className={cn(
+                                                                    "flex items-center space-x-6 border-2 transition-all duration-500 cursor-pointer relative group/option",
+                                                                    isOptionSelected(question.id, option.id)
+                                                                        ? "shadow-2xl shadow-primary/10 border-primary scale-[1.02] bg-primary/3"
+                                                                        : "border-border/50 hover:border-primary/40 hover:bg-primary/2"
+                                                                )}
+                                                                style={{
+                                                                    padding: `${safeOptionStyle.container?.padding || 20}px`,
+                                                                    borderRadius: safeOptionStyle.container?.borderShape === 'pill' ? '9999px' : safeOptionStyle.container?.borderShape === 'rounded' ? '1rem' : '0',
+                                                                    backgroundColor: isOptionSelected(question.id, option.id) ? `${style.primaryColor}15` : 'transparent',
+                                                                }}
+                                                                onClick={() => handleOptionChange(question.id, option.id)}
+                                                            >
+                                                                <div className="relative flex items-center justify-center">
+                                                                    <Checkbox
+                                                                        checked={isOptionSelected(question.id, option.id)}
+                                                                        onCheckedChange={() => handleOptionChange(question.id, option.id)}
+                                                                        className="h-8 w-8 border-2 transition-all group-hover/option:scale-110 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                                                        style={{
+                                                                            borderColor: isOptionSelected(question.id, option.id) ? style.primaryColor : 'var(--border)'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <Label
+                                                                    className="flex-1 cursor-pointer font-black text-xl tracking-tight select-none transition-colors group-hover/option:text-foreground"
+                                                                    style={{
+                                                                        fontFamily: safeOptionStyle.fontFamily || style.fontFamily,
+                                                                        fontSize: `${Math.max(safeOptionStyle.fontSize, 18)}px`,
+                                                                        fontWeight: 700,
+                                                                        color: isOptionSelected(question.id, option.id) ? style.primaryColor : (safeOptionStyle.color === '#000000' ? 'inherit' : safeOptionStyle.color)
+                                                                    }}
+                                                                >
+                                                                    {option.text}
+                                                                </Label>
+                                                                <AnimatePresence>
+                                                                    {isOptionSelected(question.id, option.id) && (
+                                                                        <motion.div
+                                                                            initial={{ opacity: 0, scale: 0.5 }}
+                                                                            animate={{ opacity: 1, scale: 1 }}
+                                                                            exit={{ opacity: 0, scale: 0.5 }}
+                                                                            className="absolute right-8 h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"
+                                                                        />
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     </div>

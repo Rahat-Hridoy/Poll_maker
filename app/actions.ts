@@ -137,24 +137,39 @@ export async function createPoll(formData: any) {
     return { success: true, pollId: newPoll.id };
 }
 
-export async function submitVote(pollId: string, answers: Record<string, string>, voterInfo: { name: string, email: string }) {
+export async function submitVote(pollId: string, answers: Record<string, string | string[]>, voterInfo: { name: string, email: string }) {
     const poll = await getPoll(pollId);
     if (!poll) return { success: false, error: "Poll not found" };
 
-    // Update votes
+    // Check revote prevention (if allowEditVote is false)
+    if (poll.settings && !poll.settings.allowEditVote) {
+        const pollWithClients = poll as Poll & { clients?: any[] };
+        const hasVoted = pollWithClients.clients?.some(c => c.email === voterInfo.email);
+        if (hasVoted) {
+            return { success: false, error: "You have already voted in this poll." };
+        }
+    }
+
+    // Update votes (support both single and multiple choice)
     poll.questions.forEach(q => {
-        const answerId = answers[q.id];
-        if (answerId) {
-            const option = q.options.find(o => o.id === answerId);
-            if (option) {
-                option.votes += 1;
-            }
+        const answerVal = answers[q.id];
+
+        if (Array.isArray(answerVal)) {
+            // Multiple choice - increment each selected option
+            answerVal.forEach(aId => {
+                const option = q.options.find(o => o.id === aId);
+                if (option) option.votes += 1;
+            });
+        } else if (answerVal) {
+            // Single choice - increment one option
+            const option = q.options.find(o => o.id === answerVal);
+            if (option) option.votes += 1;
         }
     });
 
     poll.totalVotes += 1;
 
-    // For the "Client List" requirement
+    // Track voter in clients array
     const pollWithClients = poll as Poll & { clients?: any[] };
     if (!pollWithClients.clients) pollWithClients.clients = [];
 
