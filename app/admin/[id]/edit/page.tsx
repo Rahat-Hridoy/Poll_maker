@@ -2,6 +2,8 @@ import { PollForm } from "@/components/poll/poll-form";
 import { getPoll } from "@/lib/store";
 import { notFound } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 // In a real app, this would be async and fetch data
 export default async function EditPollPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

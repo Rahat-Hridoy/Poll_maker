@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { ImportButton } from "@/components/admin/import-button";
 import { PollList } from "@/components/admin/poll-list";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
     const cookieStore = await cookies();
     const userId = cookieStore.get('auth_session')?.value;
