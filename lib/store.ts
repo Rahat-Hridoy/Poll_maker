@@ -88,12 +88,12 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 }
 
 function saveData() {
-    try {
-        if (!IS_VERCEL) {
+    if (!IS_VERCEL) {
+        try {
             fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
-        }
-        lastFileReadTime = Date.now();
-    } catch { }
+            lastFileReadTime = Date.now();
+        } catch { }
+    }
 }
 
 export async function getPolls(creatorId?: string): Promise<Poll[]> {
