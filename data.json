@@ -894,5 +894,37 @@
       "email": "test@test.com",
       "password": "123"
     }
+  ],
+  "presentations": [
+    {
+      "id": "85ea828a-0d95-4fea-91fe-8c6e6c8990ab",
+      "title": "New Presentation",
+      "theme": "default",
+      "createdAt": "2026-01-11T14:20:06.589Z",
+      "updatedAt": "2026-01-11T14:20:06.589Z",
+      "slides": [
+        {
+          "id": "6ae22f5f-3982-4cbe-999c-36c5d0be56b1",
+          "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Click to add title\"}]}]}",
+          "background": "#ffffff",
+          "layout": "title"
+        }
+      ]
+    },
+    {
+      "id": "4b404c46-a94e-4438-b32e-3bc7156c1c50",
+      "title": "New Presentation",
+      "theme": "default",
+      "createdAt": "2026-01-11T14:55:52.647Z",
+      "updatedAt": "2026-01-11T14:55:52.647Z",
+      "slides": [
+        {
+          "id": "296ff231-7f0d-488c-9738-30fa28756e04",
+          "content": "[]",
+          "background": "#ffffff",
+          "layout": "blank"
+        }
+      ]
+    }
   ]
 }

@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, HelpCircle, Settings, MessageSquare } from "lucide-react"
+import { BarChart3, HelpCircle, Settings, MessageSquare, MonitorPlay } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -9,6 +9,7 @@ export function Sidebar() {
 
     const mainLinks = [
         { href: "/admin/dashboard", label: "Polls", icon: BarChart3 },
+        { href: "/admin/slides", label: "My Slide", icon: MonitorPlay },
         { href: "#", label: "Quiz", icon: HelpCircle, comingSoon: true },
         { href: "#", label: "Live Q&A", icon: MessageSquare, comingSoon: true },
     ]

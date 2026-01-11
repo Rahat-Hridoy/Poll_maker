@@ -43,6 +43,25 @@ export interface Poll {
     clients?: PollClient[];
 }
 
+export interface Slide {
+    id: string;
+    content: string; // JSON string from TipTap
+    background?: string; // color hex or image url
+    layout?: 'blank' | 'title' | 'title-content'; // basic layouts
+}
+
+export interface Presentation {
+    id: string;
+    title: string;
+    slides: Slide[];
+    theme: string; // 'default', 'dark', 'pastel', etc.
+    createdAt: string;
+    updatedAt: string;
+    creatorId?: string;
+}
+
+
+
 export interface PollSettings {
     allowMultipleVotes: boolean;
     showResults: boolean;
@@ -211,3 +230,22 @@ export const MOCK_POLLS: Poll[] = [
         questions: []
     }
 ];
+
+export const MOCK_PRESENTATIONS: Presentation[] = [
+    {
+        id: "pres-1",
+        title: "Welcome Presentation",
+        theme: "default",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        slides: [
+            {
+                id: "slide-1",
+                content: '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Welcome to Slide Maker"}]}]}',
+                background: "#ffffff"
+            }
+        ]
+    }
+];
+
+

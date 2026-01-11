@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Poll, MOCK_POLLS, User } from './data';
+import { Poll, MOCK_POLLS, User, Presentation, MOCK_PRESENTATIONS } from './data';
 import { sql } from '@vercel/postgres';
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
@@ -9,6 +9,7 @@ const IS_VERCEL = !!process.env.VERCEL;
 // Global in-memory store fallback
 let memoryPolls: Poll[] = [];
 let memoryUsers: User[] = [];
+let memoryPresentations: Presentation[] = [];
 let lastFileReadTime: number = 0;
 
 // Initialize memoryPolls with MOCK_POLLS or from file if possible (for local dev)
@@ -19,13 +20,15 @@ function initLocalStore() {
             const data = JSON.parse(fileData);
             memoryPolls = data.polls || [...MOCK_POLLS];
             memoryUsers = data.users || [];
+            memoryPresentations = data.presentations || [...MOCK_PRESENTATIONS];
             lastFileReadTime = Date.now();
         } else {
             memoryPolls = [...MOCK_POLLS];
             memoryUsers = [];
+            memoryPresentations = [...MOCK_PRESENTATIONS];
             try {
                 if (!IS_VERCEL) {
-                    fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+                    fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers, presentations: memoryPresentations }, null, 2));
                 }
                 lastFileReadTime = Date.now();
             } catch { }
@@ -33,6 +36,7 @@ function initLocalStore() {
     } catch {
         memoryPolls = [...MOCK_POLLS];
         memoryUsers = [];
+        memoryPresentations = [...MOCK_PRESENTATIONS];
     }
 }
 
@@ -90,7 +94,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 function saveData() {
     if (!IS_VERCEL) {
         try {
-            fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers }, null, 2));
+            fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers, presentations: memoryPresentations }, null, 2));
             lastFileReadTime = Date.now();
         } catch { }
     }
@@ -242,5 +246,43 @@ export async function deletePollFromStore(id: string) {
 
     reloadIfNeeded();
     memoryPolls = memoryPolls.filter(p => p.id !== id);
+    saveData();
+}
+
+// ----------------------------------------------------------------------
+// Presentation Management (Memory / File Only for now, unless Postgres requested)
+// ----------------------------------------------------------------------
+
+export async function getPresentations(creatorId?: string): Promise<Presentation[]> {
+    reloadIfNeeded();
+    // For now, no Postgres implementation for slides as it wasn't strictly requested to reuse the DB immediately, 
+    // but the pattern suggests we should. For MVP, memory/file is faster to implement.
+    // If user wants DB later, we can add ensureTable logic here.
+
+    if (creatorId) {
+        return memoryPresentations.filter(p => p.creatorId === creatorId);
+    }
+    return memoryPresentations;
+}
+
+export async function getPresentation(id: string): Promise<Presentation | undefined> {
+    reloadIfNeeded();
+    return memoryPresentations.find(p => p.id === id);
+}
+
+export async function savePresentation(presentation: Presentation) {
+    reloadIfNeeded();
+    const existingIndex = memoryPresentations.findIndex(p => p.id === presentation.id);
+    if (existingIndex >= 0) {
+        memoryPresentations[existingIndex] = presentation;
+    } else {
+        memoryPresentations.push(presentation);
+    }
+    saveData();
+}
+
+export async function deletePresentation(id: string) {
+    reloadIfNeeded();
+    memoryPresentations = memoryPresentations.filter(p => p.id !== id);
     saveData();
 }
