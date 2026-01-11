@@ -925,6 +925,21 @@
           "layout": "blank"
         }
       ]
+    },
+    {
+      "id": "6fbb834c-ea2c-4650-94ee-2dfdb72f54d3",
+      "title": "New Presentation",
+      "theme": "default",
+      "createdAt": "2026-01-11T15:39:22.051Z",
+      "updatedAt": "2026-01-11T15:39:22.051Z",
+      "slides": [
+        {
+          "id": "46b8840b-2ebb-4ab5-bb03-ab6c590adfe9",
+          "content": "[]",
+          "background": "#ffffff",
+          "layout": "blank"
+        }
+      ]
     }
   ]
 }

@@ -8,7 +8,7 @@ import { Loader2, ArrowLeft, Save, Play, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SlideList } from "@/components/slide-editor/slide-list"
-import { SlideCanvas } from "@/components/slide-editor/slide-canvas"
+import { SlideCanvas, CanvasElement } from "@/components/slide-editor/slide-canvas"
 import { SlideProperties } from "@/components/slide-editor/slide-properties"
 
 export default function SlideEditorPage() {
@@ -16,6 +16,7 @@ export default function SlideEditorPage() {
     const router = useRouter()
     const [presentation, setPresentation] = useState<Presentation | null>(null)
     const [activeSlideId, setActiveSlideId] = useState<string | null>(null)
+    const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [leftOpen, setLeftOpen] = useState(true)
@@ -97,6 +98,29 @@ export default function SlideEditorPage() {
         setPresentation({ ...presentation, slides: newSlides });
     }
 
+    // Helper to get selected element
+    const activeSlide = presentation?.slides.find(s => s.id === activeSlideId)
+
+    const getActiveSlideElements = (): CanvasElement[] => {
+        if (!activeSlide?.content) return []
+        try {
+            return JSON.parse(activeSlide.content) as CanvasElement[]
+        } catch {
+            return []
+        }
+    }
+
+    const selectedElement = selectedElementId
+        ? getActiveSlideElements().find(el => el.id === selectedElementId) || null
+        : null
+
+    const updateSelectedElement = (updates: Partial<CanvasElement>) => {
+        if (!activeSlide || !selectedElementId) return;
+        const elements = getActiveSlideElements();
+        const newElements = elements.map(el => el.id === selectedElementId ? { ...el, ...updates } : el);
+        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
+    }
+
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -106,8 +130,6 @@ export default function SlideEditorPage() {
     }
 
     if (!presentation) return null
-
-    const activeSlide = presentation.slides.find(s => s.id === activeSlideId)
 
     return (
         <div className="flex flex-col h-screen bg-background">
@@ -167,12 +189,14 @@ export default function SlideEditorPage() {
                 </button>
 
                 {/* Center Panel: Canvas */}
-                <div className="flex-1 bg-muted/30 overflow-hidden flex flex-col relative z-0">
+                <div className="flex-1 bg-muted/30 overflow-hidden flex flex-col relative z-0" onClick={() => setSelectedElementId(null)}>
                     {activeSlide && (
                         <SlideCanvas
                             slide={activeSlide}
                             onChange={(updates) => updateSlide(activeSlide.id, updates)}
                             theme={presentation.theme}
+                            selectedId={selectedElementId}
+                            onSelect={setSelectedElementId}
                         />
                     )}
                 </div>
@@ -197,6 +221,8 @@ export default function SlideEditorPage() {
                                 onChange={(updates) => updateSlide(activeSlide.id, updates)}
                                 presentationTheme={presentation.theme}
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
+                                selectedElement={selectedElement}
+                                onElementChange={updateSelectedElement}
                             />
                         )}
                     </div>
