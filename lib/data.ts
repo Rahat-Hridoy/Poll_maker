@@ -55,6 +55,7 @@ export interface Presentation {
     title: string;
     slides: Slide[];
     theme: string; // 'default', 'dark', 'pastel', etc.
+    aspectRatio?: '16:9' | '4:3' | '1:1';
     createdAt: string;
     updatedAt: string;
     creatorId?: string;

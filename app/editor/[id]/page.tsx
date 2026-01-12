@@ -10,13 +10,14 @@ import Link from "next/link"
 import { SlideList } from "@/components/slide-editor/slide-list"
 import { SlideCanvas, CanvasElement } from "@/components/slide-editor/slide-canvas"
 import { SlideProperties } from "@/components/slide-editor/slide-properties"
+import { useSlideEditor } from "@/components/slide-editor/use-slide-editor"
+import { EditorToolbar } from "@/components/slide-editor/editor-toolbar"
 
 export default function SlideEditorPage() {
     const params = useParams()
     const router = useRouter()
     const [presentation, setPresentation] = useState<Presentation | null>(null)
     const [activeSlideId, setActiveSlideId] = useState<string | null>(null)
-    const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [leftOpen, setLeftOpen] = useState(true)
@@ -45,11 +46,13 @@ export default function SlideEditorPage() {
         }
     }
 
-    const handleSave = async () => {
-        if (!presentation) return
+    const handleSave = async (currentPresentation?: Presentation) => {
+        const presToSave = currentPresentation || presentation
+        if (!presToSave) return
         setSaving(true)
         try {
-            await updatePresentationAction(presentation)
+            await updatePresentationAction(presToSave)
+            setPresentation(presToSave) // Update local state to match saved
         } catch (error) {
             console.error("Failed to save", error)
         } finally {
@@ -98,28 +101,68 @@ export default function SlideEditorPage() {
         setPresentation({ ...presentation, slides: newSlides });
     }
 
-    // Helper to get selected element
-    const activeSlide = presentation?.slides.find(s => s.id === activeSlideId)
+    const activeSlide = presentation?.slides.find(s => s.id === activeSlideId) || null
 
-    const getActiveSlideElements = (): CanvasElement[] => {
-        if (!activeSlide?.content) return []
-        try {
-            return JSON.parse(activeSlide.content) as CanvasElement[]
-        } catch {
-            return []
+    // Initialize Hook with Active Slide
+    const {
+        elements,
+        selectedId,
+        setSelectedId,
+        zoom,
+        setZoom,
+        canUndo,
+        canRedo,
+        addElement,
+        updateElementAndSave,
+        removeElement,
+        duplicateElement,
+        handleArrange,
+        handleClipboard,
+        undo,
+        redo,
+        setElements
+    } = useSlideEditor(activeSlide)
+
+    // Sync elements changes back to presentation state to be ready for save
+    // We strictly sync when 'elements' change from the hook
+    // BEWARE: This might cause render loops if not careful.
+    // 'elements' comes from 'activeSlide' initially.
+    // When 'elements' changes in hook, we want to update 'activeSlide'.
+    // We should only update if it is different.
+    useEffect(() => {
+        if (!activeSlide) return
+        const currentContent = JSON.stringify(elements)
+        if (currentContent !== activeSlide.content) {
+            updateSlide(activeSlide.id, { content: currentContent })
         }
-    }
+    }, [elements]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const selectedElement = selectedElementId
-        ? getActiveSlideElements().find(el => el.id === selectedElementId) || null
-        : null
+    // Keyboard shortcuts (Global)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                // If we have a selected element and NOT editing text (SlideCanvas handles editing state locally,
+                // but we can check if document.activeElement is an input)
+                const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
+                const isContentEditable = (document.activeElement as HTMLElement)?.isContentEditable;
 
-    const updateSelectedElement = (updates: Partial<CanvasElement>) => {
-        if (!activeSlide || !selectedElementId) return;
-        const elements = getActiveSlideElements();
-        const newElements = elements.map(el => el.id === selectedElementId ? { ...el, ...updates } : el);
-        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
-    }
+                if (selectedId && !isInput && !isContentEditable) {
+                    removeElement(selectedId)
+                }
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+                e.preventDefault()
+                undo()
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
+                e.preventDefault()
+                redo()
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [selectedId, removeElement, undo, redo])
+
 
     if (loading) {
         return (
@@ -133,11 +176,9 @@ export default function SlideEditorPage() {
 
     return (
         <div className="flex flex-col h-screen bg-background">
-            {/* Header / Toolbar */}
-            <header className="h-14 border-b flex items-center justify-between px-4 bg-card shrink-0 select-none">
+            {/* Header */}
+            <header className="h-14 border-b flex items-center justify-between px-4 bg-card shrink-0 select-none z-10 relative">
                 <div className="flex items-center gap-4">
-                    {/* Back button removed as we are in a new window */}
-                    {/* But maybe keep it to close tab? */}
                     <Link href="/admin/slides" className="text-muted-foreground hover:text-foreground">
                         <span className="text-sm font-medium">Dashboard</span>
                     </Link>
@@ -148,7 +189,7 @@ export default function SlideEditorPage() {
                     />
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={handleSave} disabled={saving}>
+                    <Button variant="ghost" size="sm" onClick={() => handleSave()} disabled={saving}>
                         {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                         Save
                     </Button>
@@ -160,6 +201,25 @@ export default function SlideEditorPage() {
                     </Link>
                 </div>
             </header>
+
+            {/* Toolbar - Full Width */}
+            <EditorToolbar
+                selectedElement={elements.find(e => e.id === selectedId) || null}
+                onAddElement={addElement}
+                onUpdateElement={(updates) => selectedId && updateElementAndSave(selectedId, updates)}
+                onDelete={() => selectedId && removeElement(selectedId)}
+                onDuplicate={duplicateElement}
+                onArrange={handleArrange}
+                onClipboard={handleClipboard}
+                onUndo={undo}
+                onRedo={redo}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                zoom={zoom}
+                onZoomChange={setZoom}
+                aspectRatio={presentation.aspectRatio || '16:9'}
+                onAspectRatioChange={(ratio) => setPresentation({ ...presentation, aspectRatio: ratio })}
+            />
 
             {/* Main Editor Area */}
             <div className="flex-1 flex overflow-hidden relative">
@@ -189,14 +249,17 @@ export default function SlideEditorPage() {
                 </button>
 
                 {/* Center Panel: Canvas */}
-                <div className="flex-1 bg-muted/30 overflow-hidden flex flex-col relative z-0" onClick={() => setSelectedElementId(null)}>
+                <div className="flex-1 bg-muted/30 overflow-hidden flex flex-col relative z-0" onClick={() => setSelectedId(null)}>
                     {activeSlide && (
                         <SlideCanvas
                             slide={activeSlide}
-                            onChange={(updates) => updateSlide(activeSlide.id, updates)}
-                            theme={presentation.theme}
-                            selectedId={selectedElementId}
-                            onSelect={setSelectedElementId}
+                            elements={elements}
+                            zoom={zoom}
+                            selectedId={selectedId}
+                            onSelect={setSelectedId}
+                            onElementUpdate={updateElementAndSave}
+                            onElementRemove={removeElement}
+                            aspectRatio={presentation.aspectRatio}
                         />
                     )}
                 </div>
@@ -221,8 +284,8 @@ export default function SlideEditorPage() {
                                 onChange={(updates) => updateSlide(activeSlide.id, updates)}
                                 presentationTheme={presentation.theme}
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
-                                selectedElement={selectedElement}
-                                onElementChange={updateSelectedElement}
+                                selectedElement={elements.find(e => e.id === selectedId) || null}
+                                onElementChange={(updates) => selectedId && updateElementAndSave(selectedId, updates)}
                             />
                         )}
                     </div>

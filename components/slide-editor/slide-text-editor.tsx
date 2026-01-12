@@ -115,17 +115,17 @@ function CustomBubbleMenu({ editor, anchorEl, children }: { editor: any, anchorE
 
             // Calculate position
             // Center horizontally relative to the element
-            const left = rect.left + rect.width / 2
+            const left = rect.left + rect.width / 5
 
             // Try Top position first
             // We want the BOTTOM of the toolbar to be slightly above the element
             // We will use transform: translate(-50%, -100%) for top placement
-            let top = rect.top - 5 // 5px Gap above element
+            let top = rect.top - 1 // 5px Gap above element
             let placement: 'top' | 'bottom' = 'top'
 
             // If too close to viewport top, flip to Bottom
-            if (top < 60) { // 60px clearance for toolbar
-                top = rect.bottom + 5 // 5px Gap below element
+            if (top < 30) { // 60px clearance for toolbar
+                top = rect.bottom + 1 // 2px Gap below element
                 placement = 'bottom'
             }
 
