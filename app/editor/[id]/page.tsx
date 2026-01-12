@@ -119,6 +119,8 @@ export default function SlideEditorPage() {
         duplicateElement,
         handleArrange,
         handleClipboard,
+        addPollElement,
+        addPollQRCode,
         undo,
         redo,
         setElements
@@ -311,6 +313,8 @@ export default function SlideEditorPage() {
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
                                 selectedElement={Array.isArray(elements) ? (elements.find(e => e.id === selectedId) || null) : null}
                                 onElementChange={(updates) => selectedId && updateElementAndSave(selectedId, updates)}
+                                onAddPoll={addPollElement}
+                                onAddQRCode={addPollQRCode}
                             />
                         )}
                     </div>

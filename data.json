@@ -861,6 +861,92 @@
           "time": "2026-01-10T12:33:58.293Z"
         }
       ]
+    },
+    {
+      "id": "poll-1768239759394",
+      "shortCode": "72488",
+      "title": "T",
+      "status": "published",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#000000",
+        "primaryColor": "#2563eb",
+        "fontFamily": "Inter, sans-serif",
+        "boxShape": "rounded",
+        "theme": "default",
+        "title": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "bold",
+          "color": "#000000"
+        },
+        "question": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 18,
+          "fontWeight": "medium",
+          "color": "#000000",
+          "input": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#f8fafc",
+            "shadow": false
+          }
+        },
+        "option": {
+          "fontFamily": "Inter, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "color": "#334155",
+          "radio": {
+            "type": "classic",
+            "size": "md",
+            "activeColor": "#2563eb"
+          },
+          "container": {
+            "borderShape": "rounded",
+            "borderColor": "#e2e8f0",
+            "backgroundColor": "#ffffff",
+            "hoverEffect": true,
+            "padding": 12,
+            "gap": 10
+          }
+        }
+      },
+      "settings": {
+        "allowMultipleVotes": false,
+        "showResults": true,
+        "allowEditVote": false
+      },
+      "createdAt": "2026-01-12T17:42:39.395Z",
+      "visitors": 1,
+      "totalVotes": 1,
+      "questions": [
+        {
+          "id": "q1",
+          "text": "A",
+          "type": "single",
+          "options": [
+            {
+              "id": "o1",
+              "text": "x",
+              "votes": 1
+            },
+            {
+              "id": "o2",
+              "text": "y",
+              "votes": 0
+            }
+          ]
+        }
+      ],
+      "creatorId": "user-1767523556026",
+      "clients": [
+        {
+          "name": "Yardley Knight",
+          "email": "vakasy@mailinator.com",
+          "time": "2026-01-12T17:49:39.024Z"
+        }
+      ]
     }
   ],
   "users": [

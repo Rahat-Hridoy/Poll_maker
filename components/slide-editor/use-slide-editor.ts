@@ -120,6 +120,51 @@ export function useSlideEditor(initialSlide: Slide | null) {
         setSelectedId(newEl.id)
     }, [elements, updateElements])
 
+    const addPollElement = useCallback((pollId: string, pollTitle: string) => {
+        const newEl: CanvasElement = {
+            id: crypto.randomUUID(),
+            type: 'poll' as any,
+            x: 100,
+            y: 100,
+            width: 400,
+            height: 300,
+            content: JSON.stringify({ pollId, title: pollTitle }),
+            rotation: 0,
+            style: {
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '20px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                color: '#0f172a'
+            }
+        }
+        updateElements([...elements, newEl])
+        setSelectedId(newEl.id)
+    }, [elements, updateElements])
+
+    const addPollQRCode = useCallback((shortCode: string, pollTitle: string) => {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/poll/' + shortCode)}`
+        const newEl: CanvasElement = {
+            id: crypto.randomUUID(),
+            type: 'qr-code' as any,
+            x: 200,
+            y: 200,
+            width: 250,
+            height: 250,
+            content: JSON.stringify({ qrUrl, title: pollTitle, shortCode }),
+            rotation: 0,
+            style: {
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px'
+            }
+        }
+        updateElements([...elements, newEl])
+        setSelectedId(newEl.id)
+    }, [elements, updateElements])
+
     const removeElement = useCallback((id: string) => {
         updateElements(elements.filter(el => el.id !== id))
         if (selectedId === id) setSelectedId(null)
@@ -208,6 +253,8 @@ export function useSlideEditor(initialSlide: Slide | null) {
         duplicateElement,
         handleArrange,
         handleClipboard,
+        addPollElement,
+        addPollQRCode,
         undo,
         redo,
         setElements: updateElements

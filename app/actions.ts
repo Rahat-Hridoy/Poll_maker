@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { Poll, QuestionType, PollQuestion, PollOption } from '@/lib/data';
-import { getPoll, savePoll, deletePollFromStore, incrementPollVisitors, getPollByCode } from '@/lib/store';
+import { getPoll, savePoll, deletePollFromStore, incrementPollVisitors, getPollByCode, getPolls } from '@/lib/store';
 import { cookies } from 'next/headers';
 import Papa from 'papaparse';
 
@@ -226,3 +226,15 @@ export async function findPollByCode(code: string) {
     if (!poll) return { success: false, error: "Poll not found" };
     return { success: true, pollId: poll.id };
 }
+
+export async function fetchMyPolls() {
+    const cookieStore = await cookies();
+    const creatorId = cookieStore.get('auth_session')?.value;
+    if (!creatorId) return [];
+    return await getPolls(creatorId);
+}
+
+export async function getPollAction(id: string) {
+    return await getPoll(id);
+}
+

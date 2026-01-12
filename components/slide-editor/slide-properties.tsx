@@ -1,12 +1,22 @@
 "use client"
 
-import { Slide } from "@/lib/data"
+import { Slide, Poll } from "@/lib/data"
+import { useState, useEffect } from "react"
+import { fetchMyPolls } from "@/app/actions"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2 } from "lucide-react"
+import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2 } from "lucide-react"
 import { CanvasElement } from "./slide-canvas"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface SlidePropertiesProps {
     slide: Slide
@@ -15,6 +25,8 @@ interface SlidePropertiesProps {
     onThemeChange: (theme: string) => void
     selectedElement: CanvasElement | null
     onElementChange: (updates: Partial<CanvasElement>) => void
+    onAddPoll: (pollId: string, pollTitle: string) => void
+    onAddQRCode: (shortCode: string, pollTitle: string) => void
 }
 
 const COLORS = [
@@ -33,20 +45,48 @@ const THEMES = [
     { id: 'corporate', name: 'Corporate', bg: '#f8fafc' },
 ]
 
-export function SlideProperties({ slide, onChange, presentationTheme, onThemeChange, selectedElement, onElementChange }: SlidePropertiesProps) {
+export function SlideProperties({ slide, onChange, presentationTheme, onThemeChange, selectedElement, onElementChange, onAddPoll, onAddQRCode }: SlidePropertiesProps) {
+    const [myPolls, setMyPolls] = useState<Poll[]>([])
+    const [loadingPolls, setLoadingPolls] = useState(false)
+    const [activeTab, setActiveTab] = useState(selectedElement ? "element" : "design")
+    const [isPollDialogOpen, setIsPollDialogOpen] = useState(false)
+
+    useEffect(() => {
+        if (selectedElement) {
+            setActiveTab("element")
+        } else if (activeTab === "element") {
+            setActiveTab("design")
+        }
+    }, [selectedElement, activeTab])
+
+    useEffect(() => {
+        const loadPolls = async () => {
+            setLoadingPolls(true)
+            try {
+                const polls = await fetchMyPolls()
+                setMyPolls(polls)
+            } catch (error) {
+                console.error("Failed to fetch polls", error)
+            } finally {
+                setLoadingPolls(false)
+            }
+        }
+        loadPolls()
+    }, [])
     return (
         <div className="p-4">
             <h3 className="font-semibold mb-4 text-sm">
                 {selectedElement ? 'Element Properties' : 'Slide Properties'}
             </h3>
 
-            <Tabs defaultValue={selectedElement ? "element" : "design"} value={selectedElement ? "element" : "design"}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full mb-4">
                     {selectedElement ? (
                         <TabsTrigger value="element" className="flex-1">Element</TabsTrigger>
                     ) : (
                         <>
                             <TabsTrigger value="design" className="flex-1">Design</TabsTrigger>
+                            <TabsTrigger value="import" className="flex-1">Import</TabsTrigger>
                             <TabsTrigger value="theme" className="flex-1">Theme</TabsTrigger>
                         </>
                     )}
@@ -195,18 +235,112 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                         />
                         <p className="text-xs text-muted-foreground">Paste a URL to an image to set it as background.</p>
                     </div>
+                </TabsContent>
 
-                    <div className="space-y-3">
+                <TabsContent value="import" className="space-y-6">
+                    <div className="space-y-4">
                         <Label className="flex items-center gap-2">
                             <BoxSelect className="w-4 h-4" />
-                            Import
+                            Select Type
                         </Label>
-                        <Button variant="outline" className="w-full justify-start" disabled>
-                            Import Live Poll (Soon)
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start" disabled>
-                            Import Quiz (Soon)
-                        </Button>
+
+                        <div className="grid gap-2">
+                            <Dialog open={isPollDialogOpen} onOpenChange={setIsPollDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-start gap-3 h-12">
+                                        <BarChart3 className="w-5 h-5 text-blue-500" />
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-sm font-semibold">Poll</span>
+                                            <span className="text-[10px] text-muted-foreground">Import live results or QR</span>
+                                        </div>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                                    <DialogHeader>
+                                        <DialogTitle>Select a Poll to Import</DialogTitle>
+                                        <DialogDescription>
+                                            Choose a poll from your dashboard to add to the current slide.
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <div className="flex-1 overflow-y-auto pr-2 py-4">
+                                        {loadingPolls ? (
+                                            <div className="flex flex-col items-center justify-center p-12 gap-3">
+                                                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                                                <span className="text-sm text-muted-foreground">Fetching your polls...</span>
+                                            </div>
+                                        ) : myPolls.length === 0 ? (
+                                            <div className="text-center p-12 border-2 border-dashed rounded-xl">
+                                                <p className="text-slate-500 mb-4">You haven't created any polls yet.</p>
+                                                <Button onClick={() => window.open('/admin/dashboard', '_blank')}>
+                                                    Go to Dashboard
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {myPolls.map(poll => (
+                                                    <div key={poll.id} className="p-4 border rounded-xl bg-card hover:border-primary transition-all group">
+                                                        <div className="flex flex-col gap-1 mb-4">
+                                                            <h4 className="font-bold text-slate-900 truncate">{poll.title}</h4>
+                                                            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                                                                <span className="flex items-center gap-1">
+                                                                    <ListTodo className="w-3 h-3" />
+                                                                    {poll.questions.length} Qs
+                                                                </span>
+                                                                <span>•</span>
+                                                                <span>Code: {poll.shortCode}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="text-[11px] h-9 gap-1.5"
+                                                                onClick={() => {
+                                                                    onAddPoll(poll.id, poll.title)
+                                                                    setIsPollDialogOpen(false)
+                                                                }}
+                                                            >
+                                                                <BarChart3 className="w-3.5 h-3.5" />
+                                                                Interface
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="text-[11px] h-9 gap-1.5"
+                                                                onClick={() => {
+                                                                    onAddQRCode(poll.shortCode, poll.title)
+                                                                    setIsPollDialogOpen(false)
+                                                                }}
+                                                            >
+                                                                <QrCode className="w-3.5 h-3.5" />
+                                                                QR Code
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+
+                            <Button variant="outline" className="w-full justify-start gap-3 h-12 opacity-60 cursor-not-allowed" disabled>
+                                <MessageSquare className="w-5 h-5 text-purple-500" />
+                                <div className="flex flex-col items-start">
+                                    <span className="text-sm font-semibold">Q&A</span>
+                                    <span className="text-[10px] text-muted-foreground">Coming Soon</span>
+                                </div>
+                            </Button>
+
+                            <Button variant="outline" className="w-full justify-start gap-3 h-12 opacity-60 cursor-not-allowed" disabled>
+                                <ListTodo className="w-5 h-5 text-orange-500" />
+                                <div className="flex flex-col items-start">
+                                    <span className="text-sm font-semibold">Quiz</span>
+                                    <span className="text-[10px] text-muted-foreground">Coming Soon</span>
+                                </div>
+                            </Button>
+                        </div>
                     </div>
                 </TabsContent>
 
@@ -231,6 +365,6 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                     </div>
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     )
 }

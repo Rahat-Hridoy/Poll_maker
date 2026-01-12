@@ -4,10 +4,11 @@ import { Ruler } from "./ruler"
 import { Slide } from "@/lib/data"
 import { useState, useEffect, useRef } from "react"
 import { Rnd } from "react-rnd"
-import { X } from "lucide-react"
+import { X, BoxSelect } from "lucide-react"
 import { SlideTextEditor } from "./slide-text-editor"
+import { SlidePollElement } from "./slide-poll-element"
 
-export type ElementType = "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave"
+export type ElementType = "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code"
 
 export interface CanvasElement {
     id: string
@@ -251,6 +252,51 @@ export function SlideCanvas({
                                     />
                                 )}
                                 {el.type === 'image' && <img src={el.content || '/placeholder.png'} className="w-full h-full object-cover pointer-events-none" />}
+
+                                {el.type === 'poll' && (
+                                    <SlidePollElement
+                                        pollId={(() => {
+                                            try {
+                                                return JSON.parse(el.content || '{}').pollId || ''
+                                            } catch {
+                                                return ''
+                                            }
+                                        })()}
+                                        title={(() => {
+                                            try {
+                                                return JSON.parse(el.content || '{}').title || ''
+                                            } catch {
+                                                return ''
+                                            }
+                                        })()}
+                                    />
+                                )}
+
+                                {el.type === 'qr-code' && (
+                                    <div className="w-full h-full p-4 flex flex-col items-center justify-center bg-white rounded-lg shadow-sm border border-slate-200 gap-2">
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Scan to Vote</div>
+                                        <img
+                                            src={(() => {
+                                                try {
+                                                    return JSON.parse(el.content || '{}').qrUrl
+                                                } catch {
+                                                    return ''
+                                                }
+                                            })()}
+                                            className="w-[85%] h-auto aspect-square object-contain"
+                                            alt="QR Code"
+                                        />
+                                        <div className="mt-2 text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                            {(() => {
+                                                try {
+                                                    return `Code: ${JSON.parse(el.content || '{}').shortCode}`
+                                                } catch {
+                                                    return ''
+                                                }
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* SVG Shapes Rendering */}
                                 {['rect', 'circle', 'triangle', 'arrow', 'star', 'polygon', 'line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(el.type) && (
