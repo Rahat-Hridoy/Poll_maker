@@ -219,6 +219,7 @@ export default function SlideEditorPage() {
                 onZoomChange={setZoom}
                 aspectRatio={presentation.aspectRatio || '16:9'}
                 onAspectRatioChange={(ratio) => setPresentation({ ...presentation, aspectRatio: ratio })}
+                onAddSlide={addSlide}
             />
 
             {/* Main Editor Area */}

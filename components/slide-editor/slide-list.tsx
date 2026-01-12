@@ -47,7 +47,7 @@ function SortableSlideItem({ slide, index, isActive, onSelect, onDelete }: any) 
 
     return (
         <div ref={setNodeRef} style={style} className="relative group mb-3">
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100" {...attributes} {...listeners}>
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 cursor-grab opacity-0 group-hover:opacity-50 hover:opacity-100!" {...attributes} {...listeners}>
                 <GripVertical className="w-4 h-4 text-muted-foreground" />
             </div>
 
@@ -105,11 +105,7 @@ export function SlideList({ slides, activeSlideId, onSelect, onAdd, onDelete, on
     return (
         <div className="flex flex-col h-full">
             <div className="p-4 border-b">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Slides</h3>
-                <Button onClick={onAdd} size="sm" className="w-full justify-start gap-2">
-                    <Plus className="w-4 h-4" />
-                    New Slide
-                </Button>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Slides</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
                 <DndContext
