@@ -3,10 +3,11 @@
 import * as React from "react"
 import {
     Type, Square, Circle, Image as ImageIcon,
-    Copy, Trash2, Layers, Undo2, Redo2, ZoomIn, ZoomOut,
-    Triangle, ArrowRight, Star,
-    ClipboardCopy, ClipboardPaste, CopyPlus,
-    BringToFront, SendToBack, AlignCenterHorizontal, AlignCenterVertical
+    Copy, Trash2, Layers, Undo2, Redo2, ZoomIn, ZoomOut, Scissors,
+    Triangle, ArrowRight, Star, Minus, Activity,
+    ClipboardCopy, ClipboardPaste, CopyPlus, Square as SquareIcon,
+    BringToFront, SendToBack, AlignCenterHorizontal, AlignCenterVertical,
+    Link2, ImagePlus, Hexagon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +17,7 @@ import { CanvasElement, ElementType } from "./slide-canvas"
 
 interface EditorToolbarProps {
     selectedElement: CanvasElement | null
-    onAddElement: (type: ElementType) => void
+    onAddElement: (type: ElementType, content?: string) => void
     onUpdateElement: (updates: Partial<CanvasElement>) => void
     onDelete: () => void
     onDuplicate: () => void
@@ -51,6 +52,20 @@ export function EditorToolbar({
     onAspectRatioChange,
     onAddSlide
 }: EditorToolbarProps) {
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            const content = event.target?.result as string
+            onAddElement('image', content)
+        }
+        reader.readAsDataURL(file)
+    }
+
 
     const handleFormat = (key: string, value: any) => {
         if (!selectedElement) return
@@ -134,23 +149,38 @@ export function EditorToolbar({
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onAddElement('text')} title="Add Text">
                     <Type className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onAddElement('image')} title="Add Image">
-                    <ImageIcon className="h-4 w-4" />
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                />
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()} title="Upload Image from PC">
+                    <ImagePlus className="h-4 w-4" />
                 </Button>
 
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8" title="Shapes">
-                            <Square className="h-4 w-4" />
+                            <SquareIcon className="h-4 w-4" />
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-2" side="bottom" align="start">
                         <div className="grid grid-cols-5 gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => onAddElement('rect')} title="Rectangle"><Square className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('rect')} title="Rectangle"><SquareIcon className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => onAddElement('circle')} title="Circle"><Circle className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => onAddElement('triangle')} title="Triangle"><Triangle className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => onAddElement('arrow')} title="Arrow"><ArrowRight className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => onAddElement('star')} title="Star"><Star className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('polygon')} title="Polygon"><Hexagon className="h-4 w-4" /></Button>
+
+                            <Separator className="col-span-5 my-1" />
+
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('line')} title="Line"><Minus className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('arrow-line')} title="Arrow Line"><ArrowRight className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('sine-wave')} title="Sine Wave"><Activity className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('square-wave')} title="Square Wave"><SquareIcon className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => onAddElement('tan-wave')} title="Tan Wave"><Activity className="h-4 w-4 rotate-90" /></Button>
                         </div>
                     </PopoverContent>
                 </Popover>
@@ -162,26 +192,89 @@ export function EditorToolbar({
             {selectedElement && (
                 <>
                     {/* SHAPE COLORS */}
-                    {['rect', 'circle', 'triangle', 'arrow', 'star'].includes(selectedElement.type) && (
+                    {/* SHAPE COLORS & BORDERS */}
+                    {['rect', 'circle', 'triangle', 'arrow', 'star', 'polygon', 'line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(selectedElement.type) && (
                         <div className="flex items-center gap-2 px-2 animate-in fade-in duration-200">
-                            <div className="flex items-center gap-1.5 p-1 bg-background border rounded-md">
-                                <span className="text-[10px] text-muted-foreground uppercase font-bold px-1">Fill</span>
-                                <Input
-                                    type="color"
-                                    className="h-5 w-6 p-0 border-0 rounded overflow-hidden cursor-pointer"
-                                    value={selectedElement.style.backgroundColor?.toString() || 'transparent'}
-                                    onChange={(e) => handleFormat('backgroundColor', e.target.value)}
-                                />
-                            </div>
+                            {/* Fill Color (only for closed shapes) */}
+                            {['rect', 'circle', 'triangle', 'star', 'polygon'].includes(selectedElement.type) && (
+                                <div className="flex items-center gap-1.5 p-1 bg-background border rounded-md">
+                                    <span className="text-[10px] text-muted-foreground uppercase font-bold px-1">Fill</span>
+                                    <input
+                                        type="color"
+                                        className="h-5 w-6 p-0 border-0 rounded overflow-hidden cursor-pointer bg-transparent"
+                                        value={selectedElement.style.backgroundColor?.toString() || 'transparent'}
+                                        onChange={(e) => handleFormat('backgroundColor', e.target.value)}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Border Color / Stroke */}
                             <div className="flex items-center gap-1.5 p-1 bg-background border rounded-md">
                                 <span className="text-[10px] text-muted-foreground uppercase font-bold px-1">Stroke</span>
-                                <Input
+                                <input
                                     type="color"
-                                    className="h-5 w-6 p-0 border-0 rounded overflow-hidden cursor-pointer"
-                                    value={selectedElement.style.borderColor?.toString() || 'transparent'}
-                                    onChange={(e) => handleFormat('borderColor', e.target.value)}
+                                    className="h-5 w-6 p-0 border-0 rounded overflow-hidden cursor-pointer bg-transparent"
+                                    value={selectedElement.style.borderColor?.toString() || (selectedElement.style as any).stroke || '#3b82f6'}
+                                    onChange={(e) => {
+                                        onUpdateElement({
+                                            style: {
+                                                ...selectedElement.style,
+                                                borderColor: e.target.value,
+                                                stroke: e.target.value
+                                            }
+                                        })
+                                    }}
                                 />
                             </div>
+
+                            {/* Border Width */}
+                            <div className="flex items-center gap-1.5 p-1 bg-background border rounded-md">
+                                <span className="text-[10px] text-muted-foreground uppercase font-bold px-1">Width</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="20"
+                                    className="h-5 w-10 p-1 text-[10px] bg-transparent border-0 focus-visible:ring-0 outline-none"
+                                    value={parseInt(selectedElement.style.borderWidth?.toString() || (selectedElement.style as any).strokeWidth || '0')}
+                                    onChange={(e) => {
+                                        onUpdateElement({
+                                            style: {
+                                                ...selectedElement.style,
+                                                borderWidth: e.target.value,
+                                                strokeWidth: e.target.value
+                                            }
+                                        })
+                                    }}
+                                />
+                            </div>
+
+                            {/* Border Style */}
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 px-2 border" title="Border Style">
+                                        <div className="flex flex-col gap-0.5 w-6">
+                                            <div className="h-0.5 w-full bg-foreground" />
+                                            <div className={`h-0.5 w-full bg-foreground ${selectedElement.style.borderStyle === 'solid' ? '' : 'opacity-30'}`} />
+                                        </div>
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-32 p-1" side="bottom" align="end">
+                                    <div className="flex flex-col gap-1">
+                                        <Button variant="ghost" size="sm" className="justify-start gap-2 h-8" onClick={() => handleFormat('borderStyle', 'solid')}>
+                                            <div className="h-0.5 w-4 bg-foreground" />
+                                            <span className="text-xs">Solid</span>
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="justify-start gap-2 h-8" onClick={() => handleFormat('borderStyle', 'dashed')}>
+                                            <div className="h-0.5 w-4 bg-foreground border-t-2 border-dashed border-transparent" style={{ borderTopColor: 'currentColor' }} />
+                                            <span className="text-xs">Dashed</span>
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="justify-start gap-2 h-8" onClick={() => handleFormat('borderStyle', 'dotted')}>
+                                            <div className="h-0.5 w-4 bg-foreground border-t-2 border-dotted border-transparent" style={{ borderTopColor: 'currentColor' }} />
+                                            <span className="text-xs">Dotted</span>
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                             <Separator orientation="vertical" className="h-6 mx-1" />
                         </div>
                     )}
@@ -198,8 +291,9 @@ export function EditorToolbar({
 
                     {/* CLIPBOARD & DELETE */}
                     <div className="flex items-center gap-0.5">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onClipboard('copy')} title="Copy"><ClipboardCopy className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onClipboard('paste')} title="Paste"><ClipboardPaste className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500" onClick={() => onClipboard('copy')} title="Copy"><ClipboardCopy className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-500" onClick={() => onClipboard('cut')} title="Cut"><Scissors className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-green-500" onClick={() => onClipboard('paste')} title="Paste"><ClipboardPaste className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDuplicate} title="Duplicate"><CopyPlus className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={onDelete} title="Delete"><Trash2 className="h-4 w-4" /></Button>
                     </div>

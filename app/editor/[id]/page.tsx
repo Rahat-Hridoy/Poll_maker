@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { fetchPresentation, updatePresentationAction } from "@/app/actions/presentation"
 import { Presentation, Slide } from "@/lib/data"
@@ -102,6 +102,7 @@ export default function SlideEditorPage() {
     }
 
     const activeSlide = presentation?.slides.find(s => s.id === activeSlideId) || null
+    const lastSlideIdRef = useRef<string | null>(null)
 
     // Initialize Hook with Active Slide
     const {
@@ -123,26 +124,49 @@ export default function SlideEditorPage() {
         setElements
     } = useSlideEditor(activeSlide)
 
+    const lastSyncedContentRef = useRef<string | null>(null)
+    const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
     // Sync elements changes back to presentation state to be ready for save
-    // We strictly sync when 'elements' change from the hook
-    // BEWARE: This might cause render loops if not careful.
-    // 'elements' comes from 'activeSlide' initially.
-    // When 'elements' changes in hook, we want to update 'activeSlide'.
-    // We should only update if it is different.
+    // Use debouncing to prevent infinite loops and improve performance during rapid updates
     useEffect(() => {
         if (!activeSlide) return
-        const currentContent = JSON.stringify(elements)
-        if (currentContent !== activeSlide.content) {
-            updateSlide(activeSlide.id, { content: currentContent })
+
+        // Skip sync if we are still switching slides
+        if (lastSlideIdRef.current !== activeSlide.id) {
+            lastSlideIdRef.current = activeSlide.id
+            lastSyncedContentRef.current = activeSlide.content
+            return
         }
-    }, [elements]) // eslint-disable-line react-hooks/exhaustive-deps
+
+        const currentContent = JSON.stringify(elements)
+
+        // Only trigger update if content is actually different and not what we last synced
+        if (currentContent !== activeSlide.content && currentContent !== lastSyncedContentRef.current) {
+
+            // Clear existing timeout
+            if (syncTimeoutRef.current) {
+                clearTimeout(syncTimeoutRef.current)
+            }
+
+            // Debounce the update to the parent state
+            syncTimeoutRef.current = setTimeout(() => {
+                lastSyncedContentRef.current = currentContent
+                updateSlide(activeSlide.id, { content: currentContent })
+            }, 500) // 500ms delay for stability
+        }
+
+        return () => {
+            if (syncTimeoutRef.current) {
+                clearTimeout(syncTimeoutRef.current)
+            }
+        }
+    }, [elements, activeSlide?.id, activeSlide?.content])
 
     // Keyboard shortcuts (Global)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                // If we have a selected element and NOT editing text (SlideCanvas handles editing state locally,
-                // but we can check if document.activeElement is an input)
                 const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
                 const isContentEditable = (document.activeElement as HTMLElement)?.isContentEditable;
 
@@ -204,7 +228,7 @@ export default function SlideEditorPage() {
 
             {/* Toolbar - Full Width */}
             <EditorToolbar
-                selectedElement={elements.find(e => e.id === selectedId) || null}
+                selectedElement={Array.isArray(elements) ? (elements.find(e => e.id === selectedId) || null) : null}
                 onAddElement={addElement}
                 onUpdateElement={(updates) => selectedId && updateElementAndSave(selectedId, updates)}
                 onDelete={() => selectedId && removeElement(selectedId)}
@@ -285,7 +309,7 @@ export default function SlideEditorPage() {
                                 onChange={(updates) => updateSlide(activeSlide.id, updates)}
                                 presentationTheme={presentation.theme}
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
-                                selectedElement={elements.find(e => e.id === selectedId) || null}
+                                selectedElement={Array.isArray(elements) ? (elements.find(e => e.id === selectedId) || null) : null}
                                 onElementChange={(updates) => selectedId && updateElementAndSave(selectedId, updates)}
                             />
                         )}

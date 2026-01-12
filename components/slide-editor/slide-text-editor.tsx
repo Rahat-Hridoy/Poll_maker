@@ -1,6 +1,5 @@
-"use client"
-
 import { useEditor, EditorContent, Mark, mergeAttributes } from '@tiptap/react'
+import Link from '@tiptap/extension-link'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import * as React from 'react'
@@ -220,7 +219,13 @@ export function SlideTextEditor({ content, onChange, editable, className, style,
             Underline,
             Superscript,
             Subscript,
-            TextStyle
+            TextStyle,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-blue-600 underline cursor-pointer',
+                },
+            }),
         ],
         content: content,
         editable: editable,

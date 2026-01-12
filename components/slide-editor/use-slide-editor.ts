@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { CanvasElement, ElementType } from "./slide-canvas"
 import { Slide } from "@/lib/data"
 
@@ -10,54 +10,72 @@ export function useSlideEditor(initialSlide: Slide | null) {
     const [history, setHistory] = useState<{ past: CanvasElement[][], future: CanvasElement[][] }>({ past: [], future: [] })
     const [zoom, setZoom] = useState(1)
     const [selectedId, setSelectedId] = useState<string | null>(null)
+    const loadedRef = useRef<{ id: string, content: string } | null>(null)
 
     // Load elements from slide content
     useEffect(() => {
         if (!initialSlide) return
-        try {
-            if (initialSlide.content && initialSlide.content.startsWith('[')) {
-                setElements(JSON.parse(initialSlide.content))
-                // Clear history when switching slides? Or keep it? 
-                // Usually better to clear or manage per slide, but for now simple reset is safer
-                setHistory({ past: [], future: [] })
-            } else {
-                setElements([])
-                setHistory({ past: [], future: [] })
 
+        const contentStr = initialSlide.content || "[]"
+
+        // Skip if this slide ID + content is already what we have loaded
+        if (loadedRef.current?.id === initialSlide.id && loadedRef.current?.content === contentStr) {
+            return
+        }
+
+        try {
+            let parsed = JSON.parse(contentStr)
+
+            // Ensure parsed content is an array
+            if (!Array.isArray(parsed)) {
+                console.warn("Slide content is not an array, defaulting to empty elements", parsed)
+                parsed = []
+            }
+
+            const nextStr = JSON.stringify(parsed)
+
+            // Update ref immediately to the incoming string to avoid re-triggering
+            loadedRef.current = { id: initialSlide.id, content: contentStr }
+
+            // Only update elements if their content representation changed
+            setElements(prev => {
+                if (JSON.stringify(prev) === nextStr) return prev
+                return parsed
+            })
+
+            // Only clear history if it's a completely different slide ID
+            if (loadedRef.current?.id !== initialSlide.id) {
+                setHistory({ past: [], future: [] })
             }
         } catch (e) {
             console.error("Failed to parse slide content", e)
             setElements([])
+            loadedRef.current = { id: initialSlide.id, content: "[]" }
         }
-    }, [initialSlide?.id, initialSlide?.content]) // simplified dep check
-
-    const saveHistory = useCallback((currentElements: CanvasElement[]) => {
-        setHistory(prev => ({
-            past: [...prev.past, currentElements],
-            future: []
-        }))
-    }, [])
+    }, [initialSlide?.id, initialSlide?.content])
 
     // Update elements and save history
     const updateElements = useCallback((newElements: CanvasElement[], save = true) => {
-        if (save) {
-            setHistory(prev => ({
-                past: [...prev.past, elements],
-                future: []
-            }))
-        }
-        setElements(newElements)
-    }, [elements])
+        setElements(prev => {
+            if (save) {
+                setHistory(hp => ({
+                    past: [...hp.past, prev],
+                    future: []
+                }))
+            }
+            return newElements
+        })
+    }, [])
 
     const undo = useCallback(() => {
         if (history.past.length === 0) return
         const previous = history.past[history.past.length - 1]
         const newPast = history.past.slice(0, -1)
 
-        setHistory({
+        setHistory(prev => ({
             past: newPast,
-            future: [elements, ...history.future]
-        })
+            future: [elements, ...prev.future]
+        }))
         setElements(previous)
     }, [history, elements])
 
@@ -66,31 +84,36 @@ export function useSlideEditor(initialSlide: Slide | null) {
         const next = history.future[0]
         const newFuture = history.future.slice(1)
 
-        setHistory({
-            past: [...history.past, elements],
+        setHistory(prev => ({
+            past: [...prev.past, elements],
             future: newFuture
-        })
+        }))
         setElements(next)
     }, [history, elements])
 
-    const addElement = useCallback((type: ElementType) => {
+    const addElement = useCallback((type: ElementType, initialContent?: string) => {
+        const isLine = type === 'line' || type === 'arrow-line' || type.includes('wave')
         const newEl: CanvasElement = {
             id: crypto.randomUUID(),
             type,
             x: 100,
             y: 100,
-            width: type === 'text' ? 300 : 150,
-            height: type === 'text' ? 100 : 150,
-            content: type === 'text' ? 'Double click to edit text...' : '',
+            width: type === 'text' ? 300 : isLine ? 300 : 150,
+            height: type === 'text' ? 100 : isLine ? 100 : 150,
+            content: initialContent || (type === 'text' ? 'Double click to edit text...' : ''),
+            rotation: 0,
             style: {
-                backgroundColor: type === 'rect' ? '#3b82f6' : type === 'circle' ? '#ef4444' : 'transparent',
+                backgroundColor: ['rect', 'circle', 'triangle', 'star', 'polygon'].includes(type) ? '#3b82f6' : 'transparent',
                 borderRadius: type === 'circle' ? '50%' : '0px',
                 border: type === 'text' ? '1px dashed rgba(0,0,0,0.2)' : 'none',
                 fontSize: '24px',
                 color: '#000000',
-                borderWidth: '0px',
-                borderColor: 'transparent',
+                borderWidth: isLine ? '2' : '0',
+                borderColor: isLine ? '#3b82f6' : 'transparent',
                 textAlign: 'left',
+                borderStyle: 'solid',
+                stroke: isLine ? '#3b82f6' : 'none',
+                strokeWidth: isLine ? '2' : '0',
             }
         }
         updateElements([...elements, newEl])
@@ -98,24 +121,16 @@ export function useSlideEditor(initialSlide: Slide | null) {
     }, [elements, updateElements])
 
     const removeElement = useCallback((id: string) => {
-        const newElements = elements.filter(el => el.id !== id)
-        updateElements(newElements)
+        updateElements(elements.filter(el => el.id !== id))
         if (selectedId === id) setSelectedId(null)
     }, [elements, selectedId, updateElements])
 
     const updateElement = useCallback((id: string, updates: Partial<CanvasElement>) => {
-        setElements(prev => {
-            // We don't save history for every drag frame, so we might need a separate mechanism for drag end
-            // But for this simple port, let's just update. 
-            // Note: pure state update doesn't trigger history save automatically here unless we use updateElements wrapper.
-            // If we use setElements directly we skip history.
-            return prev.map(el => el.id === id ? { ...el, ...updates } : el)
-        })
+        setElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el))
     }, [])
 
     const updateElementAndSave = useCallback((id: string, updates: Partial<CanvasElement>) => {
-        const newElements = elements.map(el => el.id === id ? { ...el, ...updates } : el)
-        updateElements(newElements)
+        updateElements(elements.map(el => el.id === id ? { ...el, ...updates } : el))
     }, [elements, updateElements])
 
     const duplicateElement = useCallback(() => {
@@ -187,14 +202,14 @@ export function useSlideEditor(initialSlide: Slide | null) {
         canUndo: history.past.length > 0,
         canRedo: history.future.length > 0,
         addElement,
-        updateElement, // For real-time drag (no history)
-        updateElementAndSave, // For drag end / property change (history)
+        updateElement,
+        updateElementAndSave,
         removeElement,
         duplicateElement,
         handleArrange,
         handleClipboard,
         undo,
         redo,
-        setElements: updateElements // Expose manual set if needed
+        setElements: updateElements
     }
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
-    ChevronDown, Minus, Plus, Superscript, Subscript
+    ChevronDown, Minus, Plus, Superscript, Subscript, Link2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,6 +42,25 @@ export function TextContextToolbar({ editor }: TextContextToolbarProps) {
     const setColor = (value: string) => {
         const current = editor.getAttributes('textStyle')
         editor.chain().focus().setMark('textStyle', { ...current, color: value }).run()
+    }
+
+    const setLink = () => {
+        const previousUrl = editor.getAttributes('link').href
+        const url = window.prompt('URL', previousUrl)
+
+        // cancelled
+        if (url === null) {
+            return
+        }
+
+        // empty
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run()
+            return
+        }
+
+        // update link
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     }
 
     const currentFontSize = parseInt(editor.getAttributes('textStyle').fontSize || '16px') // Default to 16 if not set
@@ -129,6 +148,14 @@ export function TextContextToolbar({ editor }: TextContextToolbarProps) {
                     title="Subscript"
                 >
                     <Subscript className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                    variant={editor.isActive('link') ? 'secondary' : 'ghost'}
+                    size="icon" className="h-7 w-7"
+                    onClick={setLink}
+                    title="Hyperlink"
+                >
+                    <Link2 className="h-3.5 w-3.5" />
                 </Button>
             </div>
 
