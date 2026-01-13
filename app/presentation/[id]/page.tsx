@@ -229,13 +229,32 @@ export default function PresentationPage() {
         if (!params.id) return
         try {
             const data = await fetchPresentation(params.id as string)
-            setPresentation(data || null)
+            if (data) {
+                // If we already have a presentation, only update if the new data is actually newer
+                setPresentation(prev => {
+                    if (!prev) return data
+                    if (data.updatedAt !== prev.updatedAt) {
+                        return data
+                    }
+                    return prev
+                })
+            }
         } catch (error) {
             console.error(error)
         } finally {
             setLoading(false)
         }
     }
+
+    // Auto-refresh logic to keep presentation in sync
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                loadPresentation()
+            }
+        }, 2000)
+        return () => clearInterval(interval)
+    }, [params.id])
 
     const nextSlide = () => {
         if (!presentation) return

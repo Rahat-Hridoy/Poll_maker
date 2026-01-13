@@ -31,7 +31,7 @@ export function SlidePollElement({ pollId, title }: SlidePollElementProps) {
         }
 
         fetchPollData()
-        const interval = setInterval(fetchPollData, 5000) // Poll every 5 seconds
+        const interval = setInterval(fetchPollData, 2000) // Poll every 2 seconds for live updates
 
         return () => {
             isMounted = false

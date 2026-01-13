@@ -70,12 +70,27 @@ export default function SlideEditorPage() {
         }
     }
 
+    const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const triggerAutoSave = (updatedPresentation: Presentation) => {
+        if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current)
+
+        autoSaveTimeoutRef.current = setTimeout(() => {
+            console.log("Auto-saving...")
+            handleSave(updatedPresentation)
+        }, 2000)
+    }
+
     const updateSlide = (slideId: string, updates: Partial<Slide>) => {
         if (!presentation) return
         const newSlides = presentation.slides.map(slide =>
             slide.id === slideId ? { ...slide, ...updates } : slide
         )
-        setPresentation({ ...presentation, slides: newSlides })
+        const updatedPresentation = { ...presentation, slides: newSlides }
+        setPresentation(updatedPresentation)
+
+        // Trigger auto-save whenever slide is updated (content, background, etc)
+        triggerAutoSave(updatedPresentation)
     }
 
     const addSlide = () => {
@@ -86,11 +101,13 @@ export default function SlideEditorPage() {
             background: "#ffffff",
             layout: 'blank'
         }
-        setPresentation({
+        const updatedPresentation = {
             ...presentation,
             slides: [...presentation.slides, newSlide]
-        })
+        }
+        setPresentation(updatedPresentation)
         setActiveSlideId(newSlide.id)
+        triggerAutoSave(updatedPresentation)
     }
 
     const removeSlide = (id: string) => {
@@ -100,15 +117,19 @@ export default function SlideEditorPage() {
             return
         }
         const newSlides = presentation.slides.filter(s => s.id !== id)
-        setPresentation({ ...presentation, slides: newSlides })
+        const updatedPresentation = { ...presentation, slides: newSlides }
+        setPresentation(updatedPresentation)
         if (activeSlideId === id) {
             setActiveSlideId(newSlides[0].id)
         }
+        triggerAutoSave(updatedPresentation)
     }
 
     const reorderSlides = (newSlides: Slide[]) => {
         if (!presentation) return;
-        setPresentation({ ...presentation, slides: newSlides });
+        const updatedPresentation = { ...presentation, slides: newSlides }
+        setPresentation(updatedPresentation);
+        triggerAutoSave(updatedPresentation)
     }
 
     const handleExportPDF = async () => {
@@ -299,7 +320,7 @@ export default function SlideEditorPage() {
                         Share
                     </Button>
 
-                    <Link href={`/presentation/${presentation.id}`} target="_blank">
+                    <Link href={`/presentation/${presentation.id}?v=${Date.now()}`} target="_blank">
                         <Button variant="outline" size="sm" className="bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary">
                             <PresentIcon className="w-4 h-4 mr-2" />
                             Present
@@ -324,7 +345,11 @@ export default function SlideEditorPage() {
                 zoom={zoom}
                 onZoomChange={setZoom}
                 aspectRatio={presentation.aspectRatio || '16:9'}
-                onAspectRatioChange={(ratio) => setPresentation({ ...presentation, aspectRatio: ratio })}
+                onAspectRatioChange={(ratio) => {
+                    const updatedPresentation = { ...presentation, aspectRatio: ratio }
+                    setPresentation(updatedPresentation)
+                    triggerAutoSave(updatedPresentation)
+                }}
                 onAddSlide={addSlide}
             />
 
