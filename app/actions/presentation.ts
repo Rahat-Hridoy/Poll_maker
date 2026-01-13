@@ -37,9 +37,11 @@ export async function deletePresentationAction(id: string) {
 }
 
 export async function updatePresentationAction(presentation: Presentation) {
+    // console.log(`[Action] Updating presentation ${presentation.id}. Slides: ${presentation.slides.length}, Slide 1 content len: ${presentation.slides[0]?.content.length}`);
     presentation.updatedAt = new Date().toISOString();
     await savePresentation(presentation);
-    revalidatePath(`/admin/slides/${presentation.id}/edit`);
+    revalidatePath(`/editor/${presentation.id}`); // Fix: Revalidate the specific editor page
+    revalidatePath(`/presentation/${presentation.id}`); // Fix: Revalidate the presentation viewer
     revalidatePath('/admin/slides');
 }
 

@@ -244,7 +244,21 @@ export const MOCK_PRESENTATIONS: Presentation[] = [
         slides: [
             {
                 id: "slide-1",
-                content: '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Welcome to Slide Maker"}]}]}',
+                content: JSON.stringify([
+                    {
+                        id: "title-1",
+                        type: "text",
+                        x: 100,
+                        y: 100,
+                        width: 800,
+                        height: 200,
+                        content: '<h1>Welcome to Slide Maker</h1><p style="text-align: center">Click to edit this text</p>',
+                        style: {
+                            color: '#000000',
+                            textAlign: 'center'
+                        }
+                    }
+                ]),
                 background: "#ffffff"
             }
         ]

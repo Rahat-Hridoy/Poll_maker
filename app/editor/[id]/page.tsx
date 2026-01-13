@@ -185,7 +185,7 @@ export default function SlideEditorPage() {
             syncTimeoutRef.current = setTimeout(() => {
                 lastSyncedContentRef.current = currentContent
                 updateSlide(activeSlide.id, { content: currentContent })
-            }, 500) // 500ms delay for stability
+            }, 1000) // Increased to 1s to rely more on explicit saves or final debounce
         }
 
         return () => {
@@ -194,6 +194,30 @@ export default function SlideEditorPage() {
             }
         }
     }, [elements, activeSlide?.id, activeSlide?.content])
+
+    // Manual Save Wrapper to ensure we save the LATEST elements state
+    const handleSaveWithSync = async () => {
+        if (!activeSlide) return
+
+        // Force sync current elements before saving
+        const currentContent = JSON.stringify(elements)
+        console.log("Saving Sync. Active Content Len:", activeSlide.content?.length, "Current Elements Len:", currentContent.length)
+
+        if (currentContent !== activeSlide.content) {
+            console.log("Content mismatch, syncing before save...", "Diff:", currentContent !== activeSlide.content)
+            updateSlide(activeSlide.id, { content: currentContent })
+            // We need to wait a tick for state to update or pass the updated presentation directly
+            const updatedPresentation = {
+                ...presentation!,
+                slides: presentation!.slides.map(s => s.id === activeSlide.id ? { ...s, content: currentContent } : s)
+            }
+            await handleSave(updatedPresentation)
+            return
+        }
+
+        console.log("Content matches, saving directly.")
+        await handleSave()
+    }
 
     // Keyboard shortcuts (Global)
     useEffect(() => {
@@ -254,7 +278,7 @@ export default function SlideEditorPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => handleSave()} disabled={saving || exporting}>
+                            <DropdownMenuItem onClick={() => handleSaveWithSync()} disabled={saving || exporting}>
                                 <Save className="w-4 h-4 mr-2" />
                                 Save Progress
                             </DropdownMenuItem>
