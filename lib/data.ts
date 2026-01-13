@@ -52,6 +52,7 @@ export interface Slide {
 
 export interface Presentation {
     id: string;
+    shortCode?: string; // Optional for migration, but new ones will have it
     title: string;
     slides: Slide[];
     theme: string; // 'default', 'dark', 'pastel', etc.
@@ -235,6 +236,7 @@ export const MOCK_POLLS: Poll[] = [
 export const MOCK_PRESENTATIONS: Presentation[] = [
     {
         id: "pres-1",
+        shortCode: "54321",
         title: "Welcome Presentation",
         theme: "default",
         createdAt: new Date().toISOString(),

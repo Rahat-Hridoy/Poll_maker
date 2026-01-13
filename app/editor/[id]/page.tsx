@@ -19,6 +19,7 @@ import { SlideCanvas, CanvasElement } from "@/components/slide-editor/slide-canv
 import { SlideProperties } from "@/components/slide-editor/slide-properties"
 import { useSlideEditor } from "@/components/slide-editor/use-slide-editor"
 import { EditorToolbar } from "@/components/slide-editor/editor-toolbar"
+import { SharePresentationDialog } from "@/components/presentation/share-presentation-dialog"
 
 export default function SlideEditorPage() {
     const params = useParams()
@@ -30,6 +31,7 @@ export default function SlideEditorPage() {
     const [exporting, setExporting] = useState(false)
     const [leftOpen, setLeftOpen] = useState(true)
     const [rightOpen, setRightOpen] = useState(true)
+    const [shareOpen, setShareOpen] = useState(false)
 
     useEffect(() => {
         loadPresentation()
@@ -270,10 +272,7 @@ export default function SlideEditorPage() {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                            navigator.clipboard.writeText(window.location.href.replace('/editor/', '/presentation/'))
-                            alert("Shareable link copied to clipboard!")
-                        }}
+                        onClick={() => setShareOpen(true)}
                     >
                         <Share2 className="w-4 h-4 mr-2" />
                         Share
@@ -380,6 +379,15 @@ export default function SlideEditorPage() {
                     </div>
                 </div>
             </div>
+            {presentation && (
+                <SharePresentationDialog
+                    open={shareOpen}
+                    onOpenChange={setShareOpen}
+                    url={typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/presentation/${presentation.id}` : ''}
+                    title={presentation.title}
+                    shortCode={presentation.shortCode}
+                />
+            )}
         </div>
     )
 }

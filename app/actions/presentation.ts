@@ -12,6 +12,7 @@ export async function fetchPresentations() {
 export async function createPresentationAction(title: string) {
     const newPresentation: Presentation = {
         id: crypto.randomUUID(),
+        shortCode: Math.floor(10000 + Math.random() * 90000).toString(), // Generate 5 digit code
         title: title || "Untitled Presentation",
         theme: 'default',
         createdAt: new Date().toISOString(),

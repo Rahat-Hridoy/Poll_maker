@@ -267,7 +267,16 @@ export async function getPresentations(creatorId?: string): Promise<Presentation
 
 export async function getPresentation(id: string): Promise<Presentation | undefined> {
     reloadIfNeeded();
-    return memoryPresentations.find(p => p.id === id);
+    const presentation = memoryPresentations.find(p => p.id === id);
+
+    // Lazy migration: If shortCode is missing, generate it and save
+    if (presentation && !presentation.shortCode) {
+        presentation.shortCode = Math.floor(10000 + Math.random() * 90000).toString();
+        // Save the update back to store
+        await savePresentation(presentation);
+    }
+
+    return presentation;
 }
 
 export async function savePresentation(presentation: Presentation) {
