@@ -22,16 +22,19 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import { SlideRenderer } from "./slide-renderer"
+
 interface SlideListProps {
     slides: Slide[]
     activeSlideId: string | null
+    aspectRatio?: '16:9' | '4:3' | '1:1'
     onSelect: (id: string) => void
     onAdd: () => void
     onDelete: (id: string) => void
     onReorder: (slides: Slide[]) => void
 }
 
-function SortableSlideItem({ slide, index, isActive, onSelect, onDelete }: any) {
+function SortableSlideItem({ slide, index, isActive, onSelect, onDelete, aspectRatio }: any) {
     const {
         attributes,
         listeners,
@@ -54,15 +57,20 @@ function SortableSlideItem({ slide, index, isActive, onSelect, onDelete }: any) 
             <div
                 onClick={() => onSelect(slide.id)}
                 className={cn(
-                    "ml-6 mr-2 aspect-video bg-white rounded border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col items-center justify-center text-[10px] text-muted-foreground select-none hover:border-primary/50",
+                    "ml-6 mr-2 bg-muted/20 rounded border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col items-center justify-center text-[10px] text-muted-foreground select-none hover:border-primary/50",
                     isActive ? "border-primary shadow-sm ring-2 ring-primary/20" : "border-transparent shadow-sm hover:shadow"
                 )}
+                style={{
+                    aspectRatio: aspectRatio?.replace(':', '/') || '16/9'
+                }}
             >
-                {/* Mini Preview Placeholder */}
-                <div className="w-full h-full p-2 bg-white" style={{ background: slide.background }}>
-                    <div className="w-full h-full border border-dashed border-gray-200 rounded flex items-center justify-center">
-                        Slide {index + 1}
-                    </div>
+                {/* Live Preview */}
+                <div className="w-full h-full pointer-events-none">
+                    <SlideRenderer
+                        slide={slide}
+                        width={220} // Fixed width for thumbnail calculation
+                        scale={undefined} // Let renderer calc scale based on width
+                    />
                 </div>
             </div>
 
@@ -85,7 +93,7 @@ function SortableSlideItem({ slide, index, isActive, onSelect, onDelete }: any) 
     );
 }
 
-export function SlideList({ slides, activeSlideId, onSelect, onAdd, onDelete, onReorder }: SlideListProps) {
+export function SlideList({ slides, activeSlideId, onSelect, onAdd, onDelete, onReorder, aspectRatio = '16:9' }: SlideListProps) {
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -107,7 +115,7 @@ export function SlideList({ slides, activeSlideId, onSelect, onAdd, onDelete, on
             <div className="p-4 border-b">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Slides</h3>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 content-start">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -123,6 +131,7 @@ export function SlideList({ slides, activeSlideId, onSelect, onAdd, onDelete, on
                                 slide={slide}
                                 index={index}
                                 isActive={slide.id === activeSlideId}
+                                aspectRatio={aspectRatio}
                                 onSelect={onSelect}
                                 onDelete={onDelete}
                             />

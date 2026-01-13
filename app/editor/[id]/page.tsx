@@ -201,10 +201,8 @@ export default function SlideEditorPage() {
 
         // Force sync current elements before saving
         const currentContent = JSON.stringify(elements)
-        console.log("Saving Sync. Active Content Len:", activeSlide.content?.length, "Current Elements Len:", currentContent.length)
 
         if (currentContent !== activeSlide.content) {
-            console.log("Content mismatch, syncing before save...", "Diff:", currentContent !== activeSlide.content)
             updateSlide(activeSlide.id, { content: currentContent })
             // We need to wait a tick for state to update or pass the updated presentation directly
             const updatedPresentation = {
@@ -215,7 +213,6 @@ export default function SlideEditorPage() {
             return
         }
 
-        console.log("Content matches, saving directly.")
         await handleSave()
     }
 
@@ -341,6 +338,7 @@ export default function SlideEditorPage() {
                         <SlideList
                             slides={presentation.slides}
                             activeSlideId={activeSlideId}
+                            aspectRatio={presentation.aspectRatio}
                             onSelect={setActiveSlideId}
                             onAdd={addSlide}
                             onDelete={removeSlide}
