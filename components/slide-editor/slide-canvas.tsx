@@ -123,6 +123,7 @@ export function SlideCanvas({
 
                 {/* The "Paper" / Slide */}
                 <div
+                    id={`slide-canvas-${slide.id}`}
                     className="shadow-2xl rounded-sm overflow-hidden relative transition-all duration-300 ease-in-out border border-border/40 bg-white"
                     style={{
                         width: '100%',

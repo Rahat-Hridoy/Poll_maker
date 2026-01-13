@@ -4,9 +4,16 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { fetchPresentation, updatePresentationAction } from "@/app/actions/presentation"
 import { Presentation, Slide } from "@/lib/data"
-import { Loader2, ArrowLeft, Save, Play, ChevronLeft } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Play, ChevronLeft, Download, Share2, Presentation as PresentIcon, FileText, MonitorPlay, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { exportToPDF, exportToPPTX } from "@/lib/export-utils"
 import { SlideList } from "@/components/slide-editor/slide-list"
 import { SlideCanvas, CanvasElement } from "@/components/slide-editor/slide-canvas"
 import { SlideProperties } from "@/components/slide-editor/slide-properties"
@@ -20,6 +27,7 @@ export default function SlideEditorPage() {
     const [activeSlideId, setActiveSlideId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [exporting, setExporting] = useState(false)
     const [leftOpen, setLeftOpen] = useState(true)
     const [rightOpen, setRightOpen] = useState(true)
 
@@ -99,6 +107,26 @@ export default function SlideEditorPage() {
     const reorderSlides = (newSlides: Slide[]) => {
         if (!presentation) return;
         setPresentation({ ...presentation, slides: newSlides });
+    }
+
+    const handleExportPDF = async () => {
+        if (!presentation) return
+        setExporting(true)
+        try {
+            await exportToPDF(presentation)
+        } finally {
+            setExporting(false)
+        }
+    }
+
+    const handleExportPPTX = async () => {
+        if (!presentation) return
+        setExporting(true)
+        try {
+            await exportToPPTX(presentation)
+        } finally {
+            setExporting(false)
+        }
     }
 
     const activeSlide = presentation?.slides.find(s => s.id === activeSlideId) || null
@@ -206,7 +234,7 @@ export default function SlideEditorPage() {
             <header className="h-14 border-b flex items-center justify-between px-4 bg-card shrink-0 select-none z-10 relative">
                 <div className="flex items-center gap-4">
                     <Link href="/admin/slides" className="text-muted-foreground hover:text-foreground">
-                        <span className="text-sm font-medium">Dashboard</span>
+                        <ArrowLeft className="w-4 h-4" />
                     </Link>
                     <input
                         className="bg-transparent font-semibold focus:outline-none focus:ring-1 focus:ring-primary rounded px-1"
@@ -214,14 +242,46 @@ export default function SlideEditorPage() {
                         onChange={(e) => setPresentation({ ...presentation, title: e.target.value })}
                     />
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleSave()} disabled={saving}>
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                        Save
+                <div className="flex items-center gap-3">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="default" size="sm" className="gap-2">
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                Save
+                                <ChevronDown className="w-3 h-3 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleSave()} disabled={saving || exporting}>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Progress
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPDF} disabled={saving || exporting}>
+                                {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                                Save as PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPPTX} disabled={saving || exporting}>
+                                {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MonitorPlay className="w-4 h-4 mr-2" />}
+                                Save as PPTX
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            navigator.clipboard.writeText(window.location.href.replace('/editor/', '/presentation/'))
+                            alert("Shareable link copied to clipboard!")
+                        }}
+                    >
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
                     </Button>
+
                     <Link href={`/presentation/${presentation.id}`} target="_blank">
-                        <Button variant="outline" size="sm">
-                            <Play className="w-4 h-4 mr-2" />
+                        <Button variant="outline" size="sm" className="bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary">
+                            <PresentIcon className="w-4 h-4 mr-2" />
                             Present
                         </Button>
                     </Link>

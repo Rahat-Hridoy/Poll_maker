@@ -18,10 +18,10 @@ export default function Home() {
           <span className="text-xl font-bold tracking-tight text-foreground">PollMaker</span>
         </div>
         <nav className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/login" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors hover:cursor-pointer">
             Sign In
           </Link>
-          <Link href="/register">
+          <Link href="/dashboard">
             <Button size="sm" className="rounded-full px-6 bg-foreground text-background hover:opacity-90 transition-opacity font-bold">
               Get Started
             </Button>
