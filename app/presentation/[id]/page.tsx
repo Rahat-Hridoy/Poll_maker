@@ -7,13 +7,16 @@ import { Presentation, Slide } from "@/lib/data"
 import { Loader2, ChevronLeft, ChevronRight, Edit, Maximize2, Minimize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
-import { SlideTextEditor } from "@/components/slide-editor/slide-text-editor"
-import { SlidePollElement } from "@/components/slide-editor/slide-poll-element"
+
+import { SlideRenderer } from "@/components/slide-editor/slide-renderer"
+import { updatePresenterStateAction, submitVoteAction } from "@/app/actions/audience"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { BarChart3, CheckCircle2, Vote } from "lucide-react"
 
 // Duplicate interfaces from SlideCanvas to avoid circular deps or verify consistency
 export interface CanvasElement {
     id: string
-    type: "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code"
+    type: "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template"
     x: number
     y: number
     width: number
@@ -29,23 +32,8 @@ interface SlideViewerProps {
 }
 
 function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
-    const [elements, setElements] = useState<CanvasElement[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
-
-    // Parse elements
-    useEffect(() => {
-        try {
-            if (slide.content && slide.content.startsWith('[')) {
-                setElements(JSON.parse(slide.content))
-            } else {
-                setElements([])
-            }
-        } catch (e) {
-            console.error("Failed to parse slide content", e)
-            setElements([])
-        }
-    }, [slide.content])
 
     // Calculate scaling to fit window
     useEffect(() => {
@@ -67,7 +55,6 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
 
             // Fit containment
             const calculatedScale = Math.min(scaleX, scaleY) * 0.95
-            // console.log("Calculated Scale:", calculatedScale, "Parent:", parentWidth, parentHeight)
             setScale(calculatedScale)
         }
 
@@ -77,139 +64,9 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
         return () => window.removeEventListener('resize', handleResize)
     }, [aspectRatio])
 
-    // console.log("Rendering SlideViewer. Elements:", elements.length, "Scale:", scale)
-
-    // Base dimensions for style
-    const baseWidth = 1000
-    const [w, h] = aspectRatio.split(':').map(Number)
-    const baseHeight = (baseWidth * h) / w
-
     return (
         <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-            <div
-                style={{
-                    width: baseWidth,
-                    height: baseHeight,
-                    transform: `scale(${scale})`,
-                    transformOrigin: 'center center',
-                    backgroundColor: slide.background?.startsWith('#') ? slide.background : 'white',
-                    backgroundImage: slide.background?.startsWith('http') ? `url(${slide.background})` : 'none',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                }}
-            >
-                {elements.map(el => (
-                    <div
-                        key={el.id}
-                        style={{
-                            position: 'absolute',
-                            left: el.x,
-                            top: el.y,
-                            width: el.width,
-                            height: el.height,
-                            transform: `rotate(${el.rotation || 0}deg)`,
-                            zIndex: el.type === 'image' ? 0 : 1 // Simple z-index, ideally from data
-                        }}
-                    >
-                        {/* Text Element (Use Read-Only Editor) */}
-                        {el.type === 'text' && (
-                            <SlideTextEditor
-                                content={el.content || ''}
-                                onChange={() => { }} // No-op
-                                editable={false}
-                                zoom={scale}
-                                className="w-full h-full"
-                                style={{
-                                    fontSize: el.style.fontSize,
-                                    color: el.style.color,
-                                    textAlign: el.style?.textAlign as any,
-                                    fontFamily: el.style.fontFamily as any,
-                                }}
-                            />
-                        )}
-
-                        {/* Image Element */}
-                        {el.type === 'image' && (
-                            <img
-                                src={el.content || '/placeholder.png'}
-                                className="w-full h-full object-cover"
-                                alt=""
-                            />
-                        )}
-
-                        {/* Poll Element (Interactive) */}
-                        {el.type === 'poll' && (
-                            <SlidePollElement
-                                pollId={(() => { try { return JSON.parse(el.content || '{}').pollId || '' } catch { return '' } })()}
-                                title={(() => { try { return JSON.parse(el.content || '{}').title || '' } catch { return '' } })()}
-                            />
-                        )}
-
-                        {/* QR Code Element */}
-                        {el.type === 'qr-code' && (
-                            <div className="w-full h-full p-4 flex flex-col items-center justify-center bg-white rounded-lg shadow-sm border border-slate-200 gap-2">
-                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Scan to Vote</div>
-                                <img
-                                    src={(() => { try { return JSON.parse(el.content || '{}').qrUrl } catch { return '' } })()}
-                                    className="w-[85%] h-auto aspect-square object-contain"
-                                    alt="QR Code"
-                                />
-                                <div className="mt-2 text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                    {(() => { try { return `Code: ${JSON.parse(el.content || '{}').shortCode}` } catch { return '' } })()}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Shapes (SVG Rendering) */}
-                        {['rect', 'circle', 'triangle', 'arrow', 'star', 'polygon', 'line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(el.type) && (
-                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" className="overflow-visible">
-                                <g
-                                    fill={el.style.backgroundColor?.toString() || 'none'}
-                                    stroke={el.style.borderColor?.toString() || (el.style as any).stroke || 'none'}
-                                    strokeWidth={
-                                        (el.style as any).strokeWidth !== undefined ? (el.style as any).strokeWidth :
-                                            el.style.borderWidth !== undefined ? parseInt(el.style.borderWidth.toString()) :
-                                                0
-                                    }
-                                    strokeDasharray={
-                                        el.style.borderStyle === 'dashed' ? '10,10' :
-                                            el.style.borderStyle === 'dotted' ? '2,4' :
-                                                'none'
-                                    }
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    {el.type === 'rect' && <rect x="5" y="5" width="90" height="90" rx={el.style.borderRadius?.toString() === '50%' ? '45' : '0'} />}
-                                    {el.type === 'circle' && <circle cx="50" cy="50" r="45" />}
-                                    {el.type === 'triangle' && <polygon points="50,5 95,95 5,95" />}
-                                    {el.type === 'star' && <polygon points="50,5 61,39 95,39 67,61 78,95 50,73 22,95 33,61 5,39 39,39" />}
-                                    {el.type === 'polygon' && <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" />}
-                                    {el.type === 'arrow' && <polygon points="5,40 60,40 60,10 95,50 60,90 60,60 5,60" />}
-                                    {el.type === 'line' && <line x1="0" y1="50" x2="100" y2="50" />}
-                                    {el.type === 'arrow-line' && (
-                                        <g>
-                                            <line x1="0" y1="50" x2="100" y2="50" />
-                                            <polygon points="90,40 100,50 90,60" fill="currentColor" stroke="none" />
-                                        </g>
-                                    )}
-                                    {el.type === 'sine-wave' && (
-                                        <path d="M 0 50 C 12.5 0, 12.5 0, 25 50 C 37.5 100, 37.5 100, 50 50 C 62.5 0, 62.5 0, 75 50 C 87.5 100, 87.5 100, 100 50" fill="none" />
-                                    )}
-                                    {el.type === 'square-wave' && (
-                                        <path d="M 0 50 L 0 10 L 25 10 L 25 90 L 50 90 L 50 10 L 75 10 L 75 90 L 100 90 L 100 50" fill="none" />
-                                    )}
-                                    {el.type === 'tan-wave' && (
-                                        <path d="M 0 100 Q 20 0, 40 100 T 80 100 T 120 100" fill="none" />
-                                    )}
-                                </g>
-                            </svg>
-                        )}
-                    </div>
-                ))}
-            </div>
+            <SlideRenderer slide={slide} scale={scale} interactive={true} />
         </div>
     )
 }
@@ -220,10 +77,74 @@ export default function PresentationPage() {
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
     const [loading, setLoading] = useState(true)
     const [fullScreen, setFullScreen] = useState(false)
+    const [isVoteOpen, setIsVoteOpen] = useState(false)
+    const [voting, setVoting] = useState(false)
+    const [hasVoted, setHasVoted] = useState(false)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [pollData, setPollData] = useState<any>(null)
 
     useEffect(() => {
         loadPresentation()
     }, [params.id])
+
+    // Sync current slide with server for audience
+    useEffect(() => {
+        if (params.id) {
+            updatePresenterStateAction(params.id as string, currentSlideIndex)
+        }
+    }, [currentSlideIndex, params.id])
+
+    // Extract poll data for voting UI
+    useEffect(() => {
+        if (presentation) {
+            const currentSlide = presentation.slides[currentSlideIndex]
+            if (currentSlide) {
+                try {
+                    const elements = JSON.parse(currentSlide.content)
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const pollEl = elements.find((el: any) => el.type === 'poll-template')
+                    if (pollEl) {
+                        const parsedPollData = JSON.parse(pollEl.content)
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        setPollData((prev: any) => {
+                            if (prev?.question !== parsedPollData.question) {
+                                setHasVoted(false)
+                                return parsedPollData
+                            }
+                            return prev
+                        })
+                    } else {
+                        setPollData(null)
+                    }
+                } catch {
+                    setPollData(null)
+                }
+            }
+        }
+    }, [presentation, currentSlideIndex])
+
+    const handleVote = async (optionId: string) => {
+        if (!presentation || !presentation.slides[currentSlideIndex]) return
+
+        setVoting(true)
+        const slideId = presentation.slides[currentSlideIndex].id
+
+        try {
+            const result = await submitVoteAction(params.id as string, slideId, optionId)
+            if (result.success) {
+                setHasVoted(true)
+                setTimeout(() => {
+                    setIsVoteOpen(false)
+                }, 2000)
+                // Refresh presentation data to show new results instantly
+                loadPresentation()
+            }
+        } catch (e) {
+            console.error("Vote failed", e)
+        } finally {
+            setVoting(false)
+        }
+    }
 
     async function loadPresentation() {
         if (!params.id) return
@@ -252,7 +173,7 @@ export default function PresentationPage() {
             if (document.visibilityState === 'visible') {
                 loadPresentation()
             }
-        }, 2000)
+        }, 1000)
         return () => clearInterval(interval)
     }, [params.id])
 
@@ -302,16 +223,67 @@ export default function PresentationPage() {
                 aspectRatio={presentation.aspectRatio}
             />
 
+            {/* Top Right Vote Button */}
+            {pollData && (
+                <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+                    <Dialog open={isVoteOpen} onOpenChange={setIsVoteOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                size="lg"
+                                className="rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold animate-bounce shadow-xl h-14 px-6 gap-2"
+                            >
+                                <Vote className="w-5 h-5" />
+                                Vote Now
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md bg-white text-slate-900 border-none z-50">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                                    Cast Your Vote
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            <div className="py-4">
+                                <h3 className="text-lg font-medium mb-4">{pollData.question}</h3>
+                                <div className="space-y-3">
+                                    {hasVoted ? (
+                                        <div className="text-center py-8 bg-green-50 rounded-xl">
+                                            <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                                            <p className="font-bold text-slate-800">Vote Submitted!</p>
+                                        </div>
+                                    ) : (
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        pollData.options.map((opt: any) => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => handleVote(opt.id)}
+                                                disabled={voting}
+                                                className="w-full text-left p-4 rounded-xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50 transition-all font-medium flex justify-between items-center group"
+                                            >
+                                                {opt.text}
+                                                <div className="w-4 h-4 rounded-full border-2 border-slate-300 group-hover:border-blue-500" />
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            )}
+
             {/* Controls Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between z-50 pointer-events-none">
                 <div className="pointer-events-auto flex flex-col gap-1">
                     <h1 className="text-lg font-bold drop-shadow-md leading-none">{presentation.title}</h1>
-                    <span className="text-xs text-white/60">
-                        Slide {currentSlideIndex + 1} of {presentation.slides.length}
-                    </span>
+                    <div className="text-xs text-white/80 font-mono bg-black/20 px-2 py-1 rounded inline-block w-fit mt-1 border border-white/10">
+                        Join: <span className="text-blue-300 font-bold">/join</span> Code: <span className="text-white font-bold tracking-widest">{presentation.shortCode}</span>
+                    </div>
                 </div>
 
                 <div className="pointer-events-auto flex items-center gap-4 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10">
+
                     <Button variant="ghost" size="icon" onClick={prevSlide} disabled={currentSlideIndex === 0} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
                         <ChevronLeft className="w-6 h-6" />
                     </Button>

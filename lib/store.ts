@@ -55,6 +55,7 @@ function reloadIfNeeded() {
                 const data = JSON.parse(fileData);
                 memoryPolls = data.polls || [...MOCK_POLLS];
                 memoryUsers = data.users || [];
+                memoryPresentations = data.presentations || [...MOCK_PRESENTATIONS];
                 lastFileReadTime = Date.now();
             }
         }
@@ -299,4 +300,9 @@ export async function deletePresentation(id: string) {
     reloadIfNeeded();
     memoryPresentations = memoryPresentations.filter(p => p.id !== id);
     saveData();
+}
+
+export async function getPresentationByCode(code: string): Promise<Presentation | undefined> {
+    reloadIfNeeded();
+    return memoryPresentations.find(p => p.shortCode === code);
 }

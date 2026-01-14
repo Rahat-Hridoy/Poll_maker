@@ -31,7 +31,7 @@ interface EditorToolbarProps {
     onZoomChange: (zoom: number) => void
     aspectRatio: string
     onAspectRatioChange: (ratio: '16:9' | '4:3' | '1:1') => void
-    onAddSlide: () => void
+    onAddSlide: (type?: 'blank' | 'poll' | 'quiz' | 'qa') => void
 }
 
 export function EditorToolbar({
@@ -77,16 +77,39 @@ export function EditorToolbar({
     return (
         <div className="h-12 border-b bg-muted/40 flex items-center px-4 gap-2 overflow-x-auto shrink-0">
             {/* NEW SLIDE */}
-            <Button
-                variant="default"
-                size="sm"
-                className="h-8 gap-1.5 px-3 whitespace-nowrap"
-                onClick={onAddSlide}
-                title="Add New Slide"
-            >
-                <CopyPlus className="h-4 w-4" />
-                <span className="hidden sm:inline font-medium">New Slide</span>
-            </Button>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="default"
+                        size="sm"
+                        className="h-8 gap-1.5 px-3 whitespace-nowrap bg-blue-600 hover:bg-blue-700"
+                        title="Add New Slide"
+                    >
+                        <CopyPlus className="h-4 w-4" />
+                        <span className="hidden sm:inline font-medium">Add Slide</span>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-1" align="start">
+                    <div className="flex flex-col gap-1">
+                        <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('blank')}>
+                            <Square className="w-4 h-4 mr-2" />
+                            Blank
+                        </Button>
+                        <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('poll')}>
+                            <Activity className="w-4 h-4 mr-2" />
+                            Poll
+                        </Button>
+                        <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('quiz')}>
+                            <Star className="w-4 h-4 mr-2" />
+                            Quiz
+                        </Button>
+                        <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('qa')}>
+                            <Type className="w-4 h-4 mr-2" />
+                            Q&A
+                        </Button>
+                    </div>
+                </PopoverContent>
+            </Popover>
 
             <Separator orientation="vertical" className="h-6 mx-1" />
 

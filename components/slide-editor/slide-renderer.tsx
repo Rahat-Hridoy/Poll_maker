@@ -3,18 +3,22 @@
 import { Slide } from "@/lib/data"
 import { SlideTextEditor } from "@/components/slide-editor/slide-text-editor"
 import { SlidePollElement } from "@/components/slide-editor/slide-poll-element"
+import { PollTemplateElement } from "@/components/slide-editor/poll-template-element"
+import { QuizTemplateElement } from "@/components/slide-editor/quiz-template-element"
+import { QATemplateElement } from "@/components/slide-editor/qa-template-element"
 
 interface SlideRendererProps {
     slide: Slide
     width?: number
     height?: number
     scale?: number
+    interactive?: boolean
 }
 
 // Coordinate system is based on 1000px width
 const BASE_WIDTH = 1000
 
-export function SlideRenderer({ slide, width = 1000, height, scale: externalScale }: SlideRendererProps) {
+export function SlideRenderer({ slide, width = 1000, height, scale: externalScale, interactive = false }: SlideRendererProps) {
     // 16:9 Aspect Ratio default if height not provided
     const baseHeight = height || (BASE_WIDTH * 9) / 16
 
@@ -44,8 +48,8 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                 backgroundPosition: 'center',
                 position: 'relative',
                 overflow: 'hidden',
-                // Pointer events none prevents interaction with mini elements in preview
-                pointerEvents: 'none'
+                // Pointer events none prevents interaction with mini elements in preview, but allows it when interactive is true
+                pointerEvents: interactive ? 'auto' : 'none'
             }}
         >
             {elements.map((el: any) => (
@@ -105,6 +109,44 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                 alt="QR Code"
                             />
                         </div>
+                    )}
+
+                    {el.type === 'poll-template' && (
+                        <PollTemplateElement
+                            data={(() => {
+                                try {
+                                    return JSON.parse(el.content || '{}')
+                                } catch {
+                                    return { question: '', options: [] }
+                                }
+                            })()}
+                        />
+                    )}
+
+                    {/* Quiz Template Element */}
+                    {el.type === 'quiz-template' && (
+                        <QuizTemplateElement
+                            data={(() => {
+                                try {
+                                    return JSON.parse(el.content || '{}')
+                                } catch {
+                                    return { question: '', options: [] }
+                                }
+                            })()}
+                        />
+                    )}
+
+                    {/* Q&A Template Element */}
+                    {el.type === 'qa-template' && (
+                        <QATemplateElement
+                            data={(() => {
+                                try {
+                                    return JSON.parse(el.content || '{}')
+                                } catch {
+                                    return { title: '', subtitle: '' }
+                                }
+                            })()}
+                        />
                     )}
 
                     {/* Shapes (SVG Rendering) */}

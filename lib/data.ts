@@ -47,7 +47,7 @@ export interface Slide {
     id: string;
     content: string; // JSON string from TipTap
     background?: string; // color hex or image url
-    layout?: 'blank' | 'title' | 'title-content'; // basic layouts
+    layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa'; // basic layouts
 }
 
 export interface Presentation {
@@ -60,6 +60,7 @@ export interface Presentation {
     createdAt: string;
     updatedAt: string;
     creatorId?: string;
+    currentSlideIndex?: number;
 }
 
 

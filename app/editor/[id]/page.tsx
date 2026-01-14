@@ -61,8 +61,9 @@ export default function SlideEditorPage() {
         if (!presToSave) return
         setSaving(true)
         try {
-            await updatePresentationAction(presToSave)
-            setPresentation(presToSave) // Update local state to match saved
+            const updated = { ...presToSave, updatedAt: new Date().toISOString() }
+            await updatePresentationAction(updated)
+            setPresentation(updated) // Update local state to match saved
         } catch (error) {
             console.error("Failed to save", error)
         } finally {
@@ -81,6 +82,33 @@ export default function SlideEditorPage() {
         }, 2000)
     }
 
+    // Poll for updates (e.g. votes) if not editing
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            // Don't poll if we are actively saving or have pending changes
+            if (saving || autoSaveTimeoutRef.current) return
+
+            if (!params.id) return
+
+            try {
+                const data = await fetchPresentation(params.id as string)
+                if (data) {
+                    setPresentation(prev => {
+                        // Only update if server has newer data
+                        if (!prev || data.updatedAt !== prev.updatedAt) {
+                            return data
+                        }
+                        return prev
+                    })
+                }
+            } catch (e) {
+                console.error("Polling failed", e)
+            }
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [params.id, saving])
+
     const updateSlide = (slideId: string, updates: Partial<Slide>) => {
         if (!presentation) return
         const newSlides = presentation.slides.map(slide =>
@@ -93,13 +121,62 @@ export default function SlideEditorPage() {
         triggerAutoSave(updatedPresentation)
     }
 
-    const addSlide = () => {
+    const addSlide = (type: 'blank' | 'poll' | 'quiz' | 'qa' = 'blank') => {
         if (!presentation) return
+
+        let initialContent = '[]'
+
+        // Helper to create full-screen template element
+        const createTemplateElement = (elementType: any, contentObj: any) => ({
+            id: crypto.randomUUID(),
+            type: elementType,
+            x: 0,
+            y: 0,
+            width: 1000, // These will be overridden by the locked logic in canvas but good to have defaults
+            height: 562.5, // 16:9 roughly
+            content: JSON.stringify(contentObj),
+            rotation: 0,
+            style: {
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '0px',
+                padding: '0px',
+                fontSize: '24px',
+                color: '#0f172a'
+            }
+        })
+
+        if (type === 'poll') {
+            const pollElement = createTemplateElement('poll-template', {
+                question: "Type your question here...",
+                options: [
+                    { id: "1", text: "Option 1", votes: 0, color: "#3b82f6" },
+                    { id: "2", text: "Option 2", votes: 0, color: "#a855f7" }
+                ]
+            })
+            initialContent = JSON.stringify([pollElement])
+        } else if (type === 'quiz') {
+            const quizElement = createTemplateElement('quiz-template', {
+                question: "Type your quiz question here...",
+                options: [
+                    { id: "1", text: "Answer 1", isCorrect: false },
+                    { id: "2", text: "Answer 2 (Correct)", isCorrect: true }
+                ]
+            })
+            initialContent = JSON.stringify([quizElement])
+        } else if (type === 'qa') {
+            const qaElement = createTemplateElement('qa-template', {
+                title: "Q&A Session",
+                subtitle: "Ask your questions now! Scan the code or go to the link."
+            })
+            initialContent = JSON.stringify([qaElement])
+        }
+
         const newSlide: Slide = {
             id: crypto.randomUUID(),
-            content: '[]', // Empty JSON array for canvas elements
+            content: initialContent,
             background: "#ffffff",
-            layout: 'blank'
+            layout: type
         }
         const updatedPresentation = {
             ...presentation,
