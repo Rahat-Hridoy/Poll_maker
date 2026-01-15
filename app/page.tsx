@@ -21,7 +21,7 @@ export default function Home() {
           <Link href="/login" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors hover:cursor-pointer">
             Sign In
           </Link>
-          <Link href="/dashboard">
+          <Link href="/admin/dashboard">
             <Button size="sm" className="rounded-full px-6 bg-foreground text-background hover:opacity-90 transition-opacity font-bold">
               Get Started
             </Button>
@@ -43,14 +43,6 @@ export default function Home() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-10 duration-700 delay-100 font-medium italic">
             Create professional, interactive polls and quizzes in seconds.
           </p>
-
-          {/* <div className="pt-8 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
-            <Link href="/poll">
-              <Button size="lg" className="rounded-2xl px-12 h-16 text-lg font-black bg-primary hover:opacity-90 shadow-2xl shadow-primary/20 transition-all active:scale-[0.98]">
-                Join a Poll <Hash className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div> */}
         </div>
 
         {/* Action Cards */}

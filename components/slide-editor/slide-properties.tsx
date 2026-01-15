@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2 } from "lucide-react"
+import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2, PieChart } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -206,7 +206,7 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                     </Label>
 
                                     {(() => {
-                                        let data = { question: '', options: [] as any[] }
+                                        let data = { question: '', options: [] as any[], questionImage: '' }
                                         try {
                                             data = JSON.parse(selectedElement.content || '{}')
                                         } catch { }
@@ -215,15 +215,85 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                             onElementChange({ content: JSON.stringify({ ...data, ...newData }) })
                                         }
 
+                                        const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'questionImage' | 'optionImage', optionIndex?: number) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                const reader = new FileReader()
+                                                reader.onloadend = () => {
+                                                    const base64String = reader.result as string
+                                                    if (field === 'questionImage') {
+                                                        updateData({ questionImage: base64String })
+                                                    } else if (field === 'optionImage' && optionIndex !== undefined) {
+                                                        const newOptions = [...data.options]
+                                                        newOptions[optionIndex] = { ...newOptions[optionIndex], image: base64String }
+                                                        updateData({ options: newOptions })
+                                                    }
+                                                }
+                                                reader.readAsDataURL(file)
+                                            }
+                                        }
+
                                         return (
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-xs text-muted-foreground">Question</label>
+                                                    <Label className="flex items-center gap-2">Question</Label>
                                                     <Input
                                                         value={data.question}
                                                         onChange={(e) => updateData({ question: e.target.value })}
                                                         placeholder="Poll Question..."
                                                     />
+
+                                                    {/* Chart Type Selector */}
+                                                    <div className="flex bg-slate-100 p-1 rounded-md gap-1">
+                                                        <button
+                                                            className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-sm transition-all ${!data['chartType'] || data['chartType'] === 'bar' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ chartType: 'bar' })}
+                                                        >
+                                                            <BarChart3 className="w-3.5 h-3.5" />
+                                                            Bar Chart
+                                                        </button>
+                                                        <button
+                                                            className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-sm transition-all ${data['chartType'] === 'pie' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ chartType: 'pie' })}
+                                                        >
+                                                            <PieChart className="w-3.5 h-3.5" />
+                                                            Pie Chart
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Question Image Input */}
+                                                    <div className="flex items-center gap-2">
+                                                        {data.questionImage ? (
+                                                            <div className="relative w-full h-32 border rounded-lg overflow-hidden group">
+                                                                <img src={data.questionImage} alt="Question" className="w-full h-full object-cover" />
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    size="icon"
+                                                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    onClick={() => updateData({ questionImage: '' })}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-full">
+                                                                <label
+                                                                    htmlFor="question-image-upload"
+                                                                    className="flex items-center justify-center w-full h-12 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 text-slate-400 gap-2 hover:text-slate-600 transition-colors"
+                                                                >
+                                                                    <ImageIcon className="w-4 h-4" />
+                                                                    <span className="text-sm font-medium">Add Image to Question</span>
+                                                                </label>
+                                                                <input
+                                                                    id="question-image-upload"
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    className="hidden"
+                                                                    onChange={(e) => handleImageUpload(e, 'questionImage')}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
 
                                                 <div className="space-y-2">
@@ -234,55 +304,104 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                                 <Popover>
                                                                     <PopoverTrigger asChild>
                                                                         <button
-                                                                            className="w-4 h-8 shrink-0 rounded-md shadow-sm border border-slate-200 transition-transform hover:scale-105"
-                                                                            style={{ backgroundColor: opt.color || '#cbd5e1' }}
-                                                                        />
+                                                                            className="w-10 h-10 shrink-0 rounded-md shadow-sm border border-slate-200 transition-transform hover:scale-105 overflow-hidden relative"
+                                                                            style={{ backgroundColor: opt.image ? 'transparent' : (opt.color || '#cbd5e1') }}
+                                                                        >
+                                                                            {opt.image && (
+                                                                                <img src={opt.image} alt="Option Pattern" className="w-full h-full object-cover" />
+                                                                            )}
+                                                                        </button>
                                                                     </PopoverTrigger>
-                                                                    <PopoverContent className="w-64 p-3" align="start">
-                                                                        <div className="space-y-3">
-                                                                            <h4 className="font-medium text-xs text-muted-foreground">Select Color</h4>
-                                                                            <div className="grid grid-cols-5 gap-2">
-                                                                                {[
-                                                                                    "#3b82f6", "#a855f7", "#10b981", "#f97316",
-                                                                                    "#ec4899", "#ef4444", "#eab308", "#06b6d4",
-                                                                                    "#64748b", "#0f172a"
-                                                                                ].map(color => (
-                                                                                    <button
-                                                                                        key={color}
-                                                                                        className={`w-8 h-8 rounded-full border shadow-sm ${opt.color === color ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-                                                                                        style={{ backgroundColor: color }}
-                                                                                        onClick={() => {
-                                                                                            const newOptions = [...data.options]
-                                                                                            newOptions[idx] = { ...opt, color }
-                                                                                            updateData({ options: newOptions })
-                                                                                        }}
-                                                                                    />
-                                                                                ))}
+                                                                    <PopoverContent className="w-72 p-0 overflow-hidden" align="start">
+                                                                        <Tabs defaultValue={opt.image ? "image" : "color"} className="w-full">
+                                                                            <TabsList className="w-full rounded-none border-b bg-muted/50 p-0 h-9">
+                                                                                <TabsTrigger value="color" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background h-9 text-xs">Solid Color</TabsTrigger>
+                                                                                <TabsTrigger value="image" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background h-9 text-xs">Image Pattern</TabsTrigger>
+                                                                            </TabsList>
+
+                                                                            <div className="p-3">
+                                                                                <TabsContent value="color" className="mt-0 space-y-3">
+                                                                                    <div className="grid grid-cols-5 gap-2">
+                                                                                        {[
+                                                                                            "#3b82f6", "#a855f7", "#10b981", "#f97316",
+                                                                                            "#ec4899", "#ef4444", "#eab308", "#06b6d4",
+                                                                                            "#64748b", "#0f172a"
+                                                                                        ].map(color => (
+                                                                                            <button
+                                                                                                key={color}
+                                                                                                className={`w-8 h-8 rounded-full border shadow-sm ${opt.color === color && !opt.image ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                                                                                                style={{ backgroundColor: color }}
+                                                                                                onClick={() => {
+                                                                                                    const newOptions = [...data.options]
+                                                                                                    // Clear image when selecting color
+                                                                                                    newOptions[idx] = { ...opt, color, image: undefined }
+                                                                                                    updateData({ options: newOptions })
+                                                                                                }}
+                                                                                            />
+                                                                                        ))}
+                                                                                    </div>
+                                                                                    <Separator />
+                                                                                    <div className="flex gap-2">
+                                                                                        <Input
+                                                                                            type="color"
+                                                                                            value={opt.color || '#000000'}
+                                                                                            className="w-8 h-8 p-0 border-0 shrink-0"
+                                                                                            onChange={(e) => {
+                                                                                                const newOptions = [...data.options]
+                                                                                                newOptions[idx] = { ...opt, color: e.target.value, image: undefined }
+                                                                                                updateData({ options: newOptions })
+                                                                                            }}
+                                                                                        />
+                                                                                        <Input
+                                                                                            value={opt.color || ''}
+                                                                                            className="h-8 text-xs"
+                                                                                            placeholder="#000000"
+                                                                                            onChange={(e) => {
+                                                                                                const newOptions = [...data.options]
+                                                                                                newOptions[idx] = { ...opt, color: e.target.value, image: undefined }
+                                                                                                updateData({ options: newOptions })
+                                                                                            }}
+                                                                                        />
+                                                                                    </div>
+                                                                                </TabsContent>
+                                                                                <TabsContent value="image" className="mt-0 space-y-3">
+                                                                                    <div className="text-center space-y-3">
+                                                                                        {opt.image ? (
+                                                                                            <div className="relative w-full h-32 border rounded-md overflow-hidden bg-slate-100 group">
+                                                                                                <img src={opt.image} alt="Preview" className="w-full h-full object-cover" />
+                                                                                                <Button
+                                                                                                    variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                    onClick={() => {
+                                                                                                        const newOptions = [...data.options]
+                                                                                                        newOptions[idx] = { ...opt, image: undefined }
+                                                                                                        updateData({ options: newOptions })
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <Trash2 className="w-3 h-3" />
+                                                                                                </Button>
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <div className="w-full">
+                                                                                                <label
+                                                                                                    htmlFor={`option-image-upload-${idx}`}
+                                                                                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 text-slate-400 gap-2 hover:text-slate-600 transition-colors"
+                                                                                                >
+                                                                                                    <ImageIcon className="w-8 h-8 opacity-50" />
+                                                                                                    <span className="text-xs font-medium">Upload Image Pattern</span>
+                                                                                                </label>
+                                                                                                <input
+                                                                                                    id={`option-image-upload-${idx}`}
+                                                                                                    type="file"
+                                                                                                    accept="image/*"
+                                                                                                    className="hidden"
+                                                                                                    onChange={(e) => handleImageUpload(e, 'optionImage', idx)}
+                                                                                                />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </TabsContent>
                                                                             </div>
-                                                                            <Separator />
-                                                                            <div className="flex gap-2">
-                                                                                <Input
-                                                                                    type="color"
-                                                                                    value={opt.color || '#000000'}
-                                                                                    className="w-8 h-8 p-0 border-0 shrink-0"
-                                                                                    onChange={(e) => {
-                                                                                        const newOptions = [...data.options]
-                                                                                        newOptions[idx] = { ...opt, color: e.target.value }
-                                                                                        updateData({ options: newOptions })
-                                                                                    }}
-                                                                                />
-                                                                                <Input
-                                                                                    value={opt.color || ''}
-                                                                                    className="h-8 text-xs"
-                                                                                    placeholder="#000000"
-                                                                                    onChange={(e) => {
-                                                                                        const newOptions = [...data.options]
-                                                                                        newOptions[idx] = { ...opt, color: e.target.value }
-                                                                                        updateData({ options: newOptions })
-                                                                                    }}
-                                                                                />
-                                                                            </div>
-                                                                        </div>
+                                                                        </Tabs>
                                                                     </PopoverContent>
                                                                 </Popover>
                                                                 <Input

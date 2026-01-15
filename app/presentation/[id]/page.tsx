@@ -35,6 +35,11 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
 
+    // Base dimensions
+    const baseWidth = 1000
+    const [w, h] = aspectRatio.split(':').map(Number)
+    const baseHeight = (baseWidth * h) / w
+
     // Calculate scaling to fit window
     useEffect(() => {
         const handleResize = () => {
@@ -44,11 +49,6 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
 
             const parentWidth = parent.clientWidth
             const parentHeight = parent.clientHeight
-
-            // Base dimensions (Internal coordinate system)
-            const baseWidth = 1000
-            const [w, h] = aspectRatio.split(':').map(Number)
-            const baseHeight = (baseWidth * h) / w
 
             const scaleX = parentWidth / baseWidth
             const scaleY = parentHeight / baseHeight
@@ -62,11 +62,11 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
         handleResize() // Initial
 
         return () => window.removeEventListener('resize', handleResize)
-    }, [aspectRatio])
+    }, [aspectRatio, baseHeight])
 
     return (
         <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-            <SlideRenderer slide={slide} scale={scale} interactive={true} />
+            <SlideRenderer slide={slide} scale={scale} interactive={true} height={baseHeight} />
         </div>
     )
 }

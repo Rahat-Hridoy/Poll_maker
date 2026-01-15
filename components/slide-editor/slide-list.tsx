@@ -69,6 +69,7 @@ function SortableSlideItem({ slide, index, isActive, onSelect, onDelete, aspectR
                     <SlideRenderer
                         slide={slide}
                         width={220} // Fixed width for thumbnail calculation
+                        height={(1000 * parseInt((aspectRatio || '16:9').split(':')[1])) / parseInt((aspectRatio || '16:9').split(':')[0])}
                         scale={undefined} // Let renderer calc scale based on width
                     />
                 </div>

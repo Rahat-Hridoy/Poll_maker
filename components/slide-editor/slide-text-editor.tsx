@@ -211,7 +211,7 @@ interface SlideTextEditorProps {
 }
 
 export function SlideTextEditor({ content, onChange, editable, className, style, zoom }: SlideTextEditorProps) {
-    const containerRef = React.useRef<HTMLDivElement>(null)
+    const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -260,12 +260,12 @@ export function SlideTextEditor({ content, onChange, editable, className, style,
     return (
         <>
             {editor && editable && (
-                <CustomBubbleMenu editor={editor} anchorEl={containerRef.current}>
+                <CustomBubbleMenu editor={editor} anchorEl={containerEl}>
                     <TextContextToolbar editor={editor} />
                 </CustomBubbleMenu>
             )}
             <div
-                ref={containerRef}
+                ref={setContainerEl}
                 className={className}
                 style={{ ...style, cursor: editable ? 'text' : 'default' }}
             >

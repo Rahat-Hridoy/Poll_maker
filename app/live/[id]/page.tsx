@@ -67,6 +67,11 @@ export default function LiveAudiencePage() {
         return () => clearInterval(intervalId)
     }, [presentationId])
 
+    // Base dimensions
+    const baseWidth = 1000
+    const [w, h] = (presentation?.aspectRatio || '16:9').split(':').map(Number)
+    const baseHeight = (baseWidth * h) / w
+
     // Calculate scaling to fit window
     useEffect(() => {
         const handleResize = () => {
@@ -75,11 +80,6 @@ export default function LiveAudiencePage() {
 
             const parentWidth = parent.clientWidth
             const parentHeight = parent.clientHeight
-
-            // Base dimensions
-            const baseWidth = 1000
-            const [w, h] = (presentation?.aspectRatio || '16:9').split(':').map(Number)
-            const baseHeight = (baseWidth * h) / w
 
             const scaleX = parentWidth / baseWidth
             const scaleY = parentHeight / baseHeight
@@ -92,7 +92,7 @@ export default function LiveAudiencePage() {
         if (presentation) handleResize()
 
         return () => window.removeEventListener('resize', handleResize)
-    }, [presentation])
+    }, [presentation, baseHeight])
 
     const handleVote = async (optionId: string) => {
         if (!presentation || !presentation.slides[presentation.currentSlideIndex || 0]) return
@@ -131,6 +131,7 @@ export default function LiveAudiencePage() {
                     slide={presentation.slides[presentation.currentSlideIndex || 0]}
                     scale={scale}
                     interactive={false} // Audience just watches, votes via button
+                    height={baseHeight}
                 />
             </div>
 

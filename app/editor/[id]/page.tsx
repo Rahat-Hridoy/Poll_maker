@@ -77,7 +77,7 @@ export default function SlideEditorPage() {
         if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current)
 
         autoSaveTimeoutRef.current = setTimeout(() => {
-            console.log("Auto-saving...")
+
             handleSave(updatedPresentation)
         }, 2000)
     }

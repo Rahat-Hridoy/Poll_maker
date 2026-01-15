@@ -3,7 +3,7 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import pptxgen from 'pptxgenjs';
-import { Presentation, Slide } from './data';
+import { Presentation } from './data';
 
 /**
  * Universal Color Normalizer
@@ -98,7 +98,7 @@ const waitForImages = (element: HTMLElement) => {
 
 export async function exportToPDF(presentation: Presentation) {
     try {
-        console.log("Starting PDF export with deep color sanitization...");
+
         const pdf = new jsPDF({
             orientation: 'landscape',
             unit: 'px',

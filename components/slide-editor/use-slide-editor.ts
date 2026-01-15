@@ -38,6 +38,7 @@ export function useSlideEditor(initialSlide: Slide | null) {
             loadedRef.current = { id: initialSlide.id, content: contentStr }
 
             // Only update elements if their content representation changed
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setElements(prev => {
                 if (JSON.stringify(prev) === nextStr) return prev
                 return parsed

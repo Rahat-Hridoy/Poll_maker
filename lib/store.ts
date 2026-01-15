@@ -95,7 +95,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 function saveData() {
     if (!IS_VERCEL) {
         try {
-            // console.log("[Store] Writing to file:", DB_PATH);
+
             fs.writeFileSync(DB_PATH, JSON.stringify({ polls: memoryPolls, users: memoryUsers, presentations: memoryPresentations }, null, 2));
             lastFileReadTime = Date.now();
         } catch (e) {
@@ -280,12 +280,12 @@ export async function getPresentation(id: string): Promise<Presentation | undefi
         await savePresentation(presentation);
     }
 
-    // console.log(`[Store] Fetching presentation ${id}:`, presentation ? "Found" : "Not Found", presentation?.slides[0]?.content.substring(0, 50));
+
     return presentation;
 }
 
 export async function savePresentation(presentation: Presentation) {
-    // console.log(`[Store] Saving presentation ${presentation.id}. Content length: ${presentation.slides[0]?.content.length}`);
+
     reloadIfNeeded();
     const existingIndex = memoryPresentations.findIndex(p => p.id === presentation.id);
     if (existingIndex >= 0) {
