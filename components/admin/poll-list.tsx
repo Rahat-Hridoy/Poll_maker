@@ -302,7 +302,7 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                                             </Button>
                                         </Link>
                                         <ShareDialog
-                                            url={`${origin}/poll/${poll.id}`}
+                                            url={`${origin}/view/${poll.id}`}
                                             shortCode={poll.shortCode}
                                             title={poll.title}
                                             trigger={
@@ -380,7 +380,7 @@ export function PollList({ polls: initialPolls }: PollListProps) {
                                             </Button>
                                         </Link>
                                         <ShareDialog
-                                            url={`${origin}/poll/${poll.id}`}
+                                            url={`${origin}/view/${poll.id}`}
                                             shortCode={poll.shortCode}
                                             title={poll.title}
                                             trigger={

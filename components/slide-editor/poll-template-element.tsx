@@ -21,9 +21,11 @@ interface PollTemplateData {
 
 interface PollTemplateElementProps {
     data: PollTemplateData
+    onVote?: (optionId: string) => void
+    hasVoted?: boolean
 }
 
-export function PollTemplateElement({ data }: PollTemplateElementProps) {
+export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElementProps) {
     const { question, options, questionImage, chartType = 'bar' } = data
 
     // Default values if data is missing
@@ -225,16 +227,18 @@ export function PollTemplateElement({ data }: PollTemplateElementProps) {
     return (
         <div className="w-full h-full p-8 flex flex-col bg-white overflow-hidden select-none">
             {/* Header / Meta */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
-                    <BarChart3 className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
+            {!onVote && (
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
+                        <BarChart3 className="w-5 h-5" />
+                        <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
+                        <Users className="w-4 h-4" />
+                        <span>{totalVotes} responses</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
-                    <Users className="w-4 h-4" />
-                    <span>{totalVotes} responses</span>
-                </div>
-            </div>
+            )}
 
             {/* Question Image (Adaptive Layout) */}
             {questionImage && (
@@ -252,9 +256,36 @@ export function PollTemplateElement({ data }: PollTemplateElementProps) {
                 {displayQuestion}
             </h1>
 
-            {/* Chart Area */}
-            <div className="flex-1 w-full relative p-4 min-h-0">
-                {renderChart()}
+            {/* Content Area: Chart or Voting Buttons */}
+            <div className="flex-1 w-full relative p-4 min-h-0 overflow-y-auto">
+                {onVote ? (
+                    // Voting Interface
+                    <div className="space-y-4 max-w-2xl mx-auto">
+                        {hasVoted ? (
+                            <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
+                                <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                                    <Users className="h-10 w-10" />
+                                </div>
+                                <h3 className="text-2xl font-black text-green-800 mb-2">Vote Submitted!</h3>
+                                <p className="text-green-600 font-medium">Thank you for participating.</p>
+                            </div>
+                        ) : (
+                            displayOptions.map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => onVote(opt.id)}
+                                    className="w-full text-left p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all font-bold text-lg text-slate-700 flex justify-between items-center group active:scale-[0.99]"
+                                >
+                                    <span>{opt.text}</span>
+                                    <div className="h-6 w-6 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors" />
+                                </button>
+                            ))
+                        )}
+                    </div>
+                ) : (
+                    // Presenter/Chart Interface
+                    renderChart()
+                )}
             </div>
         </div>
     )

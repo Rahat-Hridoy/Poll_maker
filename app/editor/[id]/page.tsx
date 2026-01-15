@@ -507,7 +507,7 @@ export default function SlideEditorPage() {
                 <SharePresentationDialog
                     open={shareOpen}
                     onOpenChange={setShareOpen}
-                    url={typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/presentation/${presentation.id}` : ''}
+                    url={typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/view/${presentation.id}` : ''}
                     title={presentation.title}
                     shortCode={presentation.shortCode}
                 />

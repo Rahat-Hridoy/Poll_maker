@@ -3,33 +3,20 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
+import { submitVoteAction } from "@/app/actions/audience"
 import { Presentation, Slide } from "@/lib/data"
-import { Loader2, ChevronLeft, ChevronRight, Edit, Maximize2, Minimize2 } from "lucide-react"
+import { Loader2, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from 'next/link'
-
 import { SlideRenderer } from "@/components/slide-editor/slide-renderer"
-import { updatePresenterStateAction } from "@/app/actions/audience"
-
-// Duplicate interfaces from SlideCanvas to avoid circular deps or verify consistency
-export interface CanvasElement {
-    id: string
-    type: "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template"
-    x: number
-    y: number
-    width: number
-    height: number
-    content?: string
-    style: React.CSSProperties
-    rotation?: number
-}
 
 interface SlideViewerProps {
     slide: Slide
     aspectRatio?: '16:9' | '4:3' | '1:1'
+    onVote?: (optionId: string) => void
+    hasVoted?: boolean
 }
 
-function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
+function SlideViewer({ slide, aspectRatio = '16:9', onVote, hasVoted }: SlideViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
 
@@ -64,61 +51,55 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
 
     return (
         <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-            <SlideRenderer slide={slide} scale={scale} interactive={true} height={baseHeight} />
+            <SlideRenderer
+                slide={slide}
+                scale={scale}
+                interactive={true}
+                height={baseHeight}
+                onPollVote={onVote}
+                hasVoted={hasVoted}
+            />
         </div>
     )
 }
 
-export default function PresentationPage() {
+export default function UserViewPage() {
     const params = useParams()
     const [presentation, setPresentation] = useState<Presentation | null>(null)
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
     const [loading, setLoading] = useState(true)
     const [fullScreen, setFullScreen] = useState(false)
+    const [hasVotedMap, setHasVotedMap] = useState<Record<string, boolean>>({})
 
-
+    // Poll for updates (sync with presenter)
     useEffect(() => {
-        loadPresentation()
-    }, [params.id])
+        let mounted = true
 
-    // Sync current slide with server for audience
-    useEffect(() => {
-        if (params.id) {
-            updatePresenterStateAction(params.id as string, currentSlideIndex)
-        }
-    }, [currentSlideIndex, params.id])
-
-
-
-    async function loadPresentation() {
-        if (!params.id) return
-        try {
-            const data = await fetchPresentation(params.id as string)
-            if (data) {
-                // If we already have a presentation, only update if the new data is actually newer
-                setPresentation(prev => {
-                    if (!prev) return data
-                    if (data.updatedAt !== prev.updatedAt) {
-                        return data
+        const loadData = async () => {
+            if (!params.id) return
+            try {
+                const data = await fetchPresentation(params.id as string)
+                if (data && mounted) {
+                    setPresentation(data)
+                    // Auto-sync slide index from presenter
+                    if (data.currentSlideIndex !== undefined) {
+                        setCurrentSlideIndex(data.currentSlideIndex)
                     }
-                    return prev
-                })
+                }
+            } catch (error) {
+                console.error(error)
+            } finally {
+                if (mounted) setLoading(false)
             }
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
         }
-    }
 
-    // Auto-refresh logic to keep presentation in sync
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                loadPresentation()
-            }
-        }, 1000)
-        return () => clearInterval(interval)
+        loadData() // Initial load
+        const intervalId = setInterval(loadData, 1000)
+
+        return () => {
+            mounted = false
+            clearInterval(intervalId)
+        }
     }, [params.id])
 
     const nextSlide = () => {
@@ -144,6 +125,28 @@ export default function PresentationPage() {
         }
     }
 
+    const handleVote = async (optionId: string) => {
+        if (!presentation) return
+        const currentSlide = presentation.slides[currentSlideIndex]
+        if (!currentSlide) return
+
+        // Optimistically set voted state
+        setHasVotedMap(prev => ({ ...prev, [currentSlide.id]: true }))
+
+        try {
+            await submitVoteAction(presentation.id, currentSlide.id, optionId)
+            // No need to reload presentation immediately as we just want to show success state
+        } catch (e) {
+            console.error("Vote failed", e)
+            // Revert on failure
+            setHasVotedMap(prev => {
+                const newMap = { ...prev }
+                delete newMap[currentSlide.id]
+                return newMap
+            })
+        }
+    }
+
     // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -165,16 +168,16 @@ export default function PresentationPage() {
             <SlideViewer
                 slide={currentSlide}
                 aspectRatio={presentation.aspectRatio}
+                onVote={handleVote}
+                hasVoted={hasVotedMap[currentSlide.id] || false}
             />
-
-
 
             {/* Controls Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between z-50 pointer-events-none">
                 <div className="pointer-events-auto flex flex-col gap-1">
                     <h1 className="text-lg font-bold drop-shadow-md leading-none">{presentation.title}</h1>
                     <div className="text-xs text-white/80 font-mono bg-black/20 px-2 py-1 rounded inline-block w-fit mt-1 border border-white/10">
-                        Join: <span className="text-blue-300 font-bold">/join</span> Code: <span className="text-white font-bold tracking-widest">{presentation.shortCode}</span>
+                        Guest View
                     </div>
                 </div>
 
@@ -195,11 +198,6 @@ export default function PresentationPage() {
                     <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
                         {fullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
                     </Button>
-                    <Link href={`/editor/${presentation.id}`} target="_blank">
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 rounded-full h-10 w-10">
-                            <Edit className="w-4 h-4" />
-                        </Button>
-                    </Link>
                 </div>
             </div>
         </div>
