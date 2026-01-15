@@ -43,6 +43,7 @@ export default function Home() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-10 duration-700 delay-100 font-medium italic">
             Create professional, interactive polls and quizzes in seconds.
           </p>
+          <p>Hello</p>
         </div>
 
         {/* Action Cards */}

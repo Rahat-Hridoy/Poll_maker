@@ -1123,7 +1123,7 @@
       "title": "New Presentation",
       "theme": "default",
       "createdAt": "2026-01-15T14:12:25.824Z",
-      "updatedAt": "2026-01-15T16:30:40.185Z",
+      "updatedAt": "2026-01-15T16:45:43.883Z",
       "slides": [
         {
           "id": "281d74b8-ef2d-4253-9ff4-246dee01503a",
@@ -1133,7 +1133,7 @@
         },
         {
           "id": "b9a179bc-9305-4266-9b55-aab7386989c4",
-          "content": "[{\"id\":\"dce22323-8aa0-4425-9a43-88ff4906b1df\",\"type\":\"poll-template\",\"x\":0,\"y\":0,\"width\":1000,\"height\":562.5,\"content\":\"{\\\"question\\\":\\\"Type your question here...\\\",\\\"options\\\":[{\\\"id\\\":\\\"1\\\",\\\"text\\\":\\\"Option 1\\\",\\\"votes\\\":1,\\\"color\\\":\\\"#3b82f6\\\"},{\\\"id\\\":\\\"2\\\",\\\"text\\\":\\\"Option 2\\\",\\\"votes\\\":0,\\\"color\\\":\\\"#a855f7\\\"}]}\",\"rotation\":0,\"style\":{\"backgroundColor\":\"#ffffff\",\"border\":\"none\",\"borderRadius\":\"0px\",\"padding\":\"0px\",\"fontSize\":\"24px\",\"color\":\"#0f172a\"}}]",
+          "content": "[{\"id\":\"dce22323-8aa0-4425-9a43-88ff4906b1df\",\"type\":\"poll-template\",\"x\":0,\"y\":0,\"width\":1000,\"height\":562.5,\"content\":\"{\\\"question\\\":\\\"Type your question here...\\\",\\\"options\\\":[{\\\"id\\\":\\\"1\\\",\\\"text\\\":\\\"Option 1\\\",\\\"votes\\\":2,\\\"color\\\":\\\"#3b82f6\\\"},{\\\"id\\\":\\\"2\\\",\\\"text\\\":\\\"Option 2\\\",\\\"votes\\\":0,\\\"color\\\":\\\"#a855f7\\\"}]}\",\"rotation\":0,\"style\":{\"backgroundColor\":\"#ffffff\",\"border\":\"none\",\"borderRadius\":\"0px\",\"padding\":\"0px\",\"fontSize\":\"24px\",\"color\":\"#0f172a\"}}]",
           "background": "#ffffff",
           "layout": "poll"
         },
