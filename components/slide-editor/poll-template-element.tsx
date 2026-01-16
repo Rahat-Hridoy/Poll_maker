@@ -17,6 +17,7 @@ interface PollTemplateData {
     showResults?: boolean
     questionImage?: string
     chartType?: 'bar' | 'pie'
+    layout?: 'vertical' | 'horizontal-left' | 'horizontal-right' | 'split-left'
 }
 
 interface PollTemplateElementProps {
@@ -27,6 +28,7 @@ interface PollTemplateElementProps {
 
 export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElementProps) {
     const { question, options, questionImage, chartType = 'bar' } = data
+    const layout = data.layout || 'vertical'
 
     // Default values if data is missing
     const displayQuestion = question || "Your Poll Question Here?"
@@ -67,13 +69,13 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                     <PieChart>
                         <Pie
                             data={chartData}
-                            cx="60%"
+                            cx="50%"
                             cy="50%"
                             labelLine={false}
                             outerRadius="80%"
                             fill="#8884d8"
                             dataKey="votes"
-                            label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                            label={({ cx, cy, midAngle = 0, innerRadius, outerRadius, percent = 0, index }) => {
                                 const RADIAN = Math.PI / 180;
                                 const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
                                 const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -107,15 +109,15 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                         <Legend
                             layout="vertical"
                             verticalAlign="middle"
-                            align="left"
-                            wrapperStyle={{ paddingLeft: "20px", maxWidth: "40%" }}
+                            align="right"
+                            wrapperStyle={{ paddingLeft: "10px", maxWidth: "40%" }}
                             content={(props) => {
                                 const { payload } = props;
                                 return (
-                                    <div className="flex flex-col gap-4">
+                                    <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
                                         {payload?.map((entry: any, index: any) => (
-                                            <div key={`item-${index}`} className="flex items-center gap-3 text-slate-700 font-semibold text-lg">
-                                                <div className="w-5 h-5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: entry.color }} />
+                                            <div key={`item-${index}`} className="flex items-center gap-2 text-slate-700 text-sm font-semibold">
+                                                <div className="w-3 h-3 rounded-full shadow-sm shrink-0" style={{ backgroundColor: entry.color }} />
                                                 <span className="truncate">{entry.value}</span>
                                             </div>
                                         ))}
@@ -134,6 +136,7 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                     data={chartData}
                     margin={{ top: 20, right: 20, left: 20, bottom: 40 }}
                     barSize={80}
+                    layout="horizontal"
                 >
                     <defs>
                         {chartData.map((entry) => (
@@ -149,9 +152,9 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                                         href={entry.image}
                                         x="0"
                                         y="0"
-                                        width="100%" // Stretch to fit the bar width
-                                        height="100%" // Stretch to fit the bar height
-                                        preserveAspectRatio="xMidYMid slice" // Crop to cover
+                                        width="100%"
+                                        height="100%"
+                                        preserveAspectRatio="xMidYMid slice"
                                     />
                                 </pattern>
                             ) : null
@@ -160,17 +163,17 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis
                         dataKey="name"
-                        tick={{ fontSize: 16, fontWeight: 600, fill: '#334155' }}
+                        tick={{ fontSize: 14, fontWeight: 600, fill: '#334155' }}
                         axisLine={{ stroke: '#94a3b8' }}
                         tickLine={false}
                         dy={10}
+                        interval={0}
                     />
                     <YAxis
-                        tick={{ fontSize: 14, fill: '#64748b' }}
+                        tick={{ fontSize: 12, fill: '#64748b' }}
                         axisLine={{ stroke: '#94a3b8' }}
                         tickLine={false}
                         allowDecimals={false}
-                        label={{ value: 'Votes', angle: -90, position: 'insideLeft', style: { fill: '#64748b', fontSize: 14, fontWeight: 500 } }}
                     />
                     <Tooltip
                         cursor={{ fill: '#f1f5f9' }}
@@ -205,11 +208,11 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                                 const voteCount = chartData[index].votes;
                                 return (
                                     <text
-                                        x={x + (props.width / 2)} // Center properly using width
+                                        x={x + (props.width / 2)}
                                         y={y - 10}
                                         textAnchor="middle"
                                         fill="#475569"
-                                        fontSize={16}
+                                        fontSize={14}
                                         fontWeight="bold"
                                         style={{ filter: 'drop-shadow(0px 1px 1px rgba(255,255,255,0.5))' }}
                                     >
@@ -224,69 +227,143 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
         )
     }
 
+    const HeaderSection = () => (
+        !onVote ? (
+            <div className="flex items-center justify-between mb-4 w-full">
+                <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
+                    <BarChart3 className="w-5 h-5" />
+                    <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
+                    <Users className="w-4 h-4" />
+                    <span>{totalVotes} responses</span>
+                </div>
+            </div>
+        ) : null
+    )
+
+    const ImageSection = ({ className = "" }: { className?: string }) => (
+        questionImage ? (
+            <div className={`flex justify-center shrink-0 ${className}`}>
+                <img
+                    src={questionImage}
+                    alt="Question Reference"
+                    className="h-full w-full object-contain rounded-lg shadow-sm border border-slate-100 max-h-full"
+                />
+            </div>
+        ) : null
+    )
+
+    const CONTENT_AREA_CLASS = "flex-1 w-full relative p-4 min-h-0 overflow-y-auto"
+
+    const VotingOrChart = () => (
+        <div className={CONTENT_AREA_CLASS}>
+            {onVote ? (
+                <div className="space-y-4 max-w-2xl mx-auto w-full">
+                    {hasVoted ? (
+                        <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
+                            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                                <Users className="h-10 w-10" />
+                            </div>
+                            <h3 className="text-2xl font-black text-green-800 mb-2">Vote Submitted!</h3>
+                            <p className="text-green-600 font-medium">Thank you for participating.</p>
+                        </div>
+                    ) : (
+                        displayOptions.map((opt) => (
+                            <button
+                                key={opt.id}
+                                onClick={() => onVote && onVote(opt.id)}
+                                className="w-full text-left p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all font-bold text-lg text-slate-700 flex justify-between items-center group active:scale-[0.99]"
+                            >
+                                <span>{opt.text}</span>
+                                <div className="h-6 w-6 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors" />
+                            </button>
+                        ))
+                    )}
+                </div>
+            ) : renderChart()}
+        </div>
+    )
+
+    // Layout Specific Renders
+    if (layout === 'split-left') {
+        return (
+            <div className="w-full h-full p-4 flex gap-4 bg-white overflow-hidden select-none">
+                {/* Left Side: Full Image */}
+                <div className="w-1/2 h-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 shadow-inner">
+                    {questionImage ? (
+                        <img src={questionImage} alt="Topic" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <BarChart3 className="w-20 h-20 opacity-20" />
+                        </div>
+                    )}
+                </div>
+                {/* Right Side: Content */}
+                <div className="w-1/2 flex flex-col h-full">
+                    <HeaderSection />
+                    <div className="flex-1 flex flex-col justify-center">
+                        <h1 className="text-3xl font-extrabold text-slate-900 leading-tight text-center mb-6">
+                            {displayQuestion}
+                        </h1>
+                        <div className="flex-1 min-h-0 w-full flex flex-col">
+                            <VotingOrChart />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (layout === 'horizontal-left' || layout === 'horizontal-right') {
+        const isImageLeft = layout === 'horizontal-left'
+        return (
+            <div className="w-full h-full p-8 flex flex-col bg-white overflow-hidden select-none">
+                <HeaderSection />
+
+                {/* Top Section: Image and Question side-by-side */}
+                <div className={`flex w-full gap-6 mb-6 h-[40%] shrink-0 ${isImageLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                    {/* Image Side */}
+                    {questionImage ? (
+                        <div className="w-1/3 h-full flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 p-2 shadow-sm">
+                            <img src={questionImage} alt="Topic" className="max-w-full max-h-full object-contain rounded-lg" />
+                        </div>
+                    ) : (
+                        // Placeholder for layout consistency
+                        <div className="w-1/3 h-full flex items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-200 p-2">
+                            <span className="text-slate-400 text-sm font-medium">No Image</span>
+                        </div>
+                    )}
+
+                    {/* Question Side */}
+                    <div className="flex-1 h-full flex items-center justify-center p-6 bg-slate-50/50 rounded-xl border border-slate-100/50">
+                        <h1 className="text-3xl font-extrabold text-slate-900 leading-tight text-center overflow-y-auto max-h-full flex items-center">
+                            {displayQuestion}
+                        </h1>
+                    </div>
+                </div>
+
+                {/* Bottom Section: Options / Chart */}
+                <div className="flex-1 w-full min-h-0 relative flex flex-col">
+                    <VotingOrChart />
+                </div>
+            </div>
+        )
+    }
+
+    // Default Vertical Layout
     return (
         <div className="w-full h-full p-8 flex flex-col bg-white overflow-hidden select-none">
-            {/* Header / Meta */}
-            {!onVote && (
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
-                        <BarChart3 className="w-5 h-5" />
-                        <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
-                        <Users className="w-4 h-4" />
-                        <span>{totalVotes} responses</span>
-                    </div>
-                </div>
-            )}
-
-            {/* Question Image (Adaptive Layout) */}
+            <HeaderSection />
             {questionImage && (
                 <div className="w-full max-h-[30%] mb-4 flex justify-center shrink-0">
-                    <img
-                        src={questionImage}
-                        alt="Question Reference"
-                        className="h-full object-contain rounded-lg shadow-sm border border-slate-100"
-                    />
+                    <ImageSection className="h-full" />
                 </div>
             )}
-
-            {/* Question Title */}
             <h1 className={`${questionImage ? 'text-3xl mb-4' : 'text-4xl mb-8'} font-extrabold text-slate-900 leading-tight text-center transition-all`}>
                 {displayQuestion}
             </h1>
-
-            {/* Content Area: Chart or Voting Buttons */}
-            <div className="flex-1 w-full relative p-4 min-h-0 overflow-y-auto">
-                {onVote ? (
-                    // Voting Interface
-                    <div className="space-y-4 max-w-2xl mx-auto">
-                        {hasVoted ? (
-                            <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
-                                <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                                    <Users className="h-10 w-10" />
-                                </div>
-                                <h3 className="text-2xl font-black text-green-800 mb-2">Vote Submitted!</h3>
-                                <p className="text-green-600 font-medium">Thank you for participating.</p>
-                            </div>
-                        ) : (
-                            displayOptions.map((opt) => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => onVote(opt.id)}
-                                    className="w-full text-left p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all font-bold text-lg text-slate-700 flex justify-between items-center group active:scale-[0.99]"
-                                >
-                                    <span>{opt.text}</span>
-                                    <div className="h-6 w-6 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors" />
-                                </button>
-                            ))
-                        )}
-                    </div>
-                ) : (
-                    // Presenter/Chart Interface
-                    renderChart()
-                )}
-            </div>
+            <VotingOrChart />
         </div>
     )
 }

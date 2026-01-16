@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2, PieChart } from "lucide-react"
+import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2, PieChart, PanelLeft, PanelRight, Columns, Rows } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -259,6 +259,41 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                             <PieChart className="w-3.5 h-3.5" />
                                                             Pie Chart
                                                         </button>
+                                                    </div>
+
+                                                    {/* Layout Selector */}
+                                                    <div className="space-y-1">
+                                                        <label className="text-xs text-muted-foreground">Layout Theme</label>
+                                                        <div className="flex bg-slate-100 p-1 rounded-md gap-1">
+                                                            <button
+                                                                title="Vertical (Image Top)"
+                                                                className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${!data['layout'] || data['layout'] === 'vertical' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                                onClick={() => updateData({ layout: 'vertical' })}
+                                                            >
+                                                                <Rows className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                title="Image Left"
+                                                                className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'horizontal-left' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                                onClick={() => updateData({ layout: 'horizontal-left' })}
+                                                            >
+                                                                <PanelLeft className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                title="Image Right"
+                                                                className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'horizontal-right' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                                onClick={() => updateData({ layout: 'horizontal-right' })}
+                                                            >
+                                                                <PanelRight className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                title="Split Screen"
+                                                                className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'split-left' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                                onClick={() => updateData({ layout: 'split-left' })}
+                                                            >
+                                                                <Columns className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
                                                     </div>
 
                                                     {/* Question Image Input */}
