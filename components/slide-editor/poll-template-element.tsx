@@ -82,7 +82,7 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                                 const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
                                 return percent > 0 ? (
-                                    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="font-bold text-shadow-sm pointer-events-none select-none text-xl">
+                                    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="font-bold text-shadow-sm pointer-events-none select-none text-sm">
                                         {`${(percent * 100).toFixed(0)}%`}
                                     </text>
                                 ) : null;
@@ -118,7 +118,10 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                                         {payload?.map((entry: any, index: any) => (
                                             <div key={`item-${index}`} className="flex items-center gap-2 text-slate-700 text-sm font-semibold">
                                                 <div className="w-3 h-3 rounded-full shadow-sm shrink-0" style={{ backgroundColor: entry.color }} />
-                                                <span className="truncate">{entry.value}</span>
+                                                <div className="flex items-baseline gap-1 min-w-0">
+                                                    <span className="truncate">{entry.value}</span>
+                                                    <span className="text-xs text-slate-500 font-medium">({entry.payload.percentage}%)</span>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -303,9 +306,10 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                 <div className="w-1/2 flex flex-col h-full">
                     <HeaderSection />
                     <div className="flex-1 flex flex-col justify-center">
-                        <h1 className="text-3xl font-extrabold text-slate-900 leading-tight text-center mb-6">
-                            {displayQuestion}
-                        </h1>
+                        <div
+                            className="text-3xl font-extrabold text-slate-900 leading-tight text-center mb-6 prose prose-slate max-w-none prose-headings:font-extrabold prose-p:my-0 prose-p:leading-tight"
+                            dangerouslySetInnerHTML={{ __html: displayQuestion }}
+                        />
                         <div className="flex-1 min-h-0 w-full flex flex-col">
                             <VotingOrChart />
                         </div>
@@ -337,9 +341,10 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
 
                     {/* Question Side */}
                     <div className="flex-1 h-full flex items-center justify-center p-6 bg-slate-50/50 rounded-xl border border-slate-100/50">
-                        <h1 className="text-3xl font-extrabold text-slate-900 leading-tight text-center overflow-y-auto max-h-full flex items-center">
-                            {displayQuestion}
-                        </h1>
+                        <div
+                            className="text-3xl font-extrabold text-slate-900 leading-tight text-center overflow-y-auto max-h-full flex items-center prose prose-slate max-w-none prose-headings:font-extrabold prose-p:my-0 prose-p:leading-tight"
+                            dangerouslySetInnerHTML={{ __html: displayQuestion }}
+                        />
                     </div>
                 </div>
 
@@ -360,9 +365,13 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
                     <ImageSection className="h-full" />
                 </div>
             )}
-            <h1 className={`${questionImage ? 'text-3xl mb-4' : 'text-4xl mb-8'} font-extrabold text-slate-900 leading-tight text-center transition-all`}>
-                {displayQuestion}
-            </h1>
+            <div className="mb-4">
+                {/* Render HTML content safely */}
+                <div
+                    className={`${questionImage ? 'text-3xl' : 'text-4xl mb-8'} font-extrabold text-slate-900 leading-tight text-center transition-all prose prose-slate max-w-none prose-headings:font-extrabold prose-p:my-0 prose-p:leading-tight`}
+                    dangerouslySetInnerHTML={{ __html: displayQuestion }}
+                />
+            </div>
             <VotingOrChart />
         </div>
     )
