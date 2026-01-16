@@ -20,6 +20,7 @@ import { SlideProperties } from "@/components/slide-editor/slide-properties"
 import { useSlideEditor } from "@/components/slide-editor/use-slide-editor"
 import { EditorToolbar } from "@/components/slide-editor/editor-toolbar"
 import { SharePresentationDialog } from "@/components/presentation/share-presentation-dialog"
+import { PreviewDialog } from "@/components/slide-editor/preview-dialog"
 
 export default function SlideEditorPage() {
     const params = useParams()
@@ -32,6 +33,7 @@ export default function SlideEditorPage() {
     const [leftOpen, setLeftOpen] = useState(true)
     const [rightOpen, setRightOpen] = useState(true)
     const [shareOpen, setShareOpen] = useState(false)
+    const [previewOpen, setPreviewOpen] = useState(false)
 
     useEffect(() => {
         loadPresentation()
@@ -363,6 +365,20 @@ export default function SlideEditorPage() {
                         onChange={(e) => setPresentation({ ...presentation, title: e.target.value })}
                     />
                 </div>
+
+                {/* Centered Preview Button */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 gap-2 shadow-sm"
+                        onClick={() => setPreviewOpen(true)}
+                    >
+                        <Play className="w-3 h-3 fill-current" />
+                        Preview
+                    </Button>
+                </div>
+
                 <div className="flex items-center gap-3">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -504,13 +520,21 @@ export default function SlideEditorPage() {
                 </div>
             </div>
             {presentation && (
-                <SharePresentationDialog
-                    open={shareOpen}
-                    onOpenChange={setShareOpen}
-                    url={typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/view/${presentation.id}` : ''}
-                    title={presentation.title}
-                    shortCode={presentation.shortCode}
-                />
+                <>
+                    <SharePresentationDialog
+                        open={shareOpen}
+                        onOpenChange={setShareOpen}
+                        url={typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/view/${presentation.id}` : ''}
+                        title={presentation.title}
+                        shortCode={presentation.shortCode}
+                    />
+                    <PreviewDialog
+                        open={previewOpen}
+                        onOpenChange={setPreviewOpen}
+                        presentationId={presentation.id}
+                        title={presentation.title}
+                    />
+                </>
             )}
         </div>
     )
