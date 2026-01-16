@@ -533,6 +533,7 @@ export default function SlideEditorPage() {
                         onOpenChange={setPreviewOpen}
                         presentationId={presentation.id}
                         title={presentation.title}
+                        initialSlideIndex={presentation.slides.findIndex(s => s.id === activeSlideId)}
                     />
                 </>
             )}

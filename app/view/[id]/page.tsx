@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
 import { submitVoteAction } from "@/app/actions/audience"
 import { Presentation, Slide } from "@/lib/data"
@@ -65,8 +65,13 @@ function SlideViewer({ slide, aspectRatio = '16:9', onVote, hasVoted }: SlideVie
 
 export default function UserViewPage() {
     const params = useParams()
+    const searchParams = useSearchParams()
+
+    const initialSlideParam = searchParams.get('slide')
+    const initialIndex = initialSlideParam ? parseInt(initialSlideParam, 10) : 0
+
     const [presentation, setPresentation] = useState<Presentation | null>(null)
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(initialIndex)
     const [loading, setLoading] = useState(true)
     const [fullScreen, setFullScreen] = useState(false)
     const [hasVotedMap, setHasVotedMap] = useState<Record<string, boolean>>({})

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
 import { Presentation, Slide } from "@/lib/data"
 import { Loader2, ChevronLeft, ChevronRight, Edit, Maximize2, Minimize2 } from "lucide-react"
@@ -71,8 +71,16 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
 
 export default function PresentationPage() {
     const params = useParams()
+    const searchParams = useSearchParams()
+
+    // Get initial slide index from URL or default to 0
+    // We do this lazily or in effect, but state initialization is cleaner if possible.
+    // However, searchParams might not be ready immediately in some Next.js versions/configs, but usually fine in client comp.
+    const initialSlideParam = searchParams.get('slide')
+    const initialIndex = initialSlideParam ? parseInt(initialSlideParam, 10) : 0
+
     const [presentation, setPresentation] = useState<Presentation | null>(null)
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(initialIndex)
     const [loading, setLoading] = useState(true)
     const [fullScreen, setFullScreen] = useState(false)
 

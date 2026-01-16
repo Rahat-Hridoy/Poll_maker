@@ -16,11 +16,12 @@ interface PreviewDialogProps {
     onOpenChange: (open: boolean) => void
     presentationId: string
     title: string
+    initialSlideIndex?: number
 }
 
 type ViewMode = 'split' | 'presenter' | 'audience'
 
-export function PreviewDialog({ open, onOpenChange, presentationId, title }: PreviewDialogProps) {
+export function PreviewDialog({ open, onOpenChange, presentationId, title, initialSlideIndex = 0 }: PreviewDialogProps) {
     const [loadingPresenter, setLoadingPresenter] = useState(true)
     const [loadingAudience, setLoadingAudience] = useState(true)
     const [viewMode, setViewMode] = useState<ViewMode>('split')
@@ -90,7 +91,7 @@ export function PreviewDialog({ open, onOpenChange, presentationId, title }: Pre
                                 </div>
                             )}
                             <iframe
-                                src={`/presentation/${presentationId}?preview=true&t=${timestamp}`}
+                                src={`/presentation/${presentationId}?preview=true&t=${timestamp}&slide=${initialSlideIndex}`}
                                 className="w-full h-full border-0"
                                 onLoad={() => setLoadingPresenter(false)}
                                 allow="fullscreen; clipboard-write; encrypted-media"
@@ -110,7 +111,7 @@ export function PreviewDialog({ open, onOpenChange, presentationId, title }: Pre
                                 </div>
                             )}
                             <iframe
-                                src={`/view/${presentationId}?preview=true&t=${timestamp}`}
+                                src={`/view/${presentationId}?preview=true&t=${timestamp}&slide=${initialSlideIndex}`}
                                 className="w-full h-full border-0"
                                 onLoad={() => setLoadingAudience(false)}
                                 allow="fullscreen; clipboard-write; encrypted-media"
