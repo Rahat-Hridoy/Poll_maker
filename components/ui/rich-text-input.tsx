@@ -39,7 +39,15 @@ const TextStyle = Mark.create({
     renderHTML({ HTMLAttributes }) {
         return ['span', mergeAttributes(HTMLAttributes), 0]
     },
+    addCommands() {
+        return {
+            setColor: (color: string) => ({ chain }: any) => {
+                return chain().setMark('textStyle', { color }).run()
+            },
+        } as any
+    },
 })
+
 
 interface RichTextInputProps {
     value: string
@@ -147,7 +155,7 @@ export function RichTextInput({ value, onChange, placeholder, className }: RichT
                         type="color"
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         onInput={(e) => {
-                            editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()
+                            (editor.chain().focus() as any).setColor((e.target as HTMLInputElement).value).run()
                             setIsFocused(true)
                         }}
                         onFocus={() => setIsFocused(true)}

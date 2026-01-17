@@ -132,6 +132,72 @@ export default function SlideEditorPage() {
         updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
     }
 
+    const updateElement = (id: string, updates: Partial<CanvasElement>) => {
+        if (!activeSlide) return;
+        const elements = getActiveSlideElements();
+        const newElements = elements.map(el => el.id === id ? { ...el, ...updates } : el);
+        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
+    }
+
+    const removeCanvasElement = (id: string) => {
+        if (!activeSlide) return;
+        const elements = getActiveSlideElements();
+        const newElements = elements.filter(el => el.id !== id);
+        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
+        if (selectedElementId === id) setSelectedElementId(null);
+    }
+
+    const addPollElement = (pollId: string, pollTitle: string) => {
+        if (!activeSlide) return;
+        const elements = getActiveSlideElements();
+        const newEl: CanvasElement = {
+            id: crypto.randomUUID(),
+            type: 'poll' as any,
+            x: 100,
+            y: 100,
+            width: 400,
+            height: 300,
+            content: JSON.stringify({ pollId, title: pollTitle }),
+            rotation: 0,
+            style: {
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '20px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                color: '#0f172a'
+            }
+        }
+        const newElements = [...elements, newEl];
+        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
+        setSelectedElementId(newEl.id);
+    }
+
+    const addQRCodeElement = (shortCode: string, pollTitle: string) => {
+        if (!activeSlide) return;
+        const elements = getActiveSlideElements();
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/poll/' + shortCode)}`
+        const newEl: CanvasElement = {
+            id: crypto.randomUUID(),
+            type: 'qr-code' as any,
+            x: 200,
+            y: 200,
+            width: 250,
+            height: 250,
+            content: JSON.stringify({ qrUrl, title: pollTitle, shortCode }),
+            rotation: 0,
+            style: {
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px'
+            }
+        }
+        const newElements = [...elements, newEl];
+        updateSlide(activeSlide.id, { content: JSON.stringify(newElements) });
+        setSelectedElementId(newEl.id);
+    }
+
     return (
         <div className="flex flex-col h-screen bg-background">
             {/* Header / Toolbar */}
@@ -192,10 +258,13 @@ export default function SlideEditorPage() {
                     {activeSlide && (
                         <SlideCanvas
                             slide={activeSlide}
-                            onChange={(updates) => updateSlide(activeSlide.id, updates)}
-                            theme={presentation.theme}
+                            elements={getActiveSlideElements()}
+                            zoom={1}
                             selectedId={selectedElementId}
                             onSelect={setSelectedElementId}
+                            onElementUpdate={updateElement}
+                            onElementRemove={removeCanvasElement}
+                            aspectRatio={presentation.aspectRatio}
                         />
                     )}
                 </div>
@@ -222,6 +291,8 @@ export default function SlideEditorPage() {
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
                                 selectedElement={selectedElement}
                                 onElementChange={updateSelectedElement}
+                                onAddPoll={addPollElement}
+                                onAddQRCode={addQRCodeElement}
                             />
                         )}
                     </div>

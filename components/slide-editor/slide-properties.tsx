@@ -1,6 +1,9 @@
 "use client"
 
+
 import { Slide, Poll } from "@/lib/data"
+import { CanvasElement } from "./slide-canvas"
+
 import { useState, useEffect } from "react"
 import { fetchMyPolls } from "@/app/actions"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -207,7 +210,7 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                     </Label>
 
                                     {(() => {
-                                        let data = { question: '', options: [] as any[], questionImage: '' }
+                                        let data: any = { question: '', options: [], questionImage: '' }
                                         try {
                                             data = JSON.parse(selectedElement.content || '{}')
                                         } catch { }
@@ -255,7 +258,7 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                             <PanelLeft className="w-4 h-4" />
                                                         </button>
                                                         <button
-                                                            title="Image Right"
+                                                            title="Image Right         "
                                                             className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'horizontal-right' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
                                                             onClick={() => updateData({ layout: 'horizontal-right' })}
                                                         >
