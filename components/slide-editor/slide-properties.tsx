@@ -510,6 +510,28 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                         </Button>
                                                     </div>
                                                 </div>
+
+                                                <div className="space-y-4">
+                                                    <Label className="text-xs text-muted-foregroundmb-2 ">Joining Options</Label>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            variant={data.showCode ? "secondary" : "outline"}
+                                                            size="sm"
+                                                            className={`flex-1 text-xs ${data.showCode ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
+                                                            onClick={() => updateData({ showCode: !data.showCode })}
+                                                        >
+                                                            {data.showCode ? 'Hide Code' : 'Show Code'}
+                                                        </Button>
+                                                        <Button
+                                                            variant={data.showQR ? "secondary" : "outline"}
+                                                            size="sm"
+                                                            className={`flex-1 text-xs ${data.showQR ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
+                                                            onClick={() => updateData({ showQR: !data.showQR })}
+                                                        >
+                                                            {data.showQR ? 'Hide QR' : 'Show QR'}
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )
                                     })()}

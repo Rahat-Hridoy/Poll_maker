@@ -496,6 +496,7 @@ export default function SlideEditorPage() {
                             onElementUpdate={updateElementAndSave}
                             onElementRemove={removeElement}
                             aspectRatio={presentation.aspectRatio}
+                            shortCode={presentation.shortCode}
                         />
                     )}
                 </div>

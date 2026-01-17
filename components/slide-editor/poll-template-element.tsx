@@ -1,7 +1,8 @@
 "use client"
 
-import { BarChart3, Users } from "lucide-react"
+import { BarChart3, Users, QrCode } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList, CartesianGrid, PieChart, Pie, Legend } from 'recharts'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface PollOption {
     id: string
@@ -14,21 +15,25 @@ interface PollOption {
 interface PollTemplateData {
     question: string
     options: PollOption[]
-    showResults?: boolean
     questionImage?: string
     chartType?: 'bar' | 'pie'
     layout?: 'vertical' | 'horizontal-left' | 'horizontal-right' | 'split-left'
+    showCode?: boolean
+    showQR?: boolean
 }
 
 interface PollTemplateElementProps {
     data: PollTemplateData
     onVote?: (optionId: string) => void
     hasVoted?: boolean
+    shortCode?: string
 }
 
-export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElementProps) {
+export function PollTemplateElement({ data, onVote, hasVoted, shortCode = "12345" }: PollTemplateElementProps) {
     const { question, options, questionImage, chartType = 'bar' } = data
     const layout = data.layout || 'vertical'
+    const showCode = data.showCode
+    const showQR = data.showQR
 
     // Default values if data is missing
     const displayQuestion = question || "Your Poll Question Here?"
@@ -232,14 +237,25 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
 
     const HeaderSection = () => (
         !onVote ? (
-            <div className="flex items-center justify-between mb-4 w-full">
-                <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
-                    <BarChart3 className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
-                    <Users className="w-4 h-4" />
-                    <span>{totalVotes} responses</span>
+            <div className="flex flex-col w-full gap-4 mb-2">
+                {showCode && (
+                    <div className={`mx-auto bg-white border-2 border-slate-200 rounded-lg px-8 py-1 shadow-sm animate-in slide-in-from-top-4 fade-in duration-500`}>
+                        <div className="text-center flex items-center justify-center gap-3 ">
+                            <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Join with Code:  </span>
+                            <div className="text-xl font-black text-slate-800 tracking-widest mt-0.5 font-mono">{shortCode}</div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
+                        <BarChart3 className="w-5 h-5" />
+                        <span className="text-sm font-bold uppercase tracking-wider">Live Poll</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
+                        <Users className="w-4 h-4" />
+                        <span>{totalVotes} responses</span>
+                    </div>
                 </div>
             </div>
         ) : null
@@ -261,30 +277,52 @@ export function PollTemplateElement({ data, onVote, hasVoted }: PollTemplateElem
 
     const VotingOrChart = () => (
         <div className={CONTENT_AREA_CLASS}>
-            {onVote ? (
-                <div className="space-y-4 max-w-2xl mx-auto w-full">
-                    {hasVoted ? (
-                        <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
-                            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                                <Users className="h-10 w-10" />
+            <div className="flex h-full gap-6">
+                {/* QR Code Section (Left Side) */}
+                {showQR && !onVote && (
+                    <div className="flex flex-col justify-end shrink-0 mb-8 animate-in slide-in-from-left-4 fade-in duration-700 delay-150">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                            <QRCodeSVG
+                                value={`https://poll.com/join/${shortCode}`}
+                                size={120}
+                                level="H"
+                                className="w-full h-full"
+                            />
+                            <div className="text-center mt-2">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scan to Join</span>
                             </div>
-                            <h3 className="text-2xl font-black text-green-800 mb-2">Vote Submitted!</h3>
-                            <p className="text-green-600 font-medium">Thank you for participating.</p>
                         </div>
-                    ) : (
-                        displayOptions.map((opt) => (
-                            <button
-                                key={opt.id}
-                                onClick={() => onVote && onVote(opt.id)}
-                                className="w-full text-left p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all font-bold text-lg text-slate-700 flex justify-between items-center group active:scale-[0.99]"
-                            >
-                                <span>{opt.text}</span>
-                                <div className="h-6 w-6 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors" />
-                            </button>
-                        ))
-                    )}
+                    </div>
+                )}
+
+                {/* Main Content Area */}
+                <div className="flex-1 min-w-0">
+                    {onVote ? (
+                        <div className="space-y-4 max-w-2xl mx-auto w-full">
+                            {hasVoted ? (
+                                <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
+                                    <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                                        <Users className="h-10 w-10" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-green-800 mb-2">Vote Submitted!</h3>
+                                    <p className="text-green-600 font-medium">Thank you for participating.</p>
+                                </div>
+                            ) : (
+                                displayOptions.map((opt) => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => onVote && onVote(opt.id)}
+                                        className="w-full text-left p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all font-bold text-lg text-slate-700 flex justify-between items-center group active:scale-[0.99]"
+                                    >
+                                        <span>{opt.text}</span>
+                                        <div className="h-6 w-6 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors" />
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    ) : renderChart()}
                 </div>
-            ) : renderChart()}
+            </div>
         </div>
     )
 

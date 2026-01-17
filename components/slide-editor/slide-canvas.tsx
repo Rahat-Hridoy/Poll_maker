@@ -32,6 +32,7 @@ interface SlideCanvasProps {
     onElementUpdate: (id: string, updates: Partial<CanvasElement>) => void
     onElementRemove: (id: string) => void
     aspectRatio?: '16:9' | '4:3' | '1:1'
+    shortCode?: string
 }
 
 export function SlideCanvas({
@@ -42,7 +43,8 @@ export function SlideCanvas({
     onSelect,
     onElementUpdate,
     onElementRemove,
-    aspectRatio = '16:9'
+    aspectRatio = '16:9',
+    shortCode
 }: SlideCanvasProps) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [isRotating, setIsRotating] = useState<string | null>(null)
@@ -294,6 +296,7 @@ export function SlideCanvas({
                                                     return { question: '', options: [] }
                                                 }
                                             })()}
+                                            shortCode={shortCode}
                                         />
                                     )}
 
