@@ -17,7 +17,7 @@ export function Ruler({ orientation, length, unit = 100, zoom = 1, gap = 0 }: Ru
     const ticks = useMemo(() => {
         const items = []
         // Add some extra length just in case
-        const totalLength = length + 50
+        const totalLength = length
 
         for (let i = 0; i <= totalLength; i += 10) {
             const isMajor = i % 100 === 0
@@ -35,16 +35,16 @@ export function Ruler({ orientation, length, unit = 100, zoom = 1, gap = 0 }: Ru
 
     return (
         <div
-            className={`absolute bg-muted text-[8px] text-muted-foreground select-none flex overflow-hidden z-10 border-border`}
+            className={`absolute bg-muted text-[8px] text-muted-foreground select-none flex overflow-hidden z-10`}
             style={{
                 [orientation === 'horizontal' ? 'left' : 'top']: 0,
                 [orientation === 'horizontal' ? 'top' : 'left']: -(thickness + gap),
                 width: orientation === 'horizontal' ? length : thickness,
                 height: orientation === 'horizontal' ? thickness : length,
-                borderBottom: orientation === 'horizontal' ? '1px solid' : 'none',
-                borderRight: orientation === 'vertical' ? '1px solid' : 'none',
-                borderTop: orientation === 'horizontal' ? '' : 'none',
-                borderLeft: orientation === 'vertical' ? ' ' : 'none',
+                borderBottom: orientation === 'horizontal' ? '1px solid var(--border)' : 'none',
+                borderRight: orientation === 'vertical' ? '1px solid var(--border)' : 'none',
+                borderLeft: orientation === 'vertical' ? '1px solid var(--border)' : 'none',
+                borderTop: orientation === 'horizontal' ? '1px solid var(--border)' : 'none',
             }}
         >
             <svg

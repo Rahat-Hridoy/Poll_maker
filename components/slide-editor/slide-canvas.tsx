@@ -56,7 +56,7 @@ export function SlideCanvas({
     const baseWidth = 1000 // Fixed internal coordinate system width
     const getBaseHeight = (ratio: string) => {
         const [w, h] = ratio.split(':').map(Number)
-        return (baseWidth * h) / w
+        return Math.round((baseWidth * h) / w)
     }
     const baseHeight = getBaseHeight(aspectRatio)
 
