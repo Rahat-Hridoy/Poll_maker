@@ -130,7 +130,7 @@ export function SlideCanvas({
                         width: '100%',
                         height: '100%',
                         backgroundColor: slide.background?.startsWith('#') ? slide.background : 'white',
-                        backgroundImage: slide.background?.startsWith('http') ? `url(${slide.background})` : 'none',
+                        backgroundImage: slide.background?.startsWith('http') || slide.background?.startsWith('data:image') ? `url(${slide.background})` : 'none',
                         backgroundPosition: 'center',
                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
                     }}

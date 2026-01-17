@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2, PieChart, PanelLeft, PanelRight, Columns, Rows } from "lucide-react"
+import { PaintBucket, ImageIcon, Layout, BoxSelect, Type, Move, Trash2, QrCode, BarChart3, MessageSquare, ListTodo, Loader2, Trophy, CheckCircle2, PieChart, PanelLeft, PanelRight, Columns, Rows, Plus } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { RichTextInput } from "@/components/ui/rich-text-input"
 import { Separator } from "@/components/ui/separator"
@@ -78,6 +78,17 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
         }
         loadPolls()
     }, [])
+    const handleSlideBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                onChange({ background: reader.result as string })
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
     return (
         <div className="p-4">
             <h3 className="font-semibold mb-4 text-sm">
@@ -656,14 +667,23 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                     onClick={() => onChange({ background: color })}
                                 />
                             ))}
+                            {/* Custom Color Input Wrapper */}
+                            <div className="w-8 h-8 rounded-full overflow-hidden relative border shadow-sm transition-transform hover:scale-105 group">
+                                <input
+                                    type="color"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    value={slide.background?.startsWith('#') ? slide.background : '#ffffff'}
+                                    onChange={(e) => onChange({ background: e.target.value })}
+                                />
+                                <div
+                                    className="w-full h-full flex items-center justify-center bg-white"
+                                    style={{ backgroundColor: slide.background?.startsWith('#') ? slide.background : undefined }}
+                                >
+                                    <Plus className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Input
-                                value={slide.background || ''}
-                                onChange={(e) => onChange({ background: e.target.value })}
-                                placeholder="Custom Hex (#000000)"
-                            />
-                        </div>
+
                     </div>
 
                     <div className="space-y-3">
@@ -671,12 +691,38 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                             <ImageIcon className="w-4 h-4" />
                             Background Image
                         </Label>
-                        <Input
-                            value={slide.background?.startsWith('http') ? slide.background : ''}
-                            onChange={(e) => onChange({ background: e.target.value })}
-                            placeholder="Image URL..."
-                        />
-                        <p className="text-xs text-muted-foreground">Paste a URL to an image to set it as background.</p>
+
+                        {slide.background?.startsWith('data:image') || slide.background?.startsWith('http') ? (
+                            <div className="relative w-full h-32 border rounded-md overflow-hidden bg-slate-100 group">
+                                <img src={slide.background} alt="Background" className="w-full h-full object-cover" />
+                                <Button
+                                    variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => onChange({ background: '#ffffff' })}
+                                >
+                                    <Trash2 className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="w-full">
+                                <label
+                                    htmlFor="slide-background-upload"
+                                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 text-slate-400 gap-2 hover:text-slate-600 transition-colors"
+                                >
+                                    <ImageIcon className="w-6 h-6 opacity-50" />
+                                    <span className="text-xs font-medium">Upload Background Image</span>
+                                </label>
+                                <input
+                                    id="slide-background-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleSlideBackgroundUpload}
+                                />
+                            </div>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Upload an image to set as slide background.
+                        </p>
                     </div>
                 </TabsContent>
 

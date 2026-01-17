@@ -53,7 +53,7 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                     transform: `scale(${effectiveScale})`,
                     transformOrigin: 'top left',
                     backgroundColor: slide.background?.startsWith('#') ? slide.background : 'white',
-                    backgroundImage: slide.background?.startsWith('http') ? `url(${slide.background})` : 'none',
+                    backgroundImage: slide.background?.startsWith('http') || slide.background?.startsWith('data:image') ? `url(${slide.background})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     position: 'absolute',
