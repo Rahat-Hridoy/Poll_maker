@@ -21,6 +21,13 @@ export default function SlideDashboard() {
 
     useEffect(() => {
         loadPresentations()
+
+        const onFocus = () => {
+            loadPresentations()
+        }
+
+        window.addEventListener("focus", onFocus)
+        return () => window.removeEventListener("focus", onFocus)
     }, [])
 
     async function loadPresentations() {
@@ -37,6 +44,7 @@ export default function SlideDashboard() {
     async function handleCreate() {
         try {
             const newPres = await createPresentationAction("New Presentation")
+            setPresentations(prev => [newPres, ...prev])
             window.open(`/editor/${newPres.id}`, '_blank')
         } catch (error) {
             console.error("Failed to create presentation", error)
