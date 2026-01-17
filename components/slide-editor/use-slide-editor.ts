@@ -6,20 +6,22 @@ import { Slide } from "@/lib/data"
 
 export function useSlideEditor(initialSlide: Slide | null) {
     const [elements, setElements] = useState<CanvasElement[]>([])
+    const [background, setBackground] = useState<string>('#ffffff')
     const [clipboard, setClipboard] = useState<CanvasElement | null>(null)
-    const [history, setHistory] = useState<{ past: CanvasElement[][], future: CanvasElement[][] }>({ past: [], future: [] })
+    const [history, setHistory] = useState<{ past: { elements: CanvasElement[], background: string }[], future: { elements: CanvasElement[], background: string }[] }>({ past: [], future: [] })
     const [zoom, setZoom] = useState(1)
     const [selectedId, setSelectedId] = useState<string | null>(null)
-    const loadedRef = useRef<{ id: string, content: string } | null>(null)
+    const loadedRef = useRef<{ id: string, content: string, background: string } | null>(null)
 
     // Load elements from slide content
     useEffect(() => {
         if (!initialSlide) return
 
         const contentStr = initialSlide.content || "[]"
+        const bgStr = initialSlide.background || "#ffffff"
 
-        // Skip if this slide ID + content is already what we have loaded
-        if (loadedRef.current?.id === initialSlide.id && loadedRef.current?.content === contentStr) {
+        // Skip if this slide ID + content + background is already what we have loaded
+        if (loadedRef.current?.id === initialSlide.id && loadedRef.current?.content === contentStr && loadedRef.current?.background === bgStr) {
             return
         }
 
@@ -35,14 +37,14 @@ export function useSlideEditor(initialSlide: Slide | null) {
             const nextStr = JSON.stringify(parsed)
 
             // Update ref immediately to the incoming string to avoid re-triggering
-            loadedRef.current = { id: initialSlide.id, content: contentStr }
+            loadedRef.current = { id: initialSlide.id, content: contentStr, background: bgStr }
 
-            // Only update elements if their content representation changed
-            // eslint-disable-next-line react-hooks/set-state-in-effect
+            // Only update state if it changed
             setElements(prev => {
                 if (JSON.stringify(prev) === nextStr) return prev
                 return parsed
             })
+            setBackground(bgStr)
 
             // Only clear history if it's a completely different slide ID
             if (loadedRef.current?.id !== initialSlide.id) {
@@ -51,22 +53,35 @@ export function useSlideEditor(initialSlide: Slide | null) {
         } catch (e) {
             console.error("Failed to parse slide content", e)
             setElements([])
-            loadedRef.current = { id: initialSlide.id, content: "[]" }
+            setBackground("#ffffff")
+            loadedRef.current = { id: initialSlide.id, content: "[]", background: "#ffffff" }
         }
-    }, [initialSlide?.id, initialSlide?.content])
+    }, [initialSlide?.id, initialSlide?.content, initialSlide?.background])
 
     // Update elements and save history
     const updateElements = useCallback((newElements: CanvasElement[], save = true) => {
-        setElements(prev => {
+        setElements(prevElements => {
             if (save) {
                 setHistory(hp => ({
-                    past: [...hp.past, prev],
+                    past: [...hp.past, { elements: prevElements, background }],
                     future: []
                 }))
             }
             return newElements
         })
-    }, [])
+    }, [background])
+
+    const updateBackground = useCallback((newBackground: string, save = true) => {
+        setBackground(prevBg => {
+            if (save) {
+                setHistory(hp => ({
+                    past: [...hp.past, { elements, background: prevBg }],
+                    future: []
+                }))
+            }
+            return newBackground
+        })
+    }, [elements])
 
     const undo = useCallback(() => {
         if (history.past.length === 0) return
@@ -75,10 +90,11 @@ export function useSlideEditor(initialSlide: Slide | null) {
 
         setHistory(prev => ({
             past: newPast,
-            future: [elements, ...prev.future]
+            future: [{ elements, background }, ...prev.future]
         }))
-        setElements(previous)
-    }, [history, elements])
+        setElements(previous.elements)
+        setBackground(previous.background)
+    }, [history, elements, background])
 
     const redo = useCallback(() => {
         if (history.future.length === 0) return
@@ -86,11 +102,12 @@ export function useSlideEditor(initialSlide: Slide | null) {
         const newFuture = history.future.slice(1)
 
         setHistory(prev => ({
-            past: [...prev.past, elements],
+            past: [...prev.past, { elements, background }],
             future: newFuture
         }))
-        setElements(next)
-    }, [history, elements])
+        setElements(next.elements)
+        setBackground(next.background)
+    }, [history, elements, background])
 
     const addElement = useCallback((type: ElementType, initialContent?: string) => {
         const isLine = type === 'line' || type === 'arrow-line' || type.includes('wave')
@@ -241,6 +258,7 @@ export function useSlideEditor(initialSlide: Slide | null) {
 
     return {
         elements,
+        background,
         selectedId,
         setSelectedId,
         zoom,
@@ -258,6 +276,7 @@ export function useSlideEditor(initialSlide: Slide | null) {
         addPollQRCode,
         undo,
         redo,
-        setElements: updateElements
+        setElements: updateElements,
+        setBackground: updateBackground,
     }
 }

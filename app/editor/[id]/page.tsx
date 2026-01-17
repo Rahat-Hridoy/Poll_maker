@@ -253,10 +253,13 @@ export default function SlideEditorPage() {
         addPollQRCode,
         undo,
         redo,
-        setElements
+        setElements,
+        background,
+        setBackground
     } = useSlideEditor(activeSlide)
 
     const lastSyncedContentRef = useRef<string | null>(null)
+    const lastSyncedBackgroundRef = useRef<string | null>(null)
     const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     // Sync elements changes back to presentation state to be ready for save
@@ -272,9 +275,11 @@ export default function SlideEditorPage() {
         }
 
         const currentContent = JSON.stringify(elements)
+        const currentBackground = background
 
-        // Only trigger update if content is actually different and not what we last synced
-        if (currentContent !== activeSlide.content && currentContent !== lastSyncedContentRef.current) {
+        // Only trigger update if content/background is actually different and not what we last synced
+        if ((currentContent !== activeSlide.content && currentContent !== lastSyncedContentRef.current) ||
+            (currentBackground !== activeSlide.background && currentBackground !== lastSyncedBackgroundRef.current)) {
 
             // Clear existing timeout
             if (syncTimeoutRef.current) {
@@ -284,7 +289,8 @@ export default function SlideEditorPage() {
             // Debounce the update to the parent state
             syncTimeoutRef.current = setTimeout(() => {
                 lastSyncedContentRef.current = currentContent
-                updateSlide(activeSlide.id, { content: currentContent })
+                lastSyncedBackgroundRef.current = currentBackground
+                updateSlide(activeSlide.id, { content: currentContent, background: currentBackground })
             }, 1000) // Increased to 1s to rely more on explicit saves or final debounce
         }
 
@@ -293,7 +299,7 @@ export default function SlideEditorPage() {
                 clearTimeout(syncTimeoutRef.current)
             }
         }
-    }, [elements, activeSlide?.id, activeSlide?.content])
+    }, [elements, background, activeSlide?.id, activeSlide?.content, activeSlide?.background])
 
     // Manual Save Wrapper to ensure we save the LATEST elements state
     const handleSaveWithSync = async () => {
@@ -301,13 +307,14 @@ export default function SlideEditorPage() {
 
         // Force sync current elements before saving
         const currentContent = JSON.stringify(elements)
+        const currentBackground = background
 
-        if (currentContent !== activeSlide.content) {
-            updateSlide(activeSlide.id, { content: currentContent })
+        if (currentContent !== activeSlide.content || currentBackground !== activeSlide.background) {
+            updateSlide(activeSlide.id, { content: currentContent, background: currentBackground })
             // We need to wait a tick for state to update or pass the updated presentation directly
             const updatedPresentation = {
                 ...presentation!,
-                slides: presentation!.slides.map(s => s.id === activeSlide.id ? { ...s, content: currentContent } : s)
+                slides: presentation!.slides.map(s => s.id === activeSlide.id ? { ...s, content: currentContent, background: currentBackground } : s)
             }
             await handleSave(updatedPresentation)
             return
@@ -478,7 +485,10 @@ export default function SlideEditorPage() {
                 <div className="flex-1 bg-muted/30 overflow-hidden flex flex-col relative z-0" onClick={() => setSelectedId(null)}>
                     {activeSlide && (
                         <SlideCanvas
-                            slide={activeSlide}
+                            slide={{
+                                ...activeSlide,
+                                background: background
+                            }}
                             elements={elements}
                             zoom={zoom}
                             selectedId={selectedId}
@@ -506,8 +516,24 @@ export default function SlideEditorPage() {
                     <div className={`w-72 h-full overflow-y-auto ${rightOpen ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
                         {activeSlide && (
                             <SlideProperties
-                                slide={activeSlide}
-                                onChange={(updates) => updateSlide(activeSlide.id, updates)}
+                                slide={{
+                                    ...activeSlide,
+                                    background: background
+                                }}
+                                onChange={(updates) => {
+                                    // Handle background updates via hook to ensure Undo/Redo tracking
+                                    if (updates.background !== undefined) {
+                                        setBackground(updates.background)
+                                        // We don't verify 'others' here because background is usually updated standalone in Properties
+                                        // But if there are mixed updates, we should sync them.
+                                        const { background: _, ...others } = updates
+                                        if (Object.keys(others).length > 0) {
+                                            updateSlide(activeSlide.id, others)
+                                        }
+                                    } else {
+                                        updateSlide(activeSlide.id, updates)
+                                    }
+                                }}
                                 presentationTheme={presentation.theme}
                                 onThemeChange={(theme) => setPresentation({ ...presentation, theme })}
                                 selectedElement={Array.isArray(elements) ? (elements.find(e => e.id === selectedId) || null) : null}
