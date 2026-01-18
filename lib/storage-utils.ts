@@ -1,28 +1,44 @@
 import { Presentation } from "./data";
+import { get, set } from 'idb-keyval';
 
 const STORAGE_KEY = "poll_maker_presentations";
 
 export const LocalPresentationStore = {
-    getAllPresentations: (): Presentation[] => {
+    getAllPresentations: async (): Promise<Presentation[]> => {
         if (typeof window === "undefined") return [];
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            return stored ? JSON.parse(stored) : [];
+            // Migration Strategy: Check LocalStorage first
+            const localStored = localStorage.getItem(STORAGE_KEY);
+            if (localStored) {
+                try {
+                    console.log("Migrating presentations from LocalStorage to IndexedDB...");
+                    const parsed = JSON.parse(localStored);
+                    await set(STORAGE_KEY, parsed);
+                    localStorage.removeItem(STORAGE_KEY); // Clear old storage to free up quota
+                    return parsed;
+                } catch (e) {
+                    console.error("Migration failed:", e);
+                }
+            }
+
+            // Normal IndexedDB retrieval
+            const stored = await get<Presentation[]>(STORAGE_KEY);
+            return stored || [];
         } catch (e) {
-            console.error("Failed to load from local storage", e);
+            console.error("Failed to load from storage", e);
             return [];
         }
     },
 
-    getPresentation: (id: string): Presentation | null => {
-        const presentations = LocalPresentationStore.getAllPresentations();
+    getPresentation: async (id: string): Promise<Presentation | null> => {
+        const presentations = await LocalPresentationStore.getAllPresentations();
         return presentations.find(p => p.id === id) || null;
     },
 
-    savePresentation: (presentation: Presentation) => {
+    savePresentation: async (presentation: Presentation) => {
         if (typeof window === "undefined") return;
         try {
-            const presentations = LocalPresentationStore.getAllPresentations();
+            const presentations = await LocalPresentationStore.getAllPresentations();
             const index = presentations.findIndex(p => p.id === presentation.id);
 
             if (index >= 0) {
@@ -32,28 +48,28 @@ export const LocalPresentationStore = {
                 presentations.unshift(presentation); // Add new to top
             }
 
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(presentations));
+            await set(STORAGE_KEY, presentations);
         } catch (e) {
-            console.error("Failed to save to local storage", e);
+            console.error("Failed to save to storage", e);
         }
     },
 
-    deletePresentation: (id: string) => {
+    deletePresentation: async (id: string) => {
         if (typeof window === "undefined") return;
         try {
-            const presentations = LocalPresentationStore.getAllPresentations();
+            const presentations = await LocalPresentationStore.getAllPresentations();
             const filtered = presentations.filter(p => p.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+            await set(STORAGE_KEY, filtered);
         } catch (e) {
-            console.error("Failed to delete from local storage", e);
+            console.error("Failed to delete from storage", e);
         }
     },
 
     // Sync helper: Merges server list with local list, preferring newer modified times
-    syncWithServer: (serverPresentations: Presentation[]) => {
+    syncWithServer: async (serverPresentations: Presentation[]): Promise<Presentation[]> => {
         if (typeof window === "undefined") return serverPresentations;
 
-        const local = LocalPresentationStore.getAllPresentations();
+        const local = await LocalPresentationStore.getAllPresentations();
         const mergedMap = new Map<string, Presentation>();
 
         // Add server items first

@@ -38,13 +38,13 @@ export default function SlideDashboard() {
 
             // Sync with local storage to get the comprehensive list
             // This handles Vercel data loss by filling gaps from localStorage
-            const merged = LocalPresentationStore.syncWithServer(serverData)
+            const merged = await LocalPresentationStore.syncWithServer(serverData)
 
             setPresentations(merged)
         } catch (error) {
             console.error("Failed to load presentations", error)
             // Still try to load local if server fails
-            const local = LocalPresentationStore.getAllPresentations()
+            const local = await LocalPresentationStore.getAllPresentations()
             setPresentations(local)
         } finally {
             setLoading(false)
@@ -56,7 +56,7 @@ export default function SlideDashboard() {
             const newPres = await createPresentationAction("New Presentation")
 
             // Save locally immediately to ensure persistence across the redirect
-            LocalPresentationStore.savePresentation(newPres)
+            await LocalPresentationStore.savePresentation(newPres)
 
             setPresentations(prev => [newPres, ...prev])
             window.open(`/editor/${newPres.id}`, '_blank')
@@ -68,7 +68,7 @@ export default function SlideDashboard() {
     async function handleDelete(id: string) {
         if (confirm("Are you sure you want to delete this presentation?")) {
             await deletePresentationAction(id)
-            LocalPresentationStore.deletePresentation(id)
+            await LocalPresentationStore.deletePresentation(id)
             setPresentations(prev => prev.filter(p => p.id !== id))
         }
     }

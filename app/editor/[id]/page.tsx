@@ -48,7 +48,7 @@ export default function SlideEditorPage() {
 
             // Fallback to local storage if not found on server (common in Vercel serverless)
             if (!data) {
-                const localData = LocalPresentationStore.getPresentation(params.id as string)
+                const localData = await LocalPresentationStore.getPresentation(params.id as string)
                 if (localData) {
                     console.log("Loaded from local storage fallback")
                     data = localData
@@ -80,7 +80,7 @@ export default function SlideEditorPage() {
             const updated = { ...presToSave, updatedAt: new Date().toISOString() }
 
             // Save to Local Storage FIRST (Sync fail-safe)
-            LocalPresentationStore.savePresentation(updated)
+            await LocalPresentationStore.savePresentation(updated)
 
             // Attempt Server Save
             await updatePresentationAction(updated)

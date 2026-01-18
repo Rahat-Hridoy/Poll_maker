@@ -638,7 +638,7 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                     </Label>
 
                                     {(() => {
-                                        let data = { title: '', subtitle: '' }
+                                        let data: any = { title: '', subtitle: '', questionImage: '' }
                                         try {
                                             data = JSON.parse(selectedElement?.content || '{}')
                                         } catch { }
@@ -647,15 +647,94 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                             onElementChange({ content: JSON.stringify({ ...data, ...newData }) })
                                         }
 
+                                        const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                const reader = new FileReader()
+                                                reader.onloadend = () => {
+                                                    updateData({ questionImage: reader.result as string })
+                                                }
+                                                reader.readAsDataURL(file)
+                                            }
+                                        }
+
                                         return (
                                             <div className="space-y-4">
+                                                {/* Layout Selector */}
+                                                <div className="space-y-1">
+                                                    <label className="text-xs text-muted-foreground">Layout Theme</label>
+                                                    <div className="flex bg-slate-100 p-1 rounded-md gap-1">
+                                                        <button
+                                                            title="Vertical (Image Top)"
+                                                            className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${!data['layout'] || data['layout'] === 'vertical' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ layout: 'vertical' })}
+                                                        >
+                                                            <Rows className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            title="Image Left"
+                                                            className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'horizontal-left' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ layout: 'horizontal-left' })}
+                                                        >
+                                                            <PanelLeft className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            title="Image Right"
+                                                            className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'horizontal-right' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ layout: 'horizontal-right' })}
+                                                        >
+                                                            <PanelRight className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            title="Split Screen"
+                                                            className={`flex-1 flex items-center justify-center py-2 rounded-sm transition-all ${data['layout'] === 'split-left' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-900'}`}
+                                                            onClick={() => updateData({ layout: 'split-left' })}
+                                                        >
+                                                            <Columns className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                                 <div className="space-y-2">
                                                     <label className="text-xs text-muted-foreground">Title</label>
-                                                    <Input
-                                                        value={data.title}
-                                                        onChange={(e) => updateData({ title: e.target.value })}
-                                                        placeholder="Q&A Session"
-                                                    />
+                                                    <div className="flex gap-2 items-start">
+                                                        {/* Compact Image Uploader */}
+                                                        <div className="shrink-0">
+                                                            {data.questionImage ? (
+                                                                <div className="relative w-10 h-10 border rounded-md overflow-hidden group">
+                                                                    <img src={data.questionImage} alt="Title" className="w-full h-full object-cover" />
+                                                                    <button
+                                                                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                        onClick={() => updateData({ questionImage: '' })}
+                                                                    >
+                                                                        <Trash2 className="w-3 h-3 text-white" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <label
+                                                                        htmlFor="qa-image-upload"
+                                                                        className="flex items-center justify-center w-10 h-10 border border-dashed rounded-md cursor-pointer hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors"
+                                                                        title="Add Image"
+                                                                    >
+                                                                        <ImageIcon className="w-4 h-4" />
+                                                                    </label>
+                                                                    <input
+                                                                        id="qa-image-upload"
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        className="hidden"
+                                                                        onChange={handleImageUpload}
+                                                                    />
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                        <Input
+                                                            value={data.title}
+                                                            onChange={(e) => updateData({ title: e.target.value })}
+                                                            placeholder="Q&A Session Title"
+                                                            className="flex-1"
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-xs text-muted-foreground">Subtitle / Instructions</label>
@@ -664,6 +743,28 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                         onChange={(e) => updateData({ subtitle: e.target.value })}
                                                         placeholder="Ask your questions..."
                                                     />
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <Label className="text-xs text-muted-foreground mb-2 ">Joining Options</Label>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            variant={data.showCode ? "secondary" : "outline"}
+                                                            size="sm"
+                                                            className={`flex-1 text-xs ${data.showCode ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}`}
+                                                            onClick={() => updateData({ showCode: !data.showCode })}
+                                                        >
+                                                            {data.showCode ? 'Hide Code' : 'Show Code'}
+                                                        </Button>
+                                                        <Button
+                                                            variant={data.showQR ? "secondary" : "outline"}
+                                                            size="sm"
+                                                            className={`flex-1 text-xs ${data.showQR ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}`}
+                                                            onClick={() => updateData({ showQR: !data.showQR })}
+                                                        >
+                                                            {data.showQR ? 'Hide QR' : 'Show QR'}
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )

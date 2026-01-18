@@ -8,6 +8,7 @@ import { X, BoxSelect } from "lucide-react"
 import { SlideTextEditor } from "./slide-text-editor"
 import { SlidePollElement } from "./slide-poll-element"
 import { PollTemplateElement } from "./poll-template-element"
+import { QATemplateElement } from "./qa-template-element"
 
 export type ElementType = "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template"
 
@@ -294,6 +295,19 @@ export function SlideCanvas({
                                                     return JSON.parse(el.content || '{}')
                                                 } catch {
                                                     return { question: '', options: [] }
+                                                }
+                                            })()}
+                                            shortCode={shortCode}
+                                        />
+                                    )}
+
+                                    {el.type === 'qa-template' && (
+                                        <QATemplateElement
+                                            data={(() => {
+                                                try {
+                                                    return JSON.parse(el.content || '{}')
+                                                } catch {
+                                                    return { title: '', subtitle: '' }
                                                 }
                                             })()}
                                             shortCode={shortCode}
