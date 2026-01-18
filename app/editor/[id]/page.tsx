@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { fetchPresentation, updatePresentationAction } from "@/app/actions/presentation"
 import { Presentation, Slide } from "@/lib/data"
-import { Loader2, ArrowLeft, Save, Play, ChevronLeft, Download, Share2, Presentation as PresentIcon, FileText, MonitorPlay, ChevronDown } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Play, ChevronLeft, Download, Share2, Presentation as PresentIcon, FileText, MonitorPlay, ChevronDown, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import {
@@ -374,7 +374,7 @@ export default function SlideEditorPage() {
                 </div>
 
                 {/* Centered Preview Button */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2">
                     <Button
                         variant="secondary"
                         size="sm"
@@ -384,6 +384,17 @@ export default function SlideEditorPage() {
                         <Play className="w-3 h-3 fill-current" />
                         Preview
                     </Button>
+
+                    <Link href={`/editor/${presentation.id}/results`} target="_blank">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-secondary/50 hover:bg-secondary text-secondary-foreground gap-2 shadow-sm"
+                        >
+                            <BarChart3 className="w-3 h-3" />
+                            Results
+                        </Button>
+                    </Link>
                 </div>
 
                 <div className="flex items-center gap-3">
