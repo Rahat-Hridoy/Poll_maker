@@ -20,7 +20,7 @@ export async function updatePresenterStateAction(presentationId: string, slideIn
     revalidatePath(`/live/${presentationId}`);
 }
 
-export async function submitVoteAction(presentationId: string, slideId: string, optionId: string) {
+export async function submitVoteAction(presentationId: string, slideId: string, optionId: string, userName: string = 'Anonymous') {
     const presentation = await getPresentation(presentationId);
     if (!presentation) return { error: "Presentation not found" };
 
@@ -35,16 +35,10 @@ export async function submitVoteAction(presentationId: string, slideId: string, 
         return { error: "Failed to parse slide content" };
     }
 
-    // Find the poll element (poll-template or poll)
-    // We assume there's one poll per slide usually, or we find the right one if we had elementId.
-    // For simplicity, we find the first element associated with a poll.
-    // Actually, `submitVote` usually implies finding the poll.
-    // But our templates store data inside `content` string.
+    // Find the poll/quiz element
+    const pollElementIndex = elements.findIndex(el => ['poll-template', 'quiz-template', 'qa-template'].includes(el.type));
 
-    // Strategy: Look for 'poll-template'
-    const pollElementIndex = elements.findIndex(el => el.type === 'poll-template');
-
-    if (pollElementIndex === -1) return { error: "No poll found on this slide" };
+    if (pollElementIndex === -1) return { error: "No poll/quiz found on this slide" };
 
     const pollElement = elements[pollElementIndex];
     let pollData;
@@ -54,11 +48,28 @@ export async function submitVoteAction(presentationId: string, slideId: string, 
         return { error: "Invalid poll data" };
     }
 
-    // Update votes
-    const optionIndex = pollData.options.findIndex((o: any) => o.id === optionId);
-    if (optionIndex === -1) return { error: "Option not found" };
+    // Initialize responses array if needed
+    if (!pollData.responses) {
+        pollData.responses = [];
+    }
 
-    pollData.options[optionIndex].votes = (pollData.options[optionIndex].votes || 0) + 1;
+    // Check if user already voted (optional check, client should handle it mostly, but good for safety)
+    // For now we allow multiple votes from same name if testing, or we could strict it.
+    // Let's just append.
+
+    // Update votes count (Legacy/Simple count)
+    const optionIndex = pollData.options.findIndex((o: any) => o.id === optionId);
+    if (optionIndex !== -1) {
+        pollData.options[optionIndex].votes = (pollData.options[optionIndex].votes || 0) + 1;
+    }
+
+    // Store detailed response
+    pollData.responses.push({
+        userId: crypto.randomUUID(), // Or session ID if we had one
+        userName: userName,
+        optionId: optionId,
+        timestamp: new Date().toISOString()
+    });
 
     // Save back
     pollElement.content = JSON.stringify(pollData);
@@ -73,6 +84,7 @@ export async function submitVoteAction(presentationId: string, slideId: string, 
     // Revalidate paths for real-time updates
     revalidatePath(`/presentation/${presentationId}`);
     revalidatePath(`/live/${presentationId}`);
+    revalidatePath(`/editor/${presentationId}/results`); // Ensure results page updates
 
     return { success: true };
 }

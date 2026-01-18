@@ -15,12 +15,13 @@ interface SlideRendererProps {
     interactive?: boolean
     onPollVote?: (optionId: string) => void
     hasVoted?: boolean
+    shortCode?: string
 }
 
 // Coordinate system is based on 1000px width
 const BASE_WIDTH = 1000
 
-export function SlideRenderer({ slide, width = 1000, height, scale: externalScale, interactive = false, onPollVote, hasVoted }: SlideRendererProps) {
+export function SlideRenderer({ slide, width = 1000, height, scale: externalScale, interactive = false, onPollVote, hasVoted, shortCode }: SlideRendererProps) {
     // 16:9 Aspect Ratio default if height not provided
     const baseHeight = height || (BASE_WIDTH * 9) / 16
 

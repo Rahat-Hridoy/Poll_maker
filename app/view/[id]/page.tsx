@@ -63,6 +63,43 @@ function SlideViewer({ slide, aspectRatio = '16:9', onVote, hasVoted }: SlideVie
     )
 }
 
+function IdentityModal({ onJoin }: { onJoin: (name: string) => void }) {
+    const [name, setName] = useState("")
+
+    return (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full space-y-6 shadow-2xl animate-in zoom-in-95 duration-300">
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold text-slate-900">Join Presentation</h2>
+                    <p className="text-slate-500">Please enter your name to participate</p>
+                </div>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">Your Name</label>
+                        <input
+                            autoFocus
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && name.trim() && onJoin(name)}
+                            placeholder="e.g. John Doe"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                        />
+                    </div>
+                    <Button
+                        size="lg"
+                        className="w-full text-lg h-12 rounded-xl"
+                        disabled={!name.trim()}
+                        onClick={() => onJoin(name)}
+                    >
+                        Join Now
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function UserViewPage() {
     const params = useParams()
     const searchParams = useSearchParams()
@@ -75,6 +112,19 @@ export default function UserViewPage() {
     const [loading, setLoading] = useState(true)
     const [fullScreen, setFullScreen] = useState(false)
     const [hasVotedMap, setHasVotedMap] = useState<Record<string, boolean>>({})
+    const [userName, setUserName] = useState<string | null>(null)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+        const storedName = localStorage.getItem('poll_maker_username')
+        if (storedName) setUserName(storedName)
+    }, [])
+
+    const handleJoin = (name: string) => {
+        localStorage.setItem('poll_maker_username', name)
+        setUserName(name)
+    }
 
     // Poll for updates (sync with presenter)
     useEffect(() => {
@@ -139,7 +189,7 @@ export default function UserViewPage() {
         setHasVotedMap(prev => ({ ...prev, [currentSlide.id]: true }))
 
         try {
-            await submitVoteAction(presentation.id, currentSlide.id, optionId)
+            await submitVoteAction(presentation.id, currentSlide.id, optionId, userName || 'Anonymous')
             // No need to reload presentation immediately as we just want to show success state
         } catch (e) {
             console.error("Vote failed", e)
@@ -165,6 +215,10 @@ export default function UserViewPage() {
 
     if (loading) return <div className="h-screen w-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>
     if (!presentation) return <div className="h-screen w-screen bg-black flex items-center justify-center text-white">Presentation not found</div>
+
+    if (!userName && mounted) {
+        return <IdentityModal onJoin={handleJoin} />
+    }
 
     const currentSlide = presentation.slides[currentSlideIndex]
 
