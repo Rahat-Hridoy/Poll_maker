@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { fetchPresentation, updatePresentationAction } from "@/app/actions/presentation"
 import { Presentation, Slide } from "@/lib/data"
+import { LocalPresentationStore } from "@/lib/storage-utils"
 import { Loader2, ArrowLeft, Save, Play, ChevronLeft, Download, Share2, Presentation as PresentIcon, FileText, MonitorPlay, ChevronDown, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -42,13 +43,26 @@ export default function SlideEditorPage() {
     async function loadPresentation() {
         if (!params.id) return
         try {
-            const data = await fetchPresentation(params.id as string)
+            // Try fetching from server first
+            let data = await fetchPresentation(params.id as string)
+
+            // Fallback to local storage if not found on server (common in Vercel serverless)
+            if (!data) {
+                const localData = LocalPresentationStore.getPresentation(params.id as string)
+                if (localData) {
+                    console.log("Loaded from local storage fallback")
+                    data = localData
+                }
+            }
+
             if (data) {
                 setPresentation(data)
                 if (data.slides.length > 0) {
                     setActiveSlideId(data.slides[0].id)
                 }
             } else {
+                // Only redirect if absolutely unavailable in both
+                // We might want to keep it on screen or show error
                 router.push("/admin/slides")
             }
         } catch (error) {
@@ -64,11 +78,19 @@ export default function SlideEditorPage() {
         setSaving(true)
         try {
             const updated = { ...presToSave, updatedAt: new Date().toISOString() }
+
+            // Save to Local Storage FIRST (Sync fail-safe)
+            LocalPresentationStore.savePresentation(updated)
+
+            // Attempt Server Save
             await updatePresentationAction(updated)
+
             setPresentation(updated) // Update local state to match saved
         } catch (error) {
             console.error("Failed to save", error)
+            // Even if server fails, we have it locally, so maybe don't alert heavily?
         } finally {
+            setLoading(false) // Correction: Was setSaving(false) in original, keeping setSaving
             setSaving(false)
         }
     }

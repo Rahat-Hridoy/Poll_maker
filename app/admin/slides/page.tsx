@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Presentation } from "@/lib/data"
 import { fetchPresentations, createPresentationAction, deletePresentationAction } from "@/app/actions/presentation"
+import { LocalPresentationStore } from "@/lib/storage-utils"
 
 export default function SlideDashboard() {
     const [presentations, setPresentations] = useState<Presentation[]>([])
@@ -32,10 +33,19 @@ export default function SlideDashboard() {
 
     async function loadPresentations() {
         try {
-            const data = await fetchPresentations()
-            setPresentations(data)
+            // Fetch server data
+            const serverData = await fetchPresentations()
+
+            // Sync with local storage to get the comprehensive list
+            // This handles Vercel data loss by filling gaps from localStorage
+            const merged = LocalPresentationStore.syncWithServer(serverData)
+
+            setPresentations(merged)
         } catch (error) {
             console.error("Failed to load presentations", error)
+            // Still try to load local if server fails
+            const local = LocalPresentationStore.getAllPresentations()
+            setPresentations(local)
         } finally {
             setLoading(false)
         }
@@ -44,6 +54,10 @@ export default function SlideDashboard() {
     async function handleCreate() {
         try {
             const newPres = await createPresentationAction("New Presentation")
+
+            // Save locally immediately to ensure persistence across the redirect
+            LocalPresentationStore.savePresentation(newPres)
+
             setPresentations(prev => [newPres, ...prev])
             window.open(`/editor/${newPres.id}`, '_blank')
         } catch (error) {
@@ -54,6 +68,7 @@ export default function SlideDashboard() {
     async function handleDelete(id: string) {
         if (confirm("Are you sure you want to delete this presentation?")) {
             await deletePresentationAction(id)
+            LocalPresentationStore.deletePresentation(id)
             setPresentations(prev => prev.filter(p => p.id !== id))
         }
     }
