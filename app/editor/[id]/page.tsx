@@ -501,6 +501,22 @@ export default function SlideEditorPage() {
                             onAdd={addSlide}
                             onDelete={removeSlide}
                             onReorder={reorderSlides}
+                            onUpdate={(id, updates) => updateSlide(id, updates)}
+                            onDuplicate={(id) => {
+                                // Duplicate logic
+                                const slide = presentation.slides.find(s => s.id === id)
+                                if (slide) {
+                                    const newSlide = { ...slide, id: crypto.randomUUID() }
+                                    const index = presentation.slides.findIndex(s => s.id === id)
+                                    const newSlides = [...presentation.slides]
+                                    newSlides.splice(index + 1, 0, newSlide)
+                                    
+                                    const updated = { ...presentation, slides: newSlides }
+                                    setPresentation(updated)
+                                    setActiveSlideId(newSlide.id)
+                                    triggerAutoSave(updated)
+                                }
+                            }}
                         />
                     </div>
                 </div>

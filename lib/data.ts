@@ -43,11 +43,19 @@ export interface Poll {
     clients?: PollClient[];
 }
 
+export interface SlideComment {
+    id: string;
+    text: string;
+    createdAt: string;
+}
+
 export interface Slide {
     id: string;
     content: string; // JSON string from TipTap
     background?: string; // color hex or image url
     layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa'; // basic layouts
+    hidden?: boolean;
+    comments?: SlideComment[];
 }
 
 export interface QAQuestion {

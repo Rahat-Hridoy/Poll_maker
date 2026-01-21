@@ -138,14 +138,27 @@ export default function PresentationPage() {
 
     const nextSlide = () => {
         if (!presentation) return
-        if (currentSlideIndex < presentation.slides.length - 1) {
-            setCurrentSlideIndex(prev => prev + 1)
+        let nextIndex = currentSlideIndex + 1
+        // Skip hidden slides
+        while (nextIndex < presentation.slides.length && presentation.slides[nextIndex].hidden) {
+            nextIndex++
+        }
+        
+        if (nextIndex < presentation.slides.length) {
+            setCurrentSlideIndex(nextIndex)
         }
     }
 
     const prevSlide = () => {
-        if (currentSlideIndex > 0) {
-            setCurrentSlideIndex(prev => prev - 1)
+        if (!presentation) return
+        let prevIndex = currentSlideIndex - 1
+        // Skip hidden slides
+        while (prevIndex >= 0 && presentation.slides[prevIndex].hidden) {
+            prevIndex--
+        }
+
+        if (prevIndex >= 0) {
+            setCurrentSlideIndex(prevIndex)
         }
     }
 
