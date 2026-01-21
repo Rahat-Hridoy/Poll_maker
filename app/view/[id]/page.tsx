@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
 import { submitVoteAction } from "@/app/actions/audience"
+import { submitQuestion } from "@/app/actions/qa"
 import { Presentation, Slide } from "@/lib/data"
-import { Loader2, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react"
+import { Loader2, ChevronLeft, ChevronRight, Maximize2, Minimize2, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SlideRenderer } from "@/components/slide-editor/slide-renderer"
 
@@ -115,6 +116,11 @@ export default function UserViewPage() {
     const [userName, setUserName] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false)
 
+    // Q&A State
+    const [questionText, setQuestionText] = useState("")
+    const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false)
+    const [hasSubmittedQuestion, setHasSubmittedQuestion] = useState(false)
+
     useEffect(() => {
         setMounted(true)
         const storedName = localStorage.getItem('poll_maker_username')
@@ -161,12 +167,14 @@ export default function UserViewPage() {
         if (!presentation) return
         if (currentSlideIndex < presentation.slides.length - 1) {
             setCurrentSlideIndex(prev => prev + 1)
+            setHasSubmittedQuestion(false)
         }
     }
 
     const prevSlide = () => {
         if (currentSlideIndex > 0) {
             setCurrentSlideIndex(prev => prev - 1)
+            setHasSubmittedQuestion(false)
         }
     }
 
@@ -202,6 +210,27 @@ export default function UserViewPage() {
         }
     }
 
+    const handleSubmitQuestion = async () => {
+        if (!presentation || !questionText.trim()) return
+        const currentSlide = presentation.slides[currentSlideIndex]
+        if (!currentSlide) return
+
+        setIsSubmittingQuestion(true)
+        try {
+             // If we don't have a user name, maybe use "Anonymous" or prompt? 
+             // The live view allows anonymous.
+             const result = await submitQuestion(presentation.id, currentSlide.id, questionText, userName || 'Anonymous')
+             if (result.success) {
+                 setQuestionText("")
+                 setHasSubmittedQuestion(true)
+             }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsSubmittingQuestion(false)
+        }
+    }
+
     // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -221,44 +250,123 @@ export default function UserViewPage() {
     }
 
     const currentSlide = presentation.slides[currentSlideIndex]
+    
+    // Check for Q&A content
+    let isQA = false
+    try {
+        const content = JSON.parse(currentSlide.content || '[]')
+        if (Array.isArray(content)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            isQA = content.some((el: any) => el.type === 'qa-template')
+        } else {
+             // Fallback for legacy object structure
+             isQA = content.type === 'qa-template'
+        }
+    } catch {}
 
     return (
         <div className="h-screen w-screen bg-black text-white overflow-hidden relative group">
-            <SlideViewer
-                slide={currentSlide}
-                aspectRatio={presentation.aspectRatio}
-                onVote={handleVote}
-                hasVoted={hasVotedMap[currentSlide.id] || false}
-            />
+            {isQA && !loading ? (
+                <div className="absolute inset-0 z-50 bg-white flex items-center justify-center p-6 text-slate-900">
+                    <div className="w-full max-w-lg p-8 animate-in fade-in zoom-in-95 duration-500">
+                        {hasSubmittedQuestion ? (
+                            <div className="text-center">
+                                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                    <CheckCircle2 className="w-10 h-10" />
+                                </div>
+                                <h3 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">Question Sent!</h3>
+                                <p className="text-xl text-slate-500 mb-10 leading-relaxed">The presenter will see your question shortly.</p>
+                                <Button 
+                                    size="lg"
+                                    onClick={() => setHasSubmittedQuestion(false)}
+                                    className="w-full h-12 rounded-full bg-slate-900 text-white hover:bg-slate-800 font-bold text-lg shadow-xl shadow-slate-900/10 transition-all hover:scale-[1.02]"
+                                >
+                                    Ask Another Question
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col h-full">
+                                <div className="text-center mb-10">
+                                    <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Q&A Session</h3>
+                                    <p className="text-slate-500 text-lg">Ask your question anonymously</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <textarea 
+                                        placeholder="Type your question here..." 
+                                        value={questionText}
+                                        onChange={(e) => setQuestionText(e.target.value)}
+                                        className="w-full h-48 p-6 text-xl bg-slate-50 border-2 border-slate-100 rounded-3xl focus:border-black focus:ring-0 transition-all resize-none placeholder:text-slate-300 text-slate-900 shadow-inner"
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                    />
+                                    <Button 
+                                        size="lg"
+                                        onClick={handleSubmitQuestion}
+                                        disabled={!questionText.trim() || isSubmittingQuestion}
+                                        className="w-full h-16 bg-black hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl shadow-slate-900/20 text-xl transition-all hover:scale-[1.02]"
+                                    >
+                                        {isSubmittingQuestion ? (
+                                            <Loader2 className="w-6 h-6 animate-spin mr-3" />
+                                        ) : null}
+                                        {isSubmittingQuestion ? "Sending..." : "Submit Question"}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
-            {/* Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between z-50 pointer-events-none">
-                <div className="pointer-events-auto flex flex-col gap-1">
-                    <h1 className="text-lg font-bold drop-shadow-md leading-none">{presentation.title}</h1>
-                    <div className="text-xs text-white/80 font-mono bg-black/20 px-2 py-1 rounded inline-block w-fit mt-1 border border-white/10">
-                        Guest View
+                    {/* Minimal Nav Controls for Q&A */}
+                    <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                         <div className="flex items-center gap-4 bg-slate-100/50 backdrop-blur-md p-2 rounded-full border border-slate-200 shadow-sm">
+                            <Button variant="ghost" size="icon" onClick={prevSlide} disabled={currentSlideIndex === 0} className="text-slate-600 hover:bg-white rounded-full h-10 w-10">
+                                <ChevronLeft className="w-6 h-6" />
+                            </Button>
+                            <span className="text-sm font-bold min-w-[3ch] text-center text-slate-600">
+                                {currentSlideIndex + 1} / {presentation.slides.length}
+                            </span>
+                            <Button variant="ghost" size="icon" onClick={nextSlide} disabled={currentSlideIndex === presentation.slides.length - 1} className="text-slate-600 hover:bg-white rounded-full h-10 w-10">
+                                <ChevronRight className="w-6 h-6" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
+            ) : (
+                <>
+                    <SlideViewer
+                        slide={currentSlide}
+                        aspectRatio={presentation.aspectRatio}
+                        onVote={handleVote}
+                        hasVoted={hasVotedMap[currentSlide.id] || false}
+                    />
 
-                <div className="pointer-events-auto flex items-center gap-4 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10">
+                    {/* Controls Overlay for Normal Slides */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between z-40 pointer-events-none">
+                        <div className="pointer-events-auto flex flex-col gap-1">
+                            <h1 className="text-lg font-bold drop-shadow-md leading-none">{presentation.title}</h1>
+                            <div className="text-xs text-white/80 font-mono bg-black/20 px-2 py-1 rounded inline-block w-fit mt-1 border border-white/10">
+                                Guest View
+                            </div>
+                        </div>
 
-                    <Button variant="ghost" size="icon" onClick={prevSlide} disabled={currentSlideIndex === 0} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
-                        <ChevronLeft className="w-6 h-6" />
-                    </Button>
-                    <span className="text-sm font-bold min-w-[3ch] text-center">
-                        {currentSlideIndex + 1} / {presentation.slides.length}
-                    </span>
-                    <Button variant="ghost" size="icon" onClick={nextSlide} disabled={currentSlideIndex === presentation.slides.length - 1} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
-                        <ChevronRight className="w-6 h-6" />
-                    </Button>
-                </div>
+                        <div className="pointer-events-auto flex items-center gap-4 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10">
+                            <Button variant="ghost" size="icon" onClick={prevSlide} disabled={currentSlideIndex === 0} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
+                                <ChevronLeft className="w-6 h-6" />
+                            </Button>
+                            <span className="text-sm font-bold min-w-[3ch] text-center">
+                                {currentSlideIndex + 1} / {presentation.slides.length}
+                            </span>
+                            <Button variant="ghost" size="icon" onClick={nextSlide} disabled={currentSlideIndex === presentation.slides.length - 1} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
+                                <ChevronRight className="w-6 h-6" />
+                            </Button>
+                        </div>
 
-                <div className="pointer-events-auto flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
-                        {fullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-                    </Button>
-                </div>
-            </div>
+                        <div className="pointer-events-auto flex items-center gap-2">
+                            <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="text-white hover:bg-white/20 rounded-full h-10 w-10">
+                                {fullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                            </Button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

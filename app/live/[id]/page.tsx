@@ -48,11 +48,12 @@ export default function LiveAudiencePage() {
                 const currentSlide = data.slides[data.currentSlideIndex || 0]
                 if (currentSlide) {
                     try {
-                        const elements = JSON.parse(currentSlide.content)
+                        const parsed = JSON.parse(currentSlide.content || '[]')
+                        const elements = Array.isArray(parsed) ? parsed : [parsed]
                         
                         // Check for Poll
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const pollEl = elements.find((el: any) => el.type === 'poll-template')
+                        const pollEl = elements.find((el: any) => el?.type === 'poll-template')
                         if (pollEl) {
                             const parsedPollData = JSON.parse(pollEl.content)
                             setPollData((prev: any) => {
@@ -70,7 +71,7 @@ export default function LiveAudiencePage() {
                             
                             // Check for Q&A
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const qaEl = elements.find((el: any) => el.type === 'qa-template')
+                            const qaEl = elements.find((el: any) => el?.type === 'qa-template')
                             if (qaEl) {
                                 setIsQA(true)
                                 setQaData(JSON.parse(qaEl.content))
@@ -79,6 +80,11 @@ export default function LiveAudiencePage() {
                                     setQuestions(data.qaSessions[currentSlide.id])
                                 } else {
                                     setQuestions([])
+                                }
+                                // Reset vote/success state for new Q&A session if needed
+                                // We reuse hasVoted for Q&A success message
+                                if (qaData?.title !== JSON.parse(qaEl.content).title) {
+                                     setHasVoted(false)
                                 }
                             } else {
                                 setIsQA(false)
@@ -159,8 +165,7 @@ export default function LiveAudiencePage() {
             const result = await submitQuestion(presentationId, slideId, questionText)
             if (result.success) {
                 setQuestionText("")
-                // Don't close modal, allow "one or more" questions
-                // Maybe show a toast or small success indicator?
+                setHasVoted(true)
             } else {
                console.error("Failed to submit question", result.error)
             }
@@ -181,29 +186,81 @@ export default function LiveAudiencePage() {
 
     return (
         <div className="h-screen w-screen bg-black flex flex-col relative overflow-hidden">
-            {/* Live Presentation View */}
-            <div ref={containerRef} className="flex-1 w-full flex items-center justify-center">
-                <SlideRenderer
-                    slide={presentation.slides[presentation.currentSlideIndex || 0]}
-                    scale={scale}
-                    interactive={false} // Audience just watches, votes via button
-                    height={baseHeight}
-                    runtimeData={{ questions: isQA ? questions : undefined }}
-                />
-            </div>
-
-            {/* Header / Status Overlay */}
-            <div className="absolute top-0 left-0 right-0 p-4 bg-linear-to-b from-black/60 to-transparent flex justify-between items-start pointer-events-none">
-                <div className="pointer-events-auto">
-                    <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-white font-bold text-sm tracking-widest">LIVE</span>
+            {/* Simplified Q&A View */}
+            {isQA ? (
+                 <div className="absolute inset-0 z-50 bg-white flex items-center justify-center p-6">
+                     <div className="w-full max-w-lg p-8 animate-in fade-in zoom-in-95 duration-500">
+                         {hasVoted ? (
+                             <div className="text-center">
+                                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                     <CheckCircle2 className="w-10 h-10" />
+                                 </div>
+                                 <h3 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">Question Sent!</h3>
+                                 <p className="text-xl text-slate-500 mb-10 leading-relaxed">The presenter will see your question shortly.</p>
+                                 <Button 
+                                     size="lg"
+                                     onClick={() => setHasVoted(false)}
+                                     className="w-full h-14 rounded-full bg-slate-900 text-white hover:bg-slate-800 font-bold text-lg shadow-xl shadow-slate-900/10 transition-all hover:scale-[1.02]"
+                                 >
+                                     Ask Another Question
+                                 </Button>
+                             </div>
+                         ) : (
+                             <div className="flex flex-col h-full">
+                                <div className="text-center mb-10">
+                                    <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Q&A Session</h3>
+                                    <p className="text-slate-500 text-lg">Ask your question anonymously</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <textarea 
+                                        placeholder="Type your question here..." 
+                                        value={questionText}
+                                        onChange={(e) => setQuestionText(e.target.value)}
+                                        className="w-full h-48 p-6 text-xl bg-slate-50 border-2 border-slate-100 rounded-3xl focus:border-black focus:ring-0 transition-all resize-none placeholder:text-slate-300 text-slate-900 shadow-inner"
+                                    />
+                                    <Button 
+                                        size="lg"
+                                        onClick={handleSubmitQuestion}
+                                        disabled={!questionText.trim() || isSubmittingQuestion}
+                                        className="w-full h-16 bg-black hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl shadow-slate-900/20 text-xl transition-all hover:scale-[1.02]"
+                                    >
+                                        {isSubmittingQuestion ? (
+                                            <Loader2 className="w-6 h-6 animate-spin mr-3" />
+                                        ) : null}
+                                        {isSubmittingQuestion ? "Sending..." : "Submit Question"}
+                                    </Button>
+                                </div>
+                             </div>
+                         )}
                     </div>
                 </div>
-            </div>
+            ) : (
+                <>
+                    {/* Live Presentation View */}
+                    <div ref={containerRef} className="flex-1 w-full flex items-center justify-center">
+                        <SlideRenderer
+                            slide={presentation.slides[presentation.currentSlideIndex || 0]}
+                            scale={scale}
+                            interactive={false} // Audience just watches, votes via button
+                            height={baseHeight}
+                            runtimeData={{ questions: isQA ? questions : undefined }}
+                        />
+                    </div>
+        
+                    {/* Header / Status Overlay */}
+                    <div className="absolute top-0 left-0 right-0 p-4 bg-linear-to-b from-black/60 to-transparent flex justify-between items-start pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                                <span className="text-white font-bold text-sm tracking-widest">LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Voting FAB */}
-            {pollData && (
+            {!isQA && pollData && (
                 <div className="absolute top-4 right-4 z-50">
                     <Dialog open={isVoteOpen} onOpenChange={setIsVoteOpen}>
                         <DialogTrigger asChild>
@@ -252,43 +309,7 @@ export default function LiveAudiencePage() {
                 </div>
             )}
             
-            {/* Q&A Input Area (Replacing FAB) */}
-            {isQA && !loading && (
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 z-50">
-                    <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-slate-200/50 animate-in slide-in-from-bottom-10 duration-500">
-                         <div className="flex items-center gap-2 mb-3 text-purple-600">
-                             <MessageSquare className="w-5 h-5" />
-                             <span className="font-bold text-sm uppercase tracking-wider">Ask a Question</span>
-                         </div>
-                         <div className="flex gap-3">
-                             <Input 
-                                 placeholder="Type your question here..." 
-                                 value={questionText}
-                                 onChange={(e) => setQuestionText(e.target.value)}
-                                 className="flex-1 h-12 text-lg bg-slate-50 border-slate-200 focus:border-purple-500 focus:ring-purple-500"
-                                 onKeyDown={(e) => {
-                                     if(e.key === 'Enter' && !e.shiftKey) {
-                                         e.preventDefault();
-                                         handleSubmitQuestion();
-                                     }
-                                 }}
-                             />
-                             <Button 
-                                 size="lg"
-                                 onClick={handleSubmitQuestion}
-                                 disabled={!questionText.trim() || isSubmittingQuestion}
-                                 className="h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-lg shadow-purple-500/20 shrink-0"
-                             >
-                                 {isSubmittingQuestion ? (
-                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                 ) : (
-                                     <Send className="w-5 h-5" />
-                                 )}
-                             </Button>
-                         </div>
-                    </div>
-                </div>
-            )}
+
         </div>
     )
 }

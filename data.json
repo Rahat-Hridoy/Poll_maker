@@ -1113,15 +1113,42 @@
       "title": "Second",
       "theme": "default",
       "createdAt": "2026-01-17T07:39:56.886Z",
-      "updatedAt": "2026-01-17T07:40:16.150Z",
+      "updatedAt": "2026-01-21T08:36:57.087Z",
       "slides": [
         {
           "id": "6fd82364-8509-4456-9ace-864f5ac62af0",
           "content": "[]",
           "background": "#ffffff",
           "layout": "blank"
+        },
+        {
+          "id": "d619bae3-e2c4-4ee7-b3b2-8105aaa6d9f0",
+          "content": "[{\"id\":\"502ec2df-1089-4726-85fb-f3b4074e7743\",\"type\":\"qa-template\",\"x\":0,\"y\":0,\"width\":1000,\"height\":562.5,\"content\":\"{\\\"title\\\":\\\"Q&A Session\\\",\\\"subtitle\\\":\\\"Ask your questions now! Scan the code or go to the link.\\\"}\",\"rotation\":0,\"style\":{\"backgroundColor\":\"#ffffff\",\"border\":\"none\",\"borderRadius\":\"0px\",\"padding\":\"0px\",\"fontSize\":\"24px\",\"color\":\"#0f172a\"}}]",
+          "background": "#ffffff",
+          "layout": "qa"
         }
-      ]
+      ],
+      "currentSlideIndex": 1,
+      "qaSessions": {
+        "d619bae3-e2c4-4ee7-b3b2-8105aaa6d9f0": [
+          {
+            "id": "q-1768985379765-sqzb082qj",
+            "text": "gfgfg",
+            "author": "Rahat",
+            "submittedAt": "2026-01-21T08:49:39.766Z",
+            "upvotes": 0,
+            "isAnswered": false
+          },
+          {
+            "id": "q-1768985390219-l2har6sab",
+            "text": "juhy",
+            "author": "Rahat",
+            "submittedAt": "2026-01-21T08:49:50.219Z",
+            "upvotes": 0,
+            "isAnswered": false
+          }
+        ]
+      }
     },
     {
       "id": "pres-1",
@@ -1130,8 +1157,9 @@
         {
           "id": "slide-1",
           "layout": "title",
-          "content": "[{\"id\":\"el-1\",\"type\":\"text\",\"x\":100,\"y\":100,\"width\":800,\"height\":200,\"rotation\":0,\"content\":\"<h1>Welcome to Q&A</h1><p>Scan the code to ask questions</p>\",\"style\":{\"fontSize\":\"48px\",\"textAlign\":\"center\",\"color\":\"#000000\"}}]",
-          "type": "title"
+          "content": "[{\"id\":\"el-1\",\"type\":\"text\",\"x\":100,\"y\":100,\"width\":800,\"height\":200,\"rotation\":0,\"content\":\"<h1>Welcome to Q&amp;A</h1><p>Scan the code to ask questions</p>\",\"style\":{\"fontSize\":\"48px\",\"textAlign\":\"center\",\"color\":\"#000000\"}}]",
+          "type": "title",
+          "background": "#ffffff"
         },
         {
           "id": "slide-2",
@@ -1143,7 +1171,7 @@
       "theme": "default",
       "shortCode": "123456",
       "createdAt": "2026-01-20T16:50:49.898Z",
-      "updatedAt": "2026-01-20T16:50:49.910Z",
+      "updatedAt": "2026-01-21T08:35:54.607Z",
       "qaSessions": {},
       "currentSlideIndex": 1
     }
