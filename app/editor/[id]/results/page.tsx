@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
 import { Presentation } from "@/lib/data"
-import { Loader2, ArrowLeft, BarChart3, Users, LayoutGrid } from "lucide-react"
+import { Loader2, ArrowLeft, BarChart3, Users, LayoutGrid, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -154,16 +154,43 @@ export default function ResultsPage() {
                                                 <CardTitle className="text-lg font-bold text-slate-800 line-clamp-2" dangerouslySetInnerHTML={{ __html: poll.data.question || poll.data.title || 'Untitled' }} />
                                             </div>
                                             <div className="bg-white border border-slate-200 shadow-sm px-3 py-1 rounded-lg flex flex-col items-center min-w-[60px]">
-                                                <span className="text-xl font-black text-slate-900 leading-none">{totalVotes}</span>
-                                                <span className="text-[10px] uppercase font-bold text-slate-400">Votes</span>
+                                                <span className="text-xl font-black text-slate-900 leading-none">
+                                                    {poll.type === 'qa-template' 
+                                                        ? (presentation.qaSessions?.[poll.slideId]?.length || 0)
+                                                        : totalVotes
+                                                    }
+                                                </span>
+                                                <span className="text-[10px] uppercase font-bold text-slate-400">
+                                                    {poll.type === 'qa-template' ? 'Questions' : 'Votes'}
+                                                </span>
                                             </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent className="h-[300px] p-6">
                                         {poll.type === 'qa-template' ? (
-                                            <div className="flex items-center justify-center h-full text-slate-400 flex-col gap-2">
-                                                <Users className="w-10 h-10 opacity-20" />
-                                                <p className="text-sm">Q&A responses are not visualized yet</p>
+                                            <div className="h-full overflow-y-auto pr-2 space-y-3">
+                                                {presentation.qaSessions?.[poll.slideId]?.length ? (
+                                                    presentation.qaSessions[poll.slideId].slice().reverse().map((q: any) => (
+                                                        <div key={q.id} className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex gap-3">
+                                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                                                {q.author?.charAt(0) || 'A'}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-medium text-slate-800 break-words">{q.text}</p>
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className="text-[10px] text-slate-400 font-medium uppercase">{q.author || 'Anonymous'}</span>
+                                                                    <span className="text-[10px] text-slate-300">•</span>
+                                                                    <span className="text-[10px] text-slate-400">{new Date(q.submittedAt).toLocaleTimeString()}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-slate-400 flex-col gap-2">
+                                                        <MessageSquare className="w-10 h-10 opacity-20" />
+                                                        <p className="text-sm">No questions asked yet</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : chartData.length > 0 ? (
                                             <ResponsiveContainer width="100%" height="100%">

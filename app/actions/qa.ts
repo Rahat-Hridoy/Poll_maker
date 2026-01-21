@@ -34,6 +34,9 @@ export async function submitQuestion(presentationId: string, slideId: string, te
         
         // Update sorting? For now just append.
         
+        // Update timestamp to trigger polling detection
+        presentation.updatedAt = new Date().toISOString(); 
+        
         await savePresentation(presentation);
         revalidatePath(`/live/${presentationId}`);
         return { success: true, question: newQuestion };
