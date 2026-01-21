@@ -27,9 +27,10 @@ interface PollTemplateElementProps {
     onVote?: (optionId: string) => void
     hasVoted?: boolean
     shortCode?: string
+    showResults?: boolean
 }
 
-export function PollTemplateElement({ data, onVote, hasVoted, shortCode = "12345" }: PollTemplateElementProps) {
+export function PollTemplateElement({ data, onVote, hasVoted, shortCode = "12345", showResults = true }: PollTemplateElementProps) {
     const { question, options, questionImage, chartType = 'bar' } = data
     const layout = data.layout || 'vertical'
     const showCode = data.showCode
@@ -320,7 +321,18 @@ export function PollTemplateElement({ data, onVote, hasVoted, shortCode = "12345
                                 ))
                             )}
                         </div>
-                    ) : renderChart()}
+                    ) : (
+                        // Results View logic
+                        showResults ? renderChart() : (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                                     <BarChart3 className="w-10 h-10 text-slate-300" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-400">Results Hidden</h3>
+                                <p className="text-slate-400 text-sm mt-2">Wait for the presenter to reveal the results.</p>
+                            </div>
+                        )
+                    )}
                 </div>
             </div>
         </div>

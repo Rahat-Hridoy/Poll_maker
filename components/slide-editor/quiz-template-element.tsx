@@ -24,9 +24,10 @@ interface QuizTemplateElementProps {
     shortCode?: string
     interactive?: boolean
     hasVoted?: boolean
+    showResults?: boolean
 }
 
-export function QuizTemplateElement({ data, shortCode = "123456", interactive = false, hasVoted = false }: QuizTemplateElementProps) {
+export function QuizTemplateElement({ data, shortCode = "123456", interactive = false, hasVoted = false, showResults = true }: QuizTemplateElementProps) {
     const { question, options, questionImage } = data
     const layout = data.layout || 'vertical'
     const showCode = data.showCode !== false
@@ -88,10 +89,7 @@ export function QuizTemplateElement({ data, shortCode = "123456", interactive = 
                         className={`
                             relative flex items-center px-6 py-4 rounded-xl border-2 transition-all group
                             ${// Logic for styling:
-                            // 1. If NOT interactive (Editor/Presenter): Show Correct Answer
-                            // 2. If Interactive AND Voted: Show Correct Answer
-                            // 3. If Interactive AND NOT Voted: Hide Correct Answer (neutral style)
-                            (!interactive || hasVoted) && opt.isCorrect
+                            showResults && (!interactive || hasVoted) && opt.isCorrect
                                 ? 'bg-green-50 border-green-500/50'
                                 : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-blue-50/30'
                             }
@@ -99,17 +97,17 @@ export function QuizTemplateElement({ data, shortCode = "123456", interactive = 
                     >
                         <div className={`
                             w-8 h-8 shrink-0 flex items-center justify-center rounded-full border-2 mr-4 text-sm font-bold
-                            ${(!interactive || hasVoted) && opt.isCorrect
+                            ${showResults && (!interactive || hasVoted) && opt.isCorrect
                                 ? 'bg-green-500 border-green-500 text-white'
                                 : 'bg-slate-50 border-slate-200 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-500'}
                         `}>
                             {String.fromCharCode(65 + idx)}
                         </div>
-                        <span className={`text-lg font-semibold leading-tight ${(!interactive || hasVoted) && opt.isCorrect ? 'text-green-900' : 'text-slate-700'}`}>
+                        <span className={`text-lg font-semibold leading-tight ${showResults && (!interactive || hasVoted) && opt.isCorrect ? 'text-green-900' : 'text-slate-700'}`}>
                             {opt.text}
                         </span>
 
-                        {(!interactive || hasVoted) && opt.isCorrect && (
+                        {showResults && (!interactive || hasVoted) && opt.isCorrect && (
                             <div className="absolute top-2 right-2 text-green-600">
                                 <CheckCircle2 className="w-4 h-4" />
                             </div>

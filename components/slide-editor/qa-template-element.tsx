@@ -2,7 +2,6 @@
 
 import { MessageSquare, Users } from "lucide-react"
 
-
 import { QAQuestion } from "@/lib/data"
 
 interface QATemplateData {
@@ -11,20 +10,19 @@ interface QATemplateData {
     questionImage?: string
     layout?: 'vertical' | 'horizontal-left' | 'horizontal-right' | 'split-left'
     showCode?: boolean
-
 }
 
 interface QATemplateElementProps {
     data: QATemplateData
     shortCode?: string
     questions?: QAQuestion[]
+    showResults?: boolean
 }
 
-export function QATemplateElement({ data, shortCode = "12345", questions = [] }: QATemplateElementProps) {
+export function QATemplateElement({ data, shortCode = "12345", questions = [], showResults = true }: QATemplateElementProps) {
     const { title, subtitle, questionImage } = data
     const layout = data.layout || 'vertical'
     const showCode = data.showCode
-
 
     const displayTitle = title || "Q&A Session"
     const displaySubtitle = subtitle || "Ask your questions now! Scan the code or go to the link."
@@ -75,29 +73,35 @@ export function QATemplateElement({ data, shortCode = "12345", questions = [] }:
             <div className={CONTENT_AREA_CLASS}>
                 <div className="flex h-full gap-6 items-start justify-center">
 
-
                     {/* Questions List */}
                     {hasQuestions ? (
                         <div className="flex-1 w-full h-full overflow-y-auto px-2">
-                             {/* @ts-ignore - Framer Motion types sometimes conflict with React 19 types */}
-                             <div className="space-y-4 pb-20">
-                                {displayedQuestions.map((q) => (
-                                    <div 
-                                        key={q.id}
-                                        className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500"
-                                    >
-                                        <p className="text-xl text-slate-800 font-medium mb-3 leading-relaxed">{q.text}</p>
-                                        <div className="flex items-center gap-2 text-sm text-slate-400 font-bold uppercase tracking-wider">
-                                            <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-100 to-blue-100 flex items-center justify-center text-purple-600">
-                                                {q.author.charAt(0)}
+                            {showResults ? (
+                                <div className="space-y-4 pb-20">
+                                    {displayedQuestions.map((q) => (
+                                        <div 
+                                            key={q.id}
+                                            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500"
+                                        >
+                                            <p className="text-xl text-slate-800 font-medium mb-3 leading-relaxed">{q.text}</p>
+                                            <div className="flex items-center gap-2 text-sm text-slate-400 font-bold uppercase tracking-wider">
+                                                <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-100 to-blue-100 flex items-center justify-center text-purple-600">
+                                                    {q.author.charAt(0)}
+                                                </div>
+                                                <span>{q.author}</span>
+                                                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                                <span>{new Date(q.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                             </div>
-                                            <span>{q.author}</span>
-                                            <span className="w-1 h-1 rounded-full bg-slate-300" />
-                                            <span>{new Date(q.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-center p-8 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 h-full">
+                                    <MessageSquare className="w-12 h-12 text-slate-300 mb-4" />
+                                    <h3 className="text-xl font-bold text-slate-400">Questions Hidden</h3>
+                                    <p className="text-slate-400 text-sm mt-2">The presenter has hidden the questions list.</p>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         /* Empty State */
@@ -114,7 +118,6 @@ export function QATemplateElement({ data, shortCode = "12345", questions = [] }:
             </div>
         )
     }
-
 
     // Layout Specific Renders
     if (layout === 'split-left') {

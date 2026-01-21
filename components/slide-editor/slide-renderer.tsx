@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Slide } from "@/lib/data"
 import { SlideTextEditor } from "@/components/slide-editor/slide-text-editor"
 import { SlidePollElement } from "@/components/slide-editor/slide-poll-element"
@@ -7,17 +8,6 @@ import { PollTemplateElement } from "@/components/slide-editor/poll-template-ele
 import { QuizTemplateElement } from "@/components/slide-editor/quiz-template-element"
 import { QATemplateElement } from "@/components/slide-editor/qa-template-element"
 import { InstructionTemplateElement } from "./instruction-template-element"
-
-interface SlideRendererProps {
-    slide: Slide
-    width?: number
-    height?: number
-    scale?: number
-    interactive?: boolean
-    onPollVote?: (optionId: string) => void
-    hasVoted?: boolean
-    shortCode?: string
-}
 
 // Coordinate system is based on 1000px width
 const BASE_WIDTH = 1000
@@ -148,6 +138,7 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                 })()}
                                 onVote={onPollVote}
                                 hasVoted={hasVoted}
+                                showResults={slide.showResults}
                             />
                         )}
 
@@ -161,6 +152,7 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                         return { question: '', options: [] }
                                     }
                                 })()}
+                                showResults={slide.showResults}
                             />
                         )}
 
@@ -175,6 +167,7 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                     }
                                 })()}
                                 questions={runtimeData?.questions}
+                                showResults={slide.showResults}
                             />
                         )}
 
@@ -238,6 +231,46 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                     </div>
                 ))}
             </div>
+            
+            {/* Countdown Timer Overlay */}
+            {slide.timer?.isRunning && slide.timer.endsAt && (
+                <div style={{
+                    position: 'absolute',
+                    top: 20 * effectiveScale,
+                    right: 20 * effectiveScale,
+                    zIndex: 50,
+                    transform: `scale(${effectiveScale})`,
+                    transformOrigin: 'top right'
+                }}>
+                   <CountdownTimer endsAt={slide.timer.endsAt} />
+                </div>
+            )}
+        </div>
+    )
+}
+
+function CountdownTimer({ endsAt }: { endsAt: string }) {
+    const [timeLeft, setTimeLeft] = useState(0)
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = Date.now()
+            const end = new Date(endsAt).getTime()
+            const diff = Math.ceil((end - now) / 1000)
+            setTimeLeft(Math.max(0, diff))
+        }, 1000)
+        return () => clearInterval(interval)
+    }, [endsAt])
+
+    if (timeLeft <= 0) return null
+
+    const m = Math.floor(timeLeft / 60)
+    const s = timeLeft % 60
+    
+    return (
+        <div className="bg-black/80 backdrop-blur-md text-white font-mono text-4xl font-bold px-6 py-3 rounded-full border border-white/20 shadow-2xl flex items-center gap-3">
+             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+             {m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}
         </div>
     )
 }

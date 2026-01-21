@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
-import { fetchPresentation } from "@/app/actions/presentation"
+import { fetchPresentation, incrementAudienceCountAction } from "@/app/actions/presentation"
 import { submitVoteAction } from "@/app/actions/audience"
 import { submitQuestion } from "@/app/actions/qa"
 import { Presentation, QAQuestion } from "@/lib/data"
@@ -35,7 +35,18 @@ export default function LiveAudiencePage() {
     const [questionText, setQuestionText] = useState("")
     const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false)
 
+    // New States for Controls
+    const [isLocked, setIsLocked] = useState(false)
+    const [allowComments, setAllowComments] = useState(true)
+
     const presentationId = params.id as string
+    
+    // Track visit
+    useEffect(() => {
+        if (presentationId) {
+            incrementAudienceCountAction(presentationId)
+        }
+    }, [presentationId])
 
     // Polling for updates
     useEffect(() => {
@@ -47,6 +58,9 @@ export default function LiveAudiencePage() {
                 // Get current slide
                 const currentSlide = data.slides[data.currentSlideIndex || 0]
                 if (currentSlide) {
+                    setIsLocked(currentSlide.isLocked || false)
+                    setAllowComments(currentSlide.allowComments !== false)
+
                     try {
                         const parsed = JSON.parse(currentSlide.content || '[]')
                         const elements = Array.isArray(parsed) ? parsed : [parsed]
@@ -65,6 +79,12 @@ export default function LiveAudiencePage() {
                             })
                             setIsQA(false)
                             setQaData(null)
+                            
+                            // Close voting if locked
+                            if (currentSlide.isLocked) {
+                                setIsVoteOpen(false)
+                            }
+
                         } else {
                             setPollData(null)
                             setIsVoteOpen(false)
@@ -105,7 +125,7 @@ export default function LiveAudiencePage() {
         const intervalId = setInterval(loadData, 1000)
 
         return () => clearInterval(intervalId)
-    }, [presentationId])
+    }, [presentationId, qaData?.title]) // Added qaData dependency for check
 
     // Base dimensions
     const baseWidth = 1000
@@ -190,7 +210,28 @@ export default function LiveAudiencePage() {
             {isQA ? (
                  <div className="absolute inset-0 z-50 bg-white flex items-center justify-center p-6">
                      <div className="w-full max-w-lg p-8 animate-in fade-in zoom-in-95 duration-500">
-                         {hasVoted ? (
+                         
+                         {/* Header */}
+                         <div className="text-center mb-10">
+                            <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Q&A Session</h3>
+                            <p className="text-slate-500 text-lg">Ask your question anonymously</p>
+                         </div>
+
+                         {/* Locked State Logic */}
+                         {isLocked ? (
+                             <div className="text-center p-8 bg-slate-50 border-2 border-slate-100 rounded-3xl">
+                                 <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                     <div className="w-8 h-8 rounded-full border-4 border-current border-t-transparent animate-spin" /> 
+                                 </div>
+                                 <h3 className="text-xl font-bold text-slate-900 mb-2">Session Locked</h3>
+                                 <p className="text-slate-500">The presenter has paused questions.</p>
+                             </div>
+                         ) : !allowComments ? (
+                             <div className="text-center p-8 bg-slate-50 border-2 border-slate-100 rounded-3xl">
+                                 <h3 className="text-xl font-bold text-slate-900 mb-2">Comments Off</h3>
+                                 <p className="text-slate-500">Questions are currently disabled.</p>
+                             </div>
+                         ) : hasVoted ? (
                              <div className="text-center">
                                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                                      <CheckCircle2 className="w-10 h-10" />
@@ -207,10 +248,6 @@ export default function LiveAudiencePage() {
                              </div>
                          ) : (
                              <div className="flex flex-col h-full">
-                                <div className="text-center mb-10">
-                                    <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Q&A Session</h3>
-                                    <p className="text-slate-500 text-lg">Ask your question anonymously</p>
-                                </div>
                                 <div className="space-y-6">
                                     <textarea 
                                         placeholder="Type your question here..." 
@@ -255,12 +292,18 @@ export default function LiveAudiencePage() {
                                 <span className="text-white font-bold text-sm tracking-widest">LIVE</span>
                             </div>
                         </div>
+                        {/* Show locked status on top if locked and not in Q&A (e.g. Poll) */}
+                        {isLocked && !isQA && (
+                            <div className="bg-red-500/90 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg backdrop-blur-sm animate-pulse">
+                                Session Locked
+                            </div>
+                        )}
                     </div>
                 </>
             )}
 
             {/* Voting FAB */}
-            {!isQA && pollData && (
+            {!isQA && pollData && !isLocked && ( // Hide if locked
                 <div className="absolute top-4 right-4 z-50">
                     <Dialog open={isVoteOpen} onOpenChange={setIsVoteOpen}>
                         <DialogTrigger asChild>
@@ -308,8 +351,6 @@ export default function LiveAudiencePage() {
                     </Dialog>
                 </div>
             )}
-            
-
         </div>
     )
 }

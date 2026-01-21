@@ -55,7 +55,15 @@ export interface Slide {
     background?: string; // color hex or image url
     layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa' | 'instruction'; // basic layouts
     hidden?: boolean;
-    comments?: SlideComment[];
+    // Presenter State
+    isLocked?: boolean; // Stop/Start response
+    showResults?: boolean; // Show/Hide result
+    timer?: {
+        duration: number; // in seconds
+        endsAt: string | null; // ISO string
+        isRunning: boolean;
+    };
+    allowComments?: boolean; // enable/disable comment
 }
 
 export interface QAQuestion {
@@ -79,6 +87,10 @@ export interface Presentation {
     creatorId?: string;
     currentSlideIndex?: number;
     qaSessions?: Record<string, QAQuestion[]>; // Map slideId -> Questions
+    visitors?: number;
+    
+    // Global Presenter State
+    showJoiningCode?: boolean;
 }
 
 
