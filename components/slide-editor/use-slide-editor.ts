@@ -123,9 +123,12 @@ export function useSlideEditor(initialSlide: Slide | null) {
             style: {
                 backgroundColor: ['rect', 'circle', 'triangle', 'star', 'polygon'].includes(type) ? '#3b82f6' : 'transparent',
                 borderRadius: type === 'circle' ? '50%' : '0px',
+                // User request: Remove border from all shape elements
                 border: type === 'text' ? '1px dashed rgba(0,0,0,0.2)' : 'none',
                 fontSize: '24px',
                 color: '#000000',
+                // Keep properties for lines, but explicit 'none' for others isn't strictly needed if SlideCanvas handles it,
+                // but cleaner data is better.
                 borderWidth: isLine ? '2' : '0',
                 borderColor: isLine ? '#3b82f6' : 'transparent',
                 textAlign: 'left',

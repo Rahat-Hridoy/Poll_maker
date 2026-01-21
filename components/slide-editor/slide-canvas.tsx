@@ -221,6 +221,15 @@ export function SlideCanvas({
                                     className="w-full h-full flex items-center justify-center"
                                     style={{
                                         ...el.style,
+                                        // User Request: Remove border/background from wrapper for shapes.
+                                        // Allow SVG to handle fill and stroke exclusively.
+                                        ...(['rect', 'circle', 'triangle', 'arrow', 'star', 'polygon', 'line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(el.type) ? {
+                                            backgroundColor: 'transparent',
+                                            border: 'none',
+                                            borderWidth: 0,
+                                            borderColor: 'transparent',
+                                            boxShadow: 'none',
+                                        } : {}),
                                         transform: `rotate(${el.rotation || 0}deg)`,
                                         transformOrigin: 'center center',
                                         position: 'relative',
@@ -359,11 +368,18 @@ export function SlideCanvas({
                                         <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none overflow-visible">
                                             <g
                                                 fill={el.style.backgroundColor?.toString() || 'none'}
-                                                stroke={el.style.borderColor?.toString() || (el.style as any).stroke || 'none'}
+                                                // User Request: Remove border from all shape elements.
+                                                // We force stroke to 'none' for closed shapes (rect, circle, etc)
+                                                // Lines and waves still need stroke.
+                                                stroke={
+                                                    ['line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(el.type)
+                                                        ? (el.style.borderColor?.toString() || (el.style as any).stroke || '#3b82f6')
+                                                        : 'none'
+                                                }
                                                 strokeWidth={
-                                                    (el.style as any).strokeWidth !== undefined ? (el.style as any).strokeWidth :
-                                                        el.style.borderWidth !== undefined ? parseInt(el.style.borderWidth.toString()) :
-                                                            0
+                                                    ['line', 'arrow-line', 'sine-wave', 'square-wave', 'tan-wave'].includes(el.type)
+                                                        ? ((el.style as any).strokeWidth !== undefined ? (el.style as any).strokeWidth : '2')
+                                                        : '0'
                                                 }
                                                 strokeDasharray={
                                                     el.style.borderStyle === 'dashed' ? '10,10' :
