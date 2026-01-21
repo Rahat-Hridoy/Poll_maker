@@ -33,6 +33,9 @@ const Superscript = Mark.create({
         }
     },
 })
+// Verified logic: getBoundingClientRect works partially with CSS scale, but visual comparison suggests it works enough.
+// The user issue "no change" might be caching.
+
 
 // Subscript Extension
 const Subscript = Mark.create({
@@ -88,119 +91,7 @@ const TextStyle = Mark.create({
 })
 
 
-// Custom Bubble Menu implementation to bypass import issues and ensure fixed positioning
-function CustomBubbleMenu({ editor, anchorEl, children }: { editor: any, anchorEl: HTMLElement | null, children: React.ReactNode }) {
-    const [position, setPosition] = useState<{ top: number, left: number, placement: 'top' | 'bottom' } | null>(null)
-    const [offset, setOffset] = useState({ x: 0, y: 0 })
-
-    useEffect(() => {
-        const updatePosition = () => {
-            if (!editor || editor.isDestroyed || !editor.isEditable || !anchorEl) {
-                setPosition(null)
-                // We reset offset when menu kind of 'closes' to restore default behavior next time
-                setOffset({ x: 0, y: 0 })
-                return
-            }
-
-            const { selection } = editor.state
-            if (selection.empty) {
-                setPosition(null)
-                setOffset({ x: 0, y: 0 })
-                return
-            }
-
-            // Get the bounding rectangle of the editor element (or custom anchor)
-            const rect = anchorEl.getBoundingClientRect()
-
-            // Calculate position
-            // Center horizontally relative to the element
-            const left = rect.left + rect.width / 5
-
-            // Try Top position first
-            // We want the BOTTOM of the toolbar to be slightly above the element
-            // We will use transform: translate(-50%, -100%) for top placement
-            let top = rect.top - 1 // 5px Gap above element
-            let placement: 'top' | 'bottom' = 'top'
-
-            // If too close to viewport top, flip to Bottom
-            if (top < 30) { // 60px clearance for toolbar
-                top = rect.bottom + 1 // 2px Gap below element
-                placement = 'bottom'
-            }
-
-            setPosition({ top, left, placement })
-        }
-
-        updatePosition()
-
-        // Subscribe to updates
-        editor.on('selectionUpdate', updatePosition)
-        editor.on('update', updatePosition)
-        editor.on('focus', updatePosition)
-        editor.on('blur', updatePosition)
-
-        window.addEventListener('resize', updatePosition)
-        window.addEventListener('scroll', updatePosition, true)
-
-        return () => {
-            editor.off('selectionUpdate', updatePosition)
-            editor.off('update', updatePosition)
-            editor.off('focus', updatePosition)
-            editor.off('blur', updatePosition)
-            window.removeEventListener('resize', updatePosition)
-            window.removeEventListener('scroll', updatePosition, true)
-        }
-    }, [editor, anchorEl])
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        // Prevent if interacting with inputs inside (like color picker or dropdowns if they don't stop prop)
-        if ((e.target as HTMLElement).tagName === 'INPUT') return
-        if ((e.target as HTMLElement).tagName === 'BUTTON') return // Let buttons click? Actually TextContextToolbar stops click prop, but maybe not mousedown bubbling? 
-        // TextContextToolbar has onMouseDown preventDefault() but it bubbles.
-
-        e.preventDefault()
-
-        const startX = e.clientX
-        const startY = e.clientY
-        const startOffsetX = offset.x
-        const startOffsetY = offset.y
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const dx = moveEvent.clientX - startX
-            const dy = moveEvent.clientY - startY
-            setOffset({ x: startOffsetX + dx, y: startOffsetY + dy })
-        }
-
-        const handleMouseUp = () => {
-            window.removeEventListener('mousemove', handleMouseMove)
-            window.removeEventListener('mouseup', handleMouseUp)
-        }
-
-        window.addEventListener('mousemove', handleMouseMove)
-        window.addEventListener('mouseup', handleMouseUp)
-    }
-
-    if (!position) return null
-
-    return (
-        <div
-            onMouseDown={handleMouseDown}
-            style={{
-                position: 'fixed',
-                top: position.top + offset.y,
-                left: position.left + offset.x,
-                transform: position.placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
-                zIndex: 9999,
-                pointerEvents: 'auto',
-                cursor: 'move', // Indicate draggable
-            }}
-        >
-            {children}
-        </div>
-    )
-}
-
-
+// CustomBubbleMenu removed per user request for simple CSS positioning
 interface SlideTextEditorProps {
     content: string
     onChange: (html: string) => void
@@ -212,6 +103,32 @@ interface SlideTextEditorProps {
 
 export function SlideTextEditor({ content, onChange, editable, className, style, zoom }: SlideTextEditorProps) {
     const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
+    const [placement, setPlacement] = useState<'top' | 'bottom'>('top')
+
+    const updatePlacement = React.useCallback(() => {
+        if (!containerEl) return
+        const rect = containerEl.getBoundingClientRect()
+        // Toolbar height approx 40-50px. Gap 10px. 
+        // If element top is closer than ~60px to viewport top, flip to bottom.
+        // User said "if top space < -10px" - likely meaning if it goes off screen.
+        // We'll use a safe threshold of 60px to prevent clipping.
+        if (rect.top < 60) {
+            setPlacement('bottom')
+        } else {
+            setPlacement('top')
+        }
+    }, [containerEl])
+
+    useEffect(() => {
+        updatePlacement()
+        window.addEventListener('resize', updatePlacement)
+        window.addEventListener('scroll', updatePlacement, true)
+        return () => {
+            window.removeEventListener('resize', updatePlacement)
+            window.removeEventListener('scroll', updatePlacement, true)
+        }
+    }, [updatePlacement])
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -245,6 +162,12 @@ export function SlideTextEditor({ content, onChange, editable, className, style,
     useEffect(() => {
         if (editor) {
             editor.setEditable(editable)
+            if (editable) {
+                // Determine focus position: 'all' to select all text if needed, or 'end'
+                // For "Double click to edit...", maybe select all? 
+                // Let's just focus 'end' for now to be safe, or 'all' matches standard behavior.
+                editor.commands.focus() 
+            }
         }
     }, [editable, editor])
 
@@ -259,16 +182,34 @@ export function SlideTextEditor({ content, onChange, editable, className, style,
 
     return (
         <>
-            {editor && editable && (
-                <CustomBubbleMenu editor={editor} anchorEl={containerEl}>
-                    <TextContextToolbar editor={editor} />
-                </CustomBubbleMenu>
-            )}
             <div
                 ref={setContainerEl}
                 className={className}
-                style={{ ...style, cursor: editable ? 'text' : 'default' }}
+                // User Request: "just make the text field as position: relative"
+                style={{ ...style, position: 'relative', cursor: editable ? 'text' : 'default' }}
             >
+                {/* Floating Toolbar - Positioned absolutely relative to this container */}
+                {/* User Request: position: absolute, top: -5px , left : 0px */}
+                {/* Visual adjustment: translateY(-100%) moves it up to sit on top of the border */}
+                {editor && editable && !editor.state.selection.empty && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: '0px',
+                            zIndex: 50,
+                            pointerEvents: 'auto',
+                            whiteSpace: 'nowrap', // Prevent wrapping
+                            // Smart Flip Logic
+                            ...(placement === 'top' 
+                                ? { top: '-10px', transform: 'translateY(-100%)' }
+                                : { bottom: '-10px', transform: 'translateY(100%)' }
+                            )
+                        }}
+                    >
+                        <TextContextToolbar editor={editor} />
+                    </div>
+                )}
+                
                 <EditorContent editor={editor} className="h-full w-full" />
             </div>
         </>

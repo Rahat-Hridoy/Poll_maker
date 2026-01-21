@@ -1077,11 +1077,11 @@
       "title": "Welcome ",
       "theme": "default",
       "createdAt": "2026-01-17T07:35:28.171Z",
-      "updatedAt": "2026-01-21T09:36:34.474Z",
+      "updatedAt": "2026-01-21T14:52:52.603Z",
       "slides": [
         {
           "id": "c38ee9c8-3e64-4100-a24f-280904e01fff",
-          "content": "[{\"id\":\"ca9f6cda-b38a-434a-80ea-5be41c571bf1\",\"type\":\"text\",\"x\":322.0745218033331,\"y\":78.72341748462402,\"width\":420,\"height\":100,\"content\":\"<p>Welcome To My Presentation</p>\",\"rotation\":0,\"style\":{\"backgroundColor\":\"transparent\",\"borderRadius\":\"0px\",\"border\":\"1px dashed rgba(0,0,0,0.2)\",\"fontSize\":\"24px\",\"color\":\"#000000\",\"borderWidth\":\"0\",\"borderColor\":\"transparent\",\"textAlign\":\"left\",\"borderStyle\":\"solid\",\"stroke\":\"none\",\"strokeWidth\":\"0\"}}]",
+          "content": "[{\"id\":\"e377b235-50bf-4e93-a008-3aa70e9d7c8a\",\"type\":\"text\",\"x\":161.17022492122288,\"y\":135.9042474929695,\"width\":514,\"height\":49,\"content\":\"<p>Double click <span style=\\\"font-family: Arial, sans-serif;\\\">to edit text...</span></p>\",\"rotation\":0,\"style\":{\"backgroundColor\":\"transparent\",\"borderRadius\":\"0px\",\"border\":\"1px dashed rgba(0,0,0,0.2)\",\"fontSize\":\"24px\",\"color\":\"#000000\",\"borderWidth\":\"0\",\"borderColor\":\"transparent\",\"textAlign\":\"left\",\"borderStyle\":\"solid\",\"stroke\":\"none\",\"strokeWidth\":\"0\"}}]",
           "background": "#ffffff",
           "layout": "blank"
         },
