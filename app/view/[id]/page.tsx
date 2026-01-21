@@ -84,7 +84,7 @@ function IdentityModal({ onJoin }: { onJoin: (name: string) => void }) {
                             onChange={(e) => setName(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && name.trim() && onJoin(name)}
                             placeholder="e.g. John Doe"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-black"
                         />
                     </div>
                     <Button
