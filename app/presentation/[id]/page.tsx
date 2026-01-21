@@ -14,7 +14,7 @@ import { updatePresenterStateAction } from "@/app/actions/audience"
 // Duplicate interfaces from SlideCanvas to avoid circular deps or verify consistency
 export interface CanvasElement {
     id: string
-    type: "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template"
+    type: "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template" | "instruction-template"
     x: number
     y: number
     width: number

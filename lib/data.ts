@@ -53,7 +53,7 @@ export interface Slide {
     id: string;
     content: string; // JSON string from TipTap
     background?: string; // color hex or image url
-    layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa'; // basic layouts
+    layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa' | 'instruction'; // basic layouts
     hidden?: boolean;
     comments?: SlideComment[];
 }

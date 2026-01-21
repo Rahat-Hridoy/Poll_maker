@@ -6,6 +6,7 @@ import { SlidePollElement } from "@/components/slide-editor/slide-poll-element"
 import { PollTemplateElement } from "@/components/slide-editor/poll-template-element"
 import { QuizTemplateElement } from "@/components/slide-editor/quiz-template-element"
 import { QATemplateElement } from "@/components/slide-editor/qa-template-element"
+import { InstructionTemplateElement } from "./instruction-template-element"
 
 interface SlideRendererProps {
     slide: Slide
@@ -174,6 +175,19 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                     }
                                 })()}
                                 questions={runtimeData?.questions}
+                            />
+                        )}
+
+                        {/* Instruction Template Element */}
+                         {el.type === 'instruction-template' && (
+                            <InstructionTemplateElement
+                                data={(() => {
+                                    try {
+                                        return JSON.parse(el.content || '{}')
+                                    } catch {
+                                        return { shortCode: '', joinUrl: '' }
+                                    }
+                                })()}
                             />
                         )}
 

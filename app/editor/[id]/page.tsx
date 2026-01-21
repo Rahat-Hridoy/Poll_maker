@@ -145,7 +145,7 @@ export default function SlideEditorPage() {
         triggerAutoSave(updatedPresentation)
     }
 
-    const addSlide = (type: 'blank' | 'poll' | 'quiz' | 'qa' = 'blank') => {
+    const addSlide = (type: 'blank' | 'poll' | 'quiz' | 'qa' | 'instruction' = 'blank') => {
         if (!presentation) return
 
         let initialContent = '[]'
@@ -194,6 +194,12 @@ export default function SlideEditorPage() {
                 subtitle: "Ask your questions now! Scan the code or go to the link."
             })
             initialContent = JSON.stringify([qaElement])
+        } else if (type === 'instruction') {
+            const instructionElement = createTemplateElement('instruction-template', {
+                shortCode: presentation?.shortCode || "1234 5678",
+                joinUrl: "slideStudio.com"
+            })
+            initialContent = JSON.stringify([instructionElement])
         }
 
         const newSlide: Slide = {

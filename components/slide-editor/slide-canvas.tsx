@@ -10,8 +10,9 @@ import { SlidePollElement } from "./slide-poll-element"
 import { PollTemplateElement } from "./poll-template-element"
 import { QuizTemplateElement } from "./quiz-template-element"
 import { QATemplateElement } from "./qa-template-element"
+import { InstructionTemplateElement } from "./instruction-template-element"
 
-export type ElementType = "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template"
+export type ElementType = "text" | "image" | "rect" | "circle" | "triangle" | "arrow" | "star" | "line" | "arrow-line" | "polygon" | "sine-wave" | "square-wave" | "tan-wave" | "poll" | "qr-code" | "poll-template" | "quiz-template" | "qa-template" | "instruction-template"
 
 export interface CanvasElement {
     id: string
@@ -166,8 +167,8 @@ export function SlideCanvas({
                     onMouseLeave={() => setIsRotating(null)}
                 >
                     {elements.map(el => {
-                        const isSpecialSlide = ['poll', 'quiz', 'qa'].includes(slide.layout || '')
-                        const isTemplateElement = ['poll-template', 'quiz-template', 'qa-template'].includes(el.type)
+                        const isSpecialSlide = ['poll', 'quiz', 'qa', 'instruction'].includes(slide.layout || '')
+                        const isTemplateElement = ['poll-template', 'quiz-template', 'qa-template', 'instruction-template'].includes(el.type)
 
                         // If this is a special slide and this is the template element, force it to fill canvas
                         // and be non-interactable (movement wise)
@@ -321,6 +322,18 @@ export function SlideCanvas({
                                                 }
                                             })()}
                                             shortCode={shortCode}
+                                        />
+                                    )}
+
+                                    {el.type === 'instruction-template' && (
+                                        <InstructionTemplateElement
+                                            data={(() => {
+                                                try {
+                                                    return JSON.parse(el.content || '{}')
+                                                } catch {
+                                                    return { shortCode: '', joinUrl: '' }
+                                                }
+                                            })()}
                                         />
                                     )}
 

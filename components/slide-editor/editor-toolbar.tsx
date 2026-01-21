@@ -7,7 +7,7 @@ import {
     Triangle, ArrowRight, Star, Minus, Activity,
     ClipboardCopy, ClipboardPaste, CopyPlus, Square as SquareIcon,
     BringToFront, SendToBack, AlignCenterHorizontal, AlignCenterVertical,
-    Link2, ImagePlus, Hexagon
+    Link2, ImagePlus, Hexagon, Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,7 +31,7 @@ interface EditorToolbarProps {
     onZoomChange: (zoom: number) => void
     aspectRatio: string
     onAspectRatioChange: (ratio: '16:9' | '4:3' | '1:1') => void
-    onAddSlide: (type?: 'blank' | 'poll' | 'quiz' | 'qa') => void
+    onAddSlide: (type?: 'blank' | 'poll' | 'quiz' | 'qa' | 'instruction') => void
 }
 
 export function EditorToolbar({
@@ -106,6 +106,10 @@ export function EditorToolbar({
                         <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('qa')}>
                             <Type className="w-4 h-4 mr-2" />
                             Q&A
+                        </Button>
+                         <Button variant="ghost" size="sm" className="justify-start font-normal" onClick={() => onAddSlide('instruction')}>
+                            <Info className="w-4 h-4 mr-2" />
+                            Instruction
                         </Button>
                     </div>
                 </PopoverContent>
