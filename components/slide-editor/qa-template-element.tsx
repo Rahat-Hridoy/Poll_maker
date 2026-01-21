@@ -1,7 +1,9 @@
 "use client"
 
-import { MessageSquare, Users, QrCode } from "lucide-react"
-import { QRCodeSVG } from 'qrcode.react'
+import { MessageSquare, Users } from "lucide-react"
+
+
+import { QAQuestion } from "@/lib/data"
 
 interface QATemplateData {
     title: string
@@ -9,22 +11,23 @@ interface QATemplateData {
     questionImage?: string
     layout?: 'vertical' | 'horizontal-left' | 'horizontal-right' | 'split-left'
     showCode?: boolean
-    showQR?: boolean
+
 }
 
 interface QATemplateElementProps {
     data: QATemplateData
     shortCode?: string
+    questions?: QAQuestion[]
 }
 
-export function QATemplateElement({ data, shortCode = "12345" }: QATemplateElementProps) {
+export function QATemplateElement({ data, shortCode = "12345", questions = [] }: QATemplateElementProps) {
     const { title, subtitle, questionImage } = data
     const layout = data.layout || 'vertical'
     const showCode = data.showCode
-    const showQR = data.showQR
+
 
     const displayTitle = title || "Q&A Session"
-    const displaySubtitle = subtitle || "Ask your questions now! Scan the code or use the link."
+    const displaySubtitle = subtitle || "Ask your questions now! Scan the code or go to the link."
 
     const HeaderSection = () => (
         <div className="flex flex-col w-full gap-4 mb-2">
@@ -64,38 +67,53 @@ export function QATemplateElement({ data, shortCode = "12345" }: QATemplateEleme
 
     const CONTENT_AREA_CLASS = "flex-1 w-full relative p-4 min-h-0 overflow-y-auto"
 
-    const QrOrInstructions = () => (
-        <div className={CONTENT_AREA_CLASS}>
-            <div className="flex h-full gap-6 items-center justify-center">
-                {/* QR Code Section */}
-                {showQR && (
-                    <div className="flex flex-col justify-center shrink-0 animate-in slide-in-from-left-4 fade-in duration-700 delay-150">
-                        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                            <QRCodeSVG
-                                value={`https://poll.com/join/${shortCode}`}
-                                size={180}
-                                level="H"
-                                className="w-full h-full"
-                            />
-                            <div className="text-center mt-3">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Scan to Ask</span>
+    const QrOrInstructions = () => {
+        const hasQuestions = questions.length > 0
+        const displayedQuestions = [...questions].reverse() // Newest first
+
+        return (
+            <div className={CONTENT_AREA_CLASS}>
+                <div className="flex h-full gap-6 items-start justify-center">
+
+
+                    {/* Questions List */}
+                    {hasQuestions ? (
+                        <div className="flex-1 w-full h-full overflow-y-auto px-2">
+                             {/* @ts-ignore - Framer Motion types sometimes conflict with React 19 types */}
+                             <div className="space-y-4 pb-20">
+                                {displayedQuestions.map((q) => (
+                                    <div 
+                                        key={q.id}
+                                        className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500"
+                                    >
+                                        <p className="text-xl text-slate-800 font-medium mb-3 leading-relaxed">{q.text}</p>
+                                        <div className="flex items-center gap-2 text-sm text-slate-400 font-bold uppercase tracking-wider">
+                                            <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-100 to-blue-100 flex items-center justify-center text-purple-600">
+                                                {q.author.charAt(0)}
+                                            </div>
+                                            <span>{q.author}</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                            <span>{new Date(q.submittedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        /* Empty State */
+                        <div className="flex flex-col items-center justify-center text-center p-8 border-4 border-dashed border-slate-100 rounded-3xl bg-slate-50/50 w-full max-w-lg my-auto h-fit">
+                                <div className="mb-4 p-4 bg-white rounded-full shadow-sm">
+                                    <MessageSquare className="w-12 h-12 text-slate-300" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-400 mb-2">Waiting for questions...</h3>
+                                <p className="text-slate-400 text-sm">Audience questions will appear here dynamically during the presentation.</p>
+                            </div>
 
-                {!showQR && (
-                    <div className="flex flex-col items-center justify-center text-center p-8 border-4 border-dashed border-slate-100 rounded-3xl bg-slate-50/50 w-full max-w-lg">
-                        <div className="mb-4 p-4 bg-white rounded-full shadow-sm">
-                            <MessageSquare className="w-12 h-12 text-slate-300" />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-400 mb-2">Waiting for questions...</h3>
-                        <p className="text-slate-400 text-sm">Audience questions will appear here dynamically during the presentation.</p>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 
 
     // Layout Specific Renders

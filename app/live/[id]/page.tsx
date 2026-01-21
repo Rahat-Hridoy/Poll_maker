@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { fetchPresentation } from "@/app/actions/presentation"
 import { submitVoteAction } from "@/app/actions/audience"
-import { Presentation } from "@/lib/data"
-import { Loader2, Vote, BarChart3, CheckCircle2 } from "lucide-react"
+import { submitQuestion } from "@/app/actions/qa"
+import { Presentation, QAQuestion } from "@/lib/data"
+import { Loader2, Vote, BarChart3, CheckCircle2, MessageSquare, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { SlideRenderer } from "@/components/slide-editor/slide-renderer"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
@@ -18,9 +20,20 @@ export default function LiveAudiencePage() {
     const [hasVoted, setHasVoted] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [pollData, setPollData] = useState<any>(null)
+    const [isQA, setIsQA] = useState(false)
+    const [qaData, setQaData] = useState<{ title: string, subtitle: string } | null>(null)
+    const [questions, setQuestions] = useState<QAQuestion[]>([])
+    
     const [scale, setScale] = useState(1)
     const containerRef = useRef<HTMLDivElement>(null)
+    
+    // Poll State
     const [isVoteOpen, setIsVoteOpen] = useState(false)
+    
+    // Q&A State
+    const [isQAOpen, setIsQAOpen] = useState(false)
+    const [questionText, setQuestionText] = useState("")
+    const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false)
 
     const presentationId = params.id as string
 
@@ -30,31 +43,52 @@ export default function LiveAudiencePage() {
             const data = await fetchPresentation(presentationId)
             if (data) {
                 setPresentation(data)
-
-                // Check if current slide has a poll
+                
+                // Get current slide
                 const currentSlide = data.slides[data.currentSlideIndex || 0]
                 if (currentSlide) {
                     try {
                         const elements = JSON.parse(currentSlide.content)
+                        
+                        // Check for Poll
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const pollEl = elements.find((el: any) => el.type === 'poll-template')
                         if (pollEl) {
                             const parsedPollData = JSON.parse(pollEl.content)
-                            // Only update if question changed to avoid glitching
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             setPollData((prev: any) => {
                                 if (prev?.question !== parsedPollData.question) {
-                                    setHasVoted(false) // Reset vote state for new poll
+                                    setHasVoted(false)
                                     return parsedPollData
                                 }
                                 return prev
                             })
+                            setIsQA(false)
+                            setQaData(null)
                         } else {
                             setPollData(null)
                             setIsVoteOpen(false)
+                            
+                            // Check for Q&A
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const qaEl = elements.find((el: any) => el.type === 'qa-template')
+                            if (qaEl) {
+                                setIsQA(true)
+                                setQaData(JSON.parse(qaEl.content))
+                                // Extract questions for this slide
+                                if (data.qaSessions && data.qaSessions[currentSlide.id]) {
+                                    setQuestions(data.qaSessions[currentSlide.id])
+                                } else {
+                                    setQuestions([])
+                                }
+                            } else {
+                                setIsQA(false)
+                                setQaData(null)
+                                setIsQAOpen(false)
+                            }
                         }
                     } catch {
                         setPollData(null)
+                        setIsQA(false)
                     }
                 }
             }
@@ -114,6 +148,28 @@ export default function LiveAudiencePage() {
             setVoting(false)
         }
     }
+    
+    const handleSubmitQuestion = async () => {
+        if (!questionText.trim() || !presentation) return
+        
+        setIsSubmittingQuestion(true)
+        const slideId = presentation.slides[presentation.currentSlideIndex || 0].id
+        
+        try {
+            const result = await submitQuestion(presentationId, slideId, questionText)
+            if (result.success) {
+                setQuestionText("")
+                // Don't close modal, allow "one or more" questions
+                // Maybe show a toast or small success indicator?
+            } else {
+               console.error("Failed to submit question", result.error)
+            }
+        } catch (e) {
+            console.error("Error submitting question", e)
+        } finally {
+            setIsSubmittingQuestion(false)
+        }
+    }
 
     if (loading && !presentation) {
         return <div className="min-h-screen flex items-center justify-center bg-black text-white"><Loader2 className="animate-spin" /></div>
@@ -132,6 +188,7 @@ export default function LiveAudiencePage() {
                     scale={scale}
                     interactive={false} // Audience just watches, votes via button
                     height={baseHeight}
+                    runtimeData={{ questions: isQA ? questions : undefined }}
                 />
             </div>
 
@@ -192,6 +249,44 @@ export default function LiveAudiencePage() {
                             </div>
                         </DialogContent>
                     </Dialog>
+                </div>
+            )}
+            
+            {/* Q&A Input Area (Replacing FAB) */}
+            {isQA && !loading && (
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 z-50">
+                    <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-slate-200/50 animate-in slide-in-from-bottom-10 duration-500">
+                         <div className="flex items-center gap-2 mb-3 text-purple-600">
+                             <MessageSquare className="w-5 h-5" />
+                             <span className="font-bold text-sm uppercase tracking-wider">Ask a Question</span>
+                         </div>
+                         <div className="flex gap-3">
+                             <Input 
+                                 placeholder="Type your question here..." 
+                                 value={questionText}
+                                 onChange={(e) => setQuestionText(e.target.value)}
+                                 className="flex-1 h-12 text-lg bg-slate-50 border-slate-200 focus:border-purple-500 focus:ring-purple-500"
+                                 onKeyDown={(e) => {
+                                     if(e.key === 'Enter' && !e.shiftKey) {
+                                         e.preventDefault();
+                                         handleSubmitQuestion();
+                                     }
+                                 }}
+                             />
+                             <Button 
+                                 size="lg"
+                                 onClick={handleSubmitQuestion}
+                                 disabled={!questionText.trim() || isSubmittingQuestion}
+                                 className="h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-lg shadow-purple-500/20 shrink-0"
+                             >
+                                 {isSubmittingQuestion ? (
+                                     <Loader2 className="w-5 h-5 animate-spin" />
+                                 ) : (
+                                     <Send className="w-5 h-5" />
+                                 )}
+                             </Button>
+                         </div>
+                    </div>
                 </div>
             )}
         </div>

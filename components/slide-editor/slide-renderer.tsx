@@ -21,7 +21,19 @@ interface SlideRendererProps {
 // Coordinate system is based on 1000px width
 const BASE_WIDTH = 1000
 
-export function SlideRenderer({ slide, width = 1000, height, scale: externalScale, interactive = false, onPollVote, hasVoted, shortCode }: SlideRendererProps) {
+interface SlideRendererProps {
+    slide: Slide
+    width?: number
+    height?: number
+    scale?: number
+    interactive?: boolean
+    onPollVote?: (optionId: string) => void
+    hasVoted?: boolean
+    shortCode?: string
+    runtimeData?: any
+}
+
+export function SlideRenderer({ slide, width = 1000, height, scale: externalScale, interactive = false, onPollVote, hasVoted, shortCode, runtimeData }: SlideRendererProps) {
     // 16:9 Aspect Ratio default if height not provided
     const baseHeight = height || (BASE_WIDTH * 9) / 16
 
@@ -161,6 +173,7 @@ export function SlideRenderer({ slide, width = 1000, height, scale: externalScal
                                         return { title: '', subtitle: '' }
                                     }
                                 })()}
+                                questions={runtimeData?.questions}
                             />
                         )}
 

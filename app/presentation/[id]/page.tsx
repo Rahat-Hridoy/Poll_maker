@@ -27,9 +27,10 @@ export interface CanvasElement {
 interface SlideViewerProps {
     slide: Slide
     aspectRatio?: '16:9' | '4:3' | '1:1'
+    runtimeData?: any
 }
 
-function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
+function SlideViewer({ slide, aspectRatio = '16:9', runtimeData }: SlideViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
 
@@ -64,7 +65,13 @@ function SlideViewer({ slide, aspectRatio = '16:9' }: SlideViewerProps) {
 
     return (
         <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-            <SlideRenderer slide={slide} scale={scale} interactive={true} height={baseHeight} />
+            <SlideRenderer 
+                slide={slide} 
+                scale={scale} 
+                interactive={true} 
+                height={baseHeight} 
+                runtimeData={runtimeData}
+            />
         </div>
     )
 }
@@ -173,6 +180,9 @@ export default function PresentationPage() {
             <SlideViewer
                 slide={currentSlide}
                 aspectRatio={presentation.aspectRatio}
+                runtimeData={{
+                    questions: presentation.qaSessions?.[currentSlide.id] || []
+                }}
             />
 
 

@@ -756,14 +756,7 @@ export function SlideProperties({ slide, onChange, presentationTheme, onThemeCha
                                                         >
                                                             {data.showCode ? 'Hide Code' : 'Show Code'}
                                                         </Button>
-                                                        <Button
-                                                            variant={data.showQR ? "secondary" : "outline"}
-                                                            size="sm"
-                                                            className={`flex-1 text-xs ${data.showQR ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}`}
-                                                            onClick={() => updateData({ showQR: !data.showQR })}
-                                                        >
-                                                            {data.showQR ? 'Hide QR' : 'Show QR'}
-                                                        </Button>
+
                                                     </div>
                                                 </div>
                                             </div>

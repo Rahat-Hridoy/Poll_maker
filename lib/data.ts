@@ -50,6 +50,15 @@ export interface Slide {
     layout?: 'blank' | 'title' | 'title-content' | 'poll' | 'quiz' | 'qa'; // basic layouts
 }
 
+export interface QAQuestion {
+    id: string;
+    text: string;
+    author: string; // "Anonymous" if not provided
+    submittedAt: string;
+    upvotes: number;
+    isAnswered: boolean;
+}
+
 export interface Presentation {
     id: string;
     shortCode?: string; // Optional for migration, but new ones will have it
@@ -61,6 +70,7 @@ export interface Presentation {
     updatedAt: string;
     creatorId?: string;
     currentSlideIndex?: number;
+    qaSessions?: Record<string, QAQuestion[]>; // Map slideId -> Questions
 }
 
 
@@ -261,6 +271,28 @@ export const MOCK_PRESENTATIONS: Presentation[] = [
                     }
                 ]),
                 background: "#ffffff"
+            },
+            {
+                id: "slide-2",
+                content: JSON.stringify([
+                    {
+                        id: "qa-1",
+                        type: "qa-template",
+                        x: 0,
+                        y: 0,
+                        width: 1000,
+                        height: 562.5,
+                        content: JSON.stringify({
+                            title: "Ask Me Anything",
+                            subtitle: "Submit your questions below",
+                            showQR: true,
+                            showCode: true,
+                            layout: "vertical"
+                        }),
+                        style: {}
+                    }
+                ]),
+                background: "#f8fafc"
             }
         ]
     }
