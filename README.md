@@ -86,7 +86,7 @@ The system follows a **client-server architecture**:
 - IndexedDB is used for local data caching and offline support  
 - Real-time updates are reflected on the admin dashboard and presenter view  
 
-![System Architecture Demo](images/system_architecture_demo.png)
+![System Architecture Demo](images/poll_editor.png)
 
 ---
 
