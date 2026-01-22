@@ -113,7 +113,7 @@ The system follows a **client-server architecture**:
 - Rich text editing using TipTap  
 - Slide thumbnail features: Add slide, Duplicate slide, Hide slide, Copy, Reset, Delete  
 
-![Slide Editor Demo](images/slide_editor_demo.png)
+![Slide Editor Demo](/public/images/slide_editor_canvas.png)
 
 ---
 
@@ -122,7 +122,7 @@ The system follows a **client-server architecture**:
 - Embed: Polls, Quizzes, Q&A sections  
 - Live interaction visible in: Presenter mode, Result page  
 
-![Interactive Slide Demo](images/interactive_slide_demo.png)
+![Interactive Slide Demo](/public/images/slider_editor.png)
 
 ---
 
@@ -131,7 +131,7 @@ The system follows a **client-server architecture**:
 - Split screen preview: Presenter View, Audience View  
 - Presenter can control: Slide navigation, Interaction visibility, Poll activation  
 
-![Preview Demo](images/preview_demo.png)
+![Preview Demo](/public/images/presenter_view.png)
 
 ---
 
@@ -142,7 +142,7 @@ The system follows a **client-server architecture**:
 - Track participation rate  
 - Export results for further analysis  
 
-![Analytics Demo](images/analytics_demo.png)
+![Analytics Demo](/public/images/result.png)
 
 ---
 
@@ -152,7 +152,7 @@ The system follows a **client-server architecture**:
 - Export as PDF or PPTX  
 - Share via: Direct link, 5-digit access code, QR code  
 
-![Export Demo](images/export_demo.png)
+![Export Demo](/public/images/share_popup.png)
 
 ---
 
