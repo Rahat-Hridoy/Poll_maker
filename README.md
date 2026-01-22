@@ -86,8 +86,6 @@ The system follows a **client-server architecture**:
 - IndexedDB is used for local data caching and offline support  
 - Real-time updates are reflected on the admin dashboard and presenter view  
 
-![System Architecture Demo](images/poll_editor.png)
-
 ---
 
 ## 8. Core Features
@@ -104,7 +102,7 @@ The system follows a **client-server architecture**:
   - Control audience interaction  
   - Monitor live results on dashboard  
 
-![Live Poll Demo](images/live_poll_demo.png)
+![Live Poll Demo](/public/images/poll_editor.png)
 
 ---
 
