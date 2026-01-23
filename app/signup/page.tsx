@@ -38,8 +38,9 @@ export default function SignupPage() {
                 const data = await res.json()
                 setError(data.error || "Something went wrong")
             }
-        } catch {
-            setError("Failed to connect to server")
+        } catch (err) {
+            console.error("Signup error:", err)
+            setError(err instanceof Error ? err.message : "Failed to connect to server")
         } finally {
             setIsLoading(false)
         }
