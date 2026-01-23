@@ -407,7 +407,10 @@ export default function SlideEditorPage() {
                         variant="secondary"
                         size="sm"
                         className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 gap-2 shadow-sm"
-                        onClick={() => setPreviewOpen(true)}
+                        onClick={async () => {
+                            await handleSaveWithSync()
+                            setPreviewOpen(true)
+                        }}
                     >
                         <Play className="w-3 h-3 fill-current" />
                         Preview

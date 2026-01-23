@@ -271,7 +271,26 @@ export async function getPresentations(creatorId?: string): Promise<Presentation
 
 export async function getPresentation(id: string): Promise<Presentation | undefined> {
     reloadIfNeeded();
-    const presentation = memoryPresentations.find(p => p.id === id);
+    let presentation = memoryPresentations.find(p => p.id === id);
+
+    // Double check: Force reload if not found (in case of race condition or fresh serverless instance)
+    if (!presentation && !IS_VERCEL) {
+         try {
+             if (fs.existsSync(DB_PATH)) {
+                 const fileData = fs.readFileSync(DB_PATH, 'utf-8');
+                 const data = JSON.parse(fileData);
+                 const validPres = data.presentations || [];
+                 const found = validPres.find((p: Presentation) => p.id === id);
+                 if (found) {
+                     // Sync back to memory
+                     memoryPresentations = validPres;
+                     memoryPolls = data.polls || [];
+                     memoryUsers = data.users || [];
+                     presentation = found;
+                 }
+             }
+         } catch(e) { console.error("Force reload failed", e); }
+    }
 
     // Lazy migration: If shortCode is missing, generate it and save
     if (presentation && !presentation.shortCode) {

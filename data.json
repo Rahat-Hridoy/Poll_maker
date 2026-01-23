@@ -1077,7 +1077,7 @@
       "title": "Welcome ",
       "theme": "default",
       "createdAt": "2026-01-17T07:35:28.171Z",
-      "updatedAt": "2026-01-21T19:09:39.397Z",
+      "updatedAt": "2026-01-23T18:46:13.001Z",
       "slides": [
         {
           "id": "c38ee9c8-3e64-4100-a24f-280904e01fff",
@@ -1119,7 +1119,7 @@
           "layout": "instruction"
         }
       ],
-      "currentSlideIndex": 0,
+      "currentSlideIndex": 2,
       "aspectRatio": "16:9",
       "showJoiningCode": true
     }
