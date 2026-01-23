@@ -301,7 +301,7 @@ export function PollTemplateElement({ data, onVote, hasVoted, shortCode = "12345
                     {onVote ? (
                         <div className="space-y-4 max-w-2xl mx-auto w-full">
                             {hasVoted ? (
-                                <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100 animate-in fade-in zoom-in duration-300">
+                                <div className="text-center py-12 bg-green-50 rounded-2xl border-2 border-green-100">
                                     <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
                                         <Users className="h-10 w-10" />
                                     </div>

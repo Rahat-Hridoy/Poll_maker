@@ -30,7 +30,7 @@ export function QATemplateElement({ data, shortCode = "12345", questions = [], s
     const HeaderSection = () => (
         <div className="flex flex-col w-full gap-4 mb-2">
             {showCode && (
-                <div className={`mx-auto bg-white border-2 border-slate-200 rounded-lg px-8 py-1 shadow-sm animate-in slide-in-from-top-4 fade-in duration-500`}>
+                <div className={`mx-auto bg-white border-2 border-slate-200 rounded-lg px-8 py-1 shadow-sm`}>
                     <div className="text-center flex items-center justify-center gap-3 ">
                         <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Join with Code:  </span>
                         <div className="text-xl font-black text-slate-800 tracking-widest mt-0.5 font-mono">{shortCode}</div>
@@ -81,7 +81,7 @@ export function QATemplateElement({ data, shortCode = "12345", questions = [], s
                                     {displayedQuestions.map((q) => (
                                         <div 
                                             key={q.id}
-                                            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500"
+                                            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
                                         >
                                             <p className="text-xl text-slate-800 font-medium mb-3 leading-relaxed">{q.text}</p>
                                             <div className="flex items-center gap-2 text-sm text-slate-400 font-bold uppercase tracking-wider">
